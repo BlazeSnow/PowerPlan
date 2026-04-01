@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml.Navigation;
 using PowerPlan.Services;
 using PowerPlan.Views;
+using System.Runtime.InteropServices;
 
 namespace PowerPlan;
 
@@ -10,6 +11,7 @@ public partial class App : Application
     private TrayService? _trayService;
     private readonly PowerPlanService _powerPlanService = new();
     private readonly StartupService _startupService = new();
+    private bool _isExiting;
 
     public App()
     {
@@ -29,6 +31,8 @@ public partial class App : Application
 
         _ = rootFrame.Navigate(typeof(MainPage), e.Arguments);
         _window.Activate();
+        _window.Closed -= OnMainWindowClosed;
+        _window.Closed += OnMainWindowClosed;
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
 
@@ -55,7 +59,7 @@ public partial class App : Application
                         page.AddExternalStatus($"[\u6258\u76D8] \u5F00\u673A\u81EA\u542F\u52A8\uFF1A{(enabled ? "\u5F00\u542F" : "\u5173\u95ED")}");
                     }
                 },
-                showMainWindow: () => _window.Activate(),
+                showMainWindow: ShowMainWindow,
                 exitApplication: ExitApplication,
                 log: message =>
                 {
@@ -78,10 +82,48 @@ public partial class App : Application
 
     private void ExitApplication()
     {
+        _isExiting = true;
         _trayService?.Dispose();
         _trayService = null;
         Exit();
     }
+
+    private void OnMainWindowClosed(object sender, WindowEventArgs args)
+    {
+        if (_isExiting || _window is null)
+        {
+            return;
+        }
+
+        args.Handled = true;
+        HideMainWindow();
+    }
+
+    private void ShowMainWindow()
+    {
+        if (_window is null)
+        {
+            return;
+        }
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        _ = ShowWindow(hwnd, 5); // SW_SHOW
+        _window.Activate();
+    }
+
+    private void HideMainWindow()
+    {
+        if (_window is null)
+        {
+            return;
+        }
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        _ = ShowWindow(hwnd, 0); // SW_HIDE
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(nint hWnd, int nCmdShow);
 
     private static void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
     {
