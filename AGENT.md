@@ -44,6 +44,10 @@
    2. 启用托盘（开关）：默认为开
 3. 设置内容保存到`settings.json`
 4. `settings.json`：当软件为打包状态，保存到应用目录；若软件为未打包状态，回退到`%appdata%/PowerPlan/`
+5. 设置页面其他内容：
+   1. 跳转到电源计划：打开控制面板的电源选项
+   2. 打开开发者官网：<https://www.blazesnow.com>
+   3. 反馈到开发者邮箱：<powerplan@blazesnow.com>
 
 ## 侧边栏
 
