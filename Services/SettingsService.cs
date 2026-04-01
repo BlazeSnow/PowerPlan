@@ -6,17 +6,13 @@ namespace PowerPlan.Services;
 
 public sealed class SettingsService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
-    private readonly string _settingsPath;
+    private string _settingsPath;
+    private readonly string _fallbackPath;
 
     public SettingsService()
     {
-        _settingsPath = ResolveSettingsPath();
+        _settingsPath = ResolvePrimaryPath();
+        _fallbackPath = ResolveFallbackPath();
     }
 
     public AppSettings Current { get; private set; } = new();
@@ -30,35 +26,55 @@ public sealed class SettingsService
 
     public async Task<AppSettings> LoadAsync()
     {
-        if (!File.Exists(_settingsPath))
+        var loaded = await LoadFromPathAsync(_settingsPath);
+        if (loaded is not null)
         {
-            var defaults = new AppSettings();
-            await SaveAsync(defaults);
-            return defaults;
+            return loaded;
         }
 
+        if (!_settingsPath.Equals(_fallbackPath, StringComparison.OrdinalIgnoreCase))
+        {
+            loaded = await LoadFromPathAsync(_fallbackPath);
+            if (loaded is not null)
+            {
+                _settingsPath = _fallbackPath;
+                return loaded;
+            }
+        }
+
+        var defaults = new AppSettings();
         try
         {
-            var json = await File.ReadAllTextAsync(_settingsPath);
-            var loaded = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
-            return loaded ?? new AppSettings();
+            await SaveAsync(defaults);
         }
         catch
         {
-            return new AppSettings();
+            // Keep defaults in memory if writing file is not available at startup.
         }
+
+        return defaults;
     }
 
     public async Task SaveAsync(AppSettings settings)
     {
-        var directory = Path.GetDirectoryName(_settingsPath);
-        if (!string.IsNullOrWhiteSpace(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
+        var json = JsonSerializer.Serialize(settings, AppSettingsJsonContext.Default.AppSettings);
 
-        var json = JsonSerializer.Serialize(settings, JsonOptions);
-        await File.WriteAllTextAsync(_settingsPath, json);
+        try
+        {
+            await WriteToPathAsync(_settingsPath, json);
+        }
+        catch
+        {
+            if (!_settingsPath.Equals(_fallbackPath, StringComparison.OrdinalIgnoreCase))
+            {
+                await WriteToPathAsync(_fallbackPath, json);
+                _settingsPath = _fallbackPath;
+            }
+            else
+            {
+                throw;
+            }
+        }
 
         Current = settings;
         SettingsChanged?.Invoke(this, Current);
@@ -71,13 +87,47 @@ public sealed class SettingsService
 
     public string GetSettingsPath() => _settingsPath;
 
-    private static string ResolveSettingsPath()
+    private static async Task<AppSettings?> LoadFromPathAsync(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return null;
+        }
+
+        try
+        {
+            var json = await File.ReadAllTextAsync(path);
+            return JsonSerializer.Deserialize(json, AppSettingsJsonContext.Default.AppSettings);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static async Task WriteToPathAsync(string path, string json)
+    {
+        var directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        await File.WriteAllTextAsync(path, json);
+    }
+
+    private static string ResolvePrimaryPath()
     {
         if (IsPackaged())
         {
             return Path.Combine(AppContext.BaseDirectory, "settings.json");
         }
 
+        return ResolveFallbackPath();
+    }
+
+    private static string ResolveFallbackPath()
+    {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         return Path.Combine(appData, "PowerPlan", "settings.json");
     }

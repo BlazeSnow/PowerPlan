@@ -1,4 +1,3 @@
-using Microsoft.UI.Xaml.Navigation;
 using PowerPlan.Models;
 using PowerPlan.Services;
 using PowerPlan.Views;
@@ -9,6 +8,7 @@ namespace PowerPlan;
 public partial class App : Application
 {
     private Window? _window;
+    private ShellPage? _shellPage;
     private TrayService? _trayService;
     private readonly PowerPlanService _powerPlanService = new();
     private readonly StartupService _startupService = new();
@@ -25,21 +25,18 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
-        await SettingsService.InitializeAsync();
+        try
+        {
+            await SettingsService.InitializeAsync();
+        }
+        catch
+        {
+            // Keep app startup resilient even when settings file cannot be loaded.
+        }
 
         _window ??= new Window();
-
-        if (_window.Content is not Frame rootFrame)
-        {
-            rootFrame = new Frame();
-            rootFrame.NavigationFailed += OnNavigationFailed;
-            _window.Content = rootFrame;
-        }
-
-        if (rootFrame.Content is null)
-        {
-            _ = rootFrame.Navigate(typeof(ShellPage), e.Arguments);
-        }
+        _shellPage ??= new ShellPage();
+        _window.Content = _shellPage;
 
         _window.Activate();
         _window.Closed -= OnMainWindowClosed;
@@ -131,15 +128,7 @@ public partial class App : Application
         }
     }
 
-    private MainPage? GetMainPage()
-    {
-        if (_window?.Content is not Frame rootFrame)
-        {
-            return null;
-        }
-
-        return (rootFrame.Content as ShellPage)?.GetMainPage();
-    }
+    private MainPage? GetMainPage() => _shellPage?.GetMainPage();
 
     private void OnMainWindowClosed(object sender, WindowEventArgs args)
     {
@@ -188,9 +177,4 @@ public partial class App : Application
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
-
-    private static void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
-    {
-        throw new InvalidOperationException("\u9875\u9762\u52A0\u8F7D\u5931\u8D25\uFF1A" + e.SourcePageType.FullName);
-    }
 }
