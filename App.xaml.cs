@@ -1,51 +1,77 @@
 using Microsoft.UI.Xaml.Navigation;
+using PowerPlan.Services;
+using PowerPlan.Views;
 
-namespace PowerPlan
+namespace PowerPlan;
+
+public partial class App : Application
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
-    public partial class App : Application
+    private Window? _window;
+    private TrayService? _trayService;
+    private readonly PowerPlanService _powerPlanService = new();
+    private readonly StartupService _startupService = new();
+
+    public App()
     {
-        private Window window = Window.Current;
+        InitializeComponent();
+    }
 
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
-        /// </summary>
-        public App()
+    protected override async void OnLaunched(LaunchActivatedEventArgs e)
+    {
+        _window ??= new Window();
+
+        if (_window.Content is not Frame rootFrame)
         {
-            this.InitializeComponent();
+            rootFrame = new Frame();
+            rootFrame.NavigationFailed += OnNavigationFailed;
+            _window.Content = rootFrame;
         }
 
-        /// <summary>
-        /// Invoked when the application is launched normally by the end user.  Other entry points
-        /// will be used such as when the application is launched to open a specific file.
-        /// </summary>
-        /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
-        {
-            window ??= new Window();
+        _ = rootFrame.Navigate(typeof(MainPage), e.Arguments);
+        _window.Activate();
 
-            if (window.Content is not Frame rootFrame)
+        _trayService ??= new TrayService(
+            getPlansAsync: _powerPlanService.GetPlansAsync,
+            setActivePlanAsync: async guid =>
             {
-                rootFrame = new Frame();
-                rootFrame.NavigationFailed += OnNavigationFailed;
-                window.Content = rootFrame;
-            }
+                await _powerPlanService.SetActivePlanAsync(guid);
+                if (rootFrame.Content is MainPage page)
+                {
+                    await page.RefreshFromExternalAsync();
+                    page.AddExternalLog($"[Tray] Switched power plan: {guid}");
+                }
+            },
+            isStartupEnabled: _startupService.IsEnabled,
+            setStartupEnabled: enabled =>
+            {
+                _startupService.SetEnabled(enabled);
+                if (rootFrame.Content is MainPage page)
+                {
+                    page.AddExternalLog($"[Tray] Launch at startup: {(enabled ? "On" : "Off")}");
+                }
+            },
+            showMainWindow: () => _window.Activate(),
+            exitApplication: ExitApplication,
+            log: message =>
+            {
+                if (rootFrame.Content is MainPage page)
+                {
+                    page.AddExternalLog(message);
+                }
+            });
 
-            _ = rootFrame.Navigate(typeof(MainPage), e.Arguments);
-            window.Activate();
-        }
+        await _trayService.InitializeAsync();
+    }
 
-        /// <summary>
-        /// Invoked when Navigation to a certain page fails
-        /// </summary>
-        /// <param name="sender">The Frame which failed navigation</param>
-        /// <param name="e">Details about the navigation failure</param>
-        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
-        {
-            throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
-        }
+    private void ExitApplication()
+    {
+        _trayService?.Dispose();
+        _trayService = null;
+        Exit();
+    }
+
+    private static void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+    {
+        throw new InvalidOperationException("Failed to load Page " + e.SourcePageType.FullName);
     }
 }

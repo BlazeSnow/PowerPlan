@@ -4,35 +4,98 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:PowerPlan"
+    xmlns:local="using:PowerPlan.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    <Page.Content>
-        <StackPanel
-            HorizontalAlignment="Center"
-            Spacing="25"
-            VerticalAlignment="Center">
-            <TextBlock
-                FontSize="24"
-                HorizontalAlignment="Center"
-                Style="{StaticResource MyLabel}"
-                Text="Hello, World!" />
-            <TextBlock
-                FontSize="20"
-                HorizontalAlignment="Center"
-                Style="{StaticResource MyLabel}"
-                Text="Welcome to WinUI 3!" />
-            <TextBlock
-                x:Name="txtCount"
-                FontSize="16"
-                HorizontalAlignment="Center"
-                Style="{StaticResource MyLabel}"
-                Text="Current count: 0" />
-            <Button
-                Click="OnCountClicked"
-                Content="Click Me"
-                HorizontalAlignment="Center"
-                Style="{StaticResource PrimaryAction}" />
+    <ScrollViewer>
+        <StackPanel Padding="24" Spacing="16">
+            <TextBlock FontSize="24" FontWeight="SemiBold" Text="PowerPlan" />
+            <TextBlock Foreground="Gray" Text="Quickly switch Windows power plans" />
+
+            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel Spacing="10">
+                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Unlock" />
+                    <TextBlock x:Name="AdminStatusText" />
+                    <Button
+                        x:Name="ElevateButton"
+                        Click="OnElevateClicked"
+                        Content="Request administrator permission"
+                        HorizontalAlignment="Left" />
+                </StackPanel>
+            </Border>
+
+            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel Spacing="10">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Text="Plans" />
+                        <Button Click="OnRefreshClicked" Content="Refresh plans" />
+                    </StackPanel>
+
+                    <InfoBar
+                        x:Name="UltimateMissingInfoBar"
+                        IsOpen="False"
+                        IsClosable="False"
+                        Severity="Informational"
+                        Title="Ultimate Performance plan not found"
+                        Message="Click the button below to create it." />
+                    <Button
+                        x:Name="CreateUltimateButton"
+                        Click="OnCreateUltimateClicked"
+                        Content="Create Ultimate Performance plan"
+                        HorizontalAlignment="Left"
+                        Visibility="Collapsed" />
+
+                    <ListView x:Name="PlansListView">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:PowerPlanItemViewModel">
+                                <Grid ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock FontWeight="SemiBold" Text="{x:Bind Name}" />
+                                        <TextBlock
+                                            Foreground="Green"
+                                            Text="(Current)"
+                                            Visibility="{x:Bind IsActiveVisibility}" />
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Column="1" Opacity="0.75" Text="{x:Bind Guid}" />
+
+                                    <Button
+                                        Grid.Column="2"
+                                        Click="OnSwitchPlanClicked"
+                                        Content="Switch"
+                                        IsEnabled="{x:Bind CanSwitch}"
+                                        Tag="{x:Bind Guid}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Border>
+
+            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel Spacing="10">
+                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Logs" />
+                    <ListView Height="220" ItemsSource="{x:Bind Logs}" />
+                </StackPanel>
+            </Border>
+
+            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel Spacing="10">
+                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Settings" />
+                    <ToggleSwitch
+                        x:Name="StartupToggle"
+                        Header="Launch at startup"
+                        OffContent="Off"
+                        OnContent="On"
+                        Toggled="OnStartupToggled" />
+                </StackPanel>
+            </Border>
         </StackPanel>
-    </Page.Content>
+    </ScrollViewer>
 </Page>
