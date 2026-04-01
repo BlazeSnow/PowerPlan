@@ -20,17 +20,17 @@ public sealed partial class SettingsPage : Page
 
     private void ApplyLocalization()
     {
-        PageTitleText.Text = "\u8BBE\u7F6E";
-        PageDescText.Text = "\u6309 Windows 11 \u98CE\u683C\u96C6\u4E2D\u7BA1\u7406\u5E94\u7528\u884C\u4E3A";
+        PageTitleText.Text = LocalizationService.Get("Settings.PageTitle");
+        PageDescText.Text = LocalizationService.Get("Settings.PageDesc");
 
-        AutoStartTitleText.Text = "\u5F00\u673A\u81EA\u542F\u52A8";
-        AutoStartDescText.Text = "\u9ED8\u8BA4\u5173\u95ED\uFF0C\u53EF\u5728\u767B\u5F55\u540E\u81EA\u52A8\u542F\u52A8 PowerPlan";
+        AutoStartTitleText.Text = LocalizationService.Get("Settings.AutoStart.Title");
+        AutoStartDescText.Text = LocalizationService.Get("Settings.AutoStart.Desc");
 
-        TrayTitleText.Text = "\u542F\u7528\u6258\u76D8";
-        TrayDescText.Text = "\u9ED8\u8BA4\u5F00\u542F\uFF0C\u5173\u95ED\u540E\u70B9\u51FB\u7A97\u53E3\u5173\u95ED\u5C06\u76F4\u63A5\u9000\u51FA";
+        TrayTitleText.Text = LocalizationService.Get("Settings.Tray.Title");
+        TrayDescText.Text = LocalizationService.Get("Settings.Tray.Desc");
 
-        SettingsStatusBar.Title = "\u72B6\u6001";
-        SettingsStatusBar.Message = "\u8BBE\u7F6E\u5DF2\u52A0\u8F7D";
+        SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
+        SettingsStatusBar.Message = LocalizationService.Get("Settings.Status.Loaded");
     }
 
     private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
@@ -40,7 +40,7 @@ public sealed partial class SettingsPage : Page
 
         AutoStartToggle.IsOn = settings.AutoStart;
         TrayToggle.IsOn = settings.TrayEnabled;
-        PathText.Text = $"settings.json: {_settingsService.GetSettingsPath()}";
+        PathText.Text = LocalizationService.Format("Settings.PathLabel", _settingsService.GetSettingsPath());
 
         _updatingUi = false;
         try
@@ -50,7 +50,7 @@ public sealed partial class SettingsPage : Page
         catch (Exception ex)
         {
             SettingsStatusBar.Severity = InfoBarSeverity.Warning;
-            SettingsStatusBar.Message = $"\u5E94\u7528\u5F00\u673A\u81EA\u542F\u52A8\u72B6\u6001\u5931\u8D25\uFF1A{ex.Message}";
+            SettingsStatusBar.Message = LocalizationService.Format("Settings.Status.StartupApplyFailed", ex.Message);
         }
     }
 
@@ -87,14 +87,14 @@ public sealed partial class SettingsPage : Page
             await _settingsService.SaveAsync(settings);
             await EnsureStartupStateAsync(settings.AutoStart);
             SettingsStatusBar.Severity = InfoBarSeverity.Success;
-            SettingsStatusBar.Title = "\u72B6\u6001";
-            SettingsStatusBar.Message = "\u8BBE\u7F6E\u5DF2\u4FDD\u5B58";
+            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
+            SettingsStatusBar.Message = LocalizationService.Get("Settings.Status.SaveSuccess");
         }
         catch (Exception ex)
         {
             SettingsStatusBar.Severity = InfoBarSeverity.Error;
-            SettingsStatusBar.Title = "\u72B6\u6001";
-            SettingsStatusBar.Message = $"\u8BBE\u7F6E\u4FDD\u5B58\u5931\u8D25\uFF1A{ex.Message}";
+            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
+            SettingsStatusBar.Message = LocalizationService.Format("Settings.Status.SaveFailed", ex.Message);
         }
     }
 

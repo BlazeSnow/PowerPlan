@@ -77,7 +77,7 @@ public sealed class TrayService : IDisposable
         SubclassWindow();
         AddNotifyIcon();
         await RefreshPlansAsync();
-        _log("[\u6258\u76D8] \u5DF2\u521D\u59CB\u5316\u3002\u53F3\u952E\u6258\u76D8\u56FE\u6807\u53EF\u6253\u5F00\u83DC\u5355\u3002");
+        _log(LocalizationService.Get("Tray.Init"));
     }
 
     public async Task RefreshPlansAsync()
@@ -92,13 +92,13 @@ public sealed class TrayService : IDisposable
         }
         catch (Exception ex)
         {
-            _log($"[\u6258\u76D8] \u5237\u65B0\u5931\u8D25\uFF1A{ex.Message}");
+            _log(LocalizationService.Format("Tray.RefreshFailed", ex.Message));
         }
     }
 
     public void ShowBalloon(string message)
     {
-        _log($"[\u6258\u76D8] {message}");
+        _log(message);
     }
 
     public void Dispose()
@@ -113,7 +113,7 @@ public sealed class TrayService : IDisposable
         _oldWndProc = SetWindowLongPtr(_mainWindowHandle, GwlWndProc, wndProcPtr);
         if (_oldWndProc == IntPtr.Zero)
         {
-            _log("[\u6258\u76D8] \u7ED1\u5B9A\u7A97\u53E3\u6D88\u606F\u5931\u8D25\u3002\u6258\u76D8\u4E0D\u53EF\u7528\u3002");
+            _log(LocalizationService.Get("Tray.BindWindowFailed"));
         }
     }
 
@@ -132,7 +132,7 @@ public sealed class TrayService : IDisposable
         _iconAdded = Shell_NotifyIcon(NimAdd, ref data);
         if (!_iconAdded)
         {
-            _log("[\u6258\u76D8] \u6DFB\u52A0\u6258\u76D8\u56FE\u6807\u5931\u8D25\u3002");
+            _log(LocalizationService.Get("Tray.AddIconFailed"));
         }
     }
 
@@ -210,15 +210,17 @@ public sealed class TrayService : IDisposable
             _ = AppendMenu(plansMenu, flags, (nuint)id, plans[i].Name);
         }
 
-        _ = AppendMenu(menu, MfString, (nuint)MenuOpenMainWindow, "\u6253\u5F00\u4E3B\u754C\u9762");
-        _ = AppendMenu(menu, MfPopup, (nuint)plansMenu, "\u5207\u6362\u7535\u6E90\u8BA1\u5212");
-        _ = AppendMenu(menu, MfString, (nuint)MenuRefreshPlans, "\u5237\u65B0\u8BA1\u5212");
+        _ = AppendMenu(menu, MfString, (nuint)MenuOpenMainWindow, LocalizationService.Get("Tray.Menu.OpenMainWindow"));
+        _ = AppendMenu(menu, MfPopup, (nuint)plansMenu, LocalizationService.Get("Tray.Menu.SwitchPlan"));
+        _ = AppendMenu(menu, MfString, (nuint)MenuRefreshPlans, LocalizationService.Get("Tray.Menu.RefreshPlans"));
 
-        var startupText = _isStartupEnabled() ? "\u5173\u95ED\u5F00\u673A\u81EA\u542F\u52A8" : "\u5F00\u542F\u5F00\u673A\u81EA\u542F\u52A8";
+        var startupText = _isStartupEnabled()
+            ? LocalizationService.Get("Tray.Menu.DisableAutoStart")
+            : LocalizationService.Get("Tray.Menu.EnableAutoStart");
         _ = AppendMenu(menu, MfString, (nuint)MenuToggleStartup, startupText);
 
         _ = AppendMenu(menu, MfSeparator, 0, string.Empty);
-        _ = AppendMenu(menu, MfString, (nuint)MenuExit, "\u9000\u51FA");
+        _ = AppendMenu(menu, MfString, (nuint)MenuExit, LocalizationService.Get("Tray.Menu.Exit"));
 
         _ = SetForegroundWindow(_mainWindowHandle);
         _ = GetCursorPos(out var point);
@@ -264,7 +266,7 @@ public sealed class TrayService : IDisposable
                 break;
             case MenuRefreshPlans:
                 _ = RefreshPlansAsync();
-                _log("[\u6258\u76D8] \u5DF2\u5F00\u59CB\u5237\u65B0\u8BA1\u5212\u5217\u8868\u3002");
+                _log(LocalizationService.Get("Tray.RefreshStarted"));
                 break;
             case MenuToggleStartup:
                 ToggleStartup();
@@ -280,12 +282,12 @@ public sealed class TrayService : IDisposable
         try
         {
             await _setActivePlanAsync(planGuid);
-            _log($"[\u6258\u76D8] \u5DF2\u5207\u6362\u5230\uFF1A{planName}");
+            _log(LocalizationService.Format("Tray.SwitchTo", planName));
             await RefreshPlansAsync();
         }
         catch (Exception ex)
         {
-            _log($"[\u6258\u76D8] \u5207\u6362\u5931\u8D25\uFF1A{ex.Message}");
+            _log(LocalizationService.Format("Tray.SwitchFailed", ex.Message));
         }
     }
 
@@ -295,11 +297,12 @@ public sealed class TrayService : IDisposable
         {
             var next = !_isStartupEnabled();
             _setStartupEnabled(next);
-            _log($"[\u6258\u76D8] \u5F00\u673A\u81EA\u542F\u52A8\uFF1A{(next ? "\u5F00\u542F" : "\u5173\u95ED")}");
+            var state = LocalizationService.Get(next ? "App.Status.On" : "App.Status.Off");
+            _log(LocalizationService.Format("Tray.AutoStartState", state));
         }
         catch (Exception ex)
         {
-            _log($"[\u6258\u76D8] \u81EA\u542F\u52A8\u5207\u6362\u5931\u8D25\uFF1A{ex.Message}");
+            _log(LocalizationService.Format("Tray.AutoStartToggleFailed", ex.Message));
         }
     }
 

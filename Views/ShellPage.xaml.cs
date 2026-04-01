@@ -1,3 +1,5 @@
+using PowerPlan.Services;
+
 namespace PowerPlan.Views;
 
 public sealed partial class ShellPage : Page
@@ -13,8 +15,8 @@ public sealed partial class ShellPage : Page
 
     private void ApplyLocalization()
     {
-        HomeItem.Content = "\u4E3B\u9875";
-        SettingsItem.Content = "\u8BBE\u7F6E";
+        HomeItem.Content = LocalizationService.Get("Shell.Home");
+        SettingsItem.Content = LocalizationService.Get("Shell.Settings");
     }
 
     private void OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

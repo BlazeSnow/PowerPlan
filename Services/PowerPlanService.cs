@@ -6,7 +6,6 @@ namespace PowerPlan.Services;
 
 public sealed class PowerPlanService
 {
-    // Microsoft documented GUID for "Ultimate Performance".
     public const string UltimatePerformanceGuid = "e9a42b02-d5df-448d-aa00-03f14749eb61";
 
     private static readonly Regex GuidRegex = new(
@@ -16,7 +15,7 @@ public sealed class PowerPlanService
     private static readonly string[] UltimatePlanNameKeywords =
     {
         "Ultimate Performance",
-        "\u5353\u8D8A\u6027\u80FD"
+        LocalizationService.Get("PowerPlan.UltimateKeywordZh")
     };
 
     public async Task<IReadOnlyList<PowerPlanInfo>> GetPlansAsync()
@@ -73,7 +72,7 @@ public sealed class PowerPlanService
 
         foreach (var keyword in UltimatePlanNameKeywords)
         {
-            if (plan.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(keyword) && plan.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }

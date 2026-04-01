@@ -2,6 +2,7 @@ using PowerPlan.Models;
 using PowerPlan.Services;
 using PowerPlan.Views;
 using System.Runtime.InteropServices;
+using Windows.Globalization;
 
 namespace PowerPlan;
 
@@ -17,6 +18,16 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+
+        try
+        {
+            ApplicationLanguages.PrimaryLanguageOverride = "zh-CN";
+        }
+        catch
+        {
+            // Ignore when override is unavailable.
+        }
+
         SettingsService = new SettingsService();
         SettingsService.SettingsChanged += OnSettingsChanged;
     }
@@ -60,7 +71,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            GetMainPage()?.AddExternalStatus($"\u8BBE\u7F6E\u5F00\u673A\u81EA\u542F\u52A8\u5931\u8D25\uFF1A{ex.Message}", true);
+            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.StartupSettingFailed", ex.Message), true);
         }
     }
 
@@ -92,14 +103,16 @@ public partial class App : Application
                 if (page is not null)
                 {
                     await page.RefreshFromExternalAsync();
-                    page.AddExternalStatus($"[\u6258\u76D8] \u5DF2\u5207\u6362\u7535\u6E90\u8BA1\u5212\uFF1A{guid}");
+                    page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid));
                 }
             },
             isStartupEnabled: () => SettingsService.Current.AutoStart,
             setStartupEnabled: enabled => _ = UpdateAutoStartFromTrayAsync(enabled),
             showMainWindow: ShowMainWindow,
             exitApplication: ExitApplication,
-            log: message => GetMainPage()?.AddExternalStatus(message, message.Contains("\u5931\u8D25", StringComparison.Ordinal)));
+            log: message => GetMainPage()?.AddExternalStatus(
+                message,
+                message.Contains(LocalizationService.Get("Common.FailedKeyword"), StringComparison.Ordinal)));
 
         try
         {
@@ -107,7 +120,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            GetMainPage()?.AddExternalStatus($"[\u6258\u76D8] \u521D\u59CB\u5316\u5931\u8D25\uFF1A{ex.Message}", true);
+            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayInitFailed", ex.Message), true);
             _trayService?.Dispose();
             _trayService = null;
         }
@@ -120,11 +133,12 @@ public partial class App : Application
             _startupService.SetEnabled(enabled);
             SettingsService.Current.AutoStart = enabled;
             await SettingsService.SaveCurrentAsync();
-            GetMainPage()?.AddExternalStatus($"[\u6258\u76D8] \u5F00\u673A\u81EA\u542F\u52A8\uFF1A{(enabled ? "\u5F00\u542F" : "\u5173\u95ED")}");
+            var state = LocalizationService.Get(enabled ? "App.Status.On" : "App.Status.Off");
+            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStart", state));
         }
         catch (Exception ex)
         {
-            GetMainPage()?.AddExternalStatus($"[\u6258\u76D8] \u81EA\u542F\u52A8\u8BBE\u7F6E\u5931\u8D25\uFF1A{ex.Message}", true);
+            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStartFailed", ex.Message), true);
         }
     }
 
