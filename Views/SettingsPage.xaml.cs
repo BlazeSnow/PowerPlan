@@ -1,11 +1,14 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using PowerPlan.Models;
 using PowerPlan.Services;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace PowerPlan.Views;
 
 public sealed partial class SettingsPage : Page
 {
+    private const string FeedbackMail = "powerplan@blazesnow.com";
+
     private readonly SettingsService _settingsService;
     private readonly StartupService _startupService = new();
     private bool _updatingUi;
@@ -33,7 +36,7 @@ public sealed partial class SettingsPage : Page
         ToolsTitleText.Text = LocalizationService.Get("Settings.Tools.Title");
         OpenPowerOptionsButton.Content = LocalizationService.Get("Settings.Tools.PowerOptions");
         OpenWebsiteButton.Content = LocalizationService.Get("Settings.Tools.Website");
-        SendFeedbackButton.Content = LocalizationService.Get("Settings.Tools.Feedback");
+        SendFeedbackButton.Content = LocalizationService.Get("Settings.Tools.FeedbackCopy");
 
         SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
         SettingsStatusBar.Message = LocalizationService.Get("Settings.Status.Loaded");
@@ -121,7 +124,22 @@ public sealed partial class SettingsPage : Page
 
     private void OnSendFeedbackClicked(object sender, RoutedEventArgs e)
     {
-        OpenExternal("mailto:powerplan@blazesnow.com");
+        try
+        {
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(FeedbackMail);
+            Clipboard.SetContent(dataPackage);
+
+            SettingsStatusBar.Severity = InfoBarSeverity.Success;
+            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
+            SettingsStatusBar.Message = LocalizationService.Get("Settings.Status.FeedbackCopied");
+        }
+        catch (Exception ex)
+        {
+            SettingsStatusBar.Severity = InfoBarSeverity.Error;
+            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
+            SettingsStatusBar.Message = LocalizationService.Format("Settings.Status.OpenExternalFailed", ex.Message);
+        }
     }
 
     private void OpenExternal(string target, string? args = null)

@@ -1,84 +1,234 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
-  <resheader name="version"><value>2.0</value></resheader>
-  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value></resheader>
-  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value></resheader>
-
-  <data name="Shell.Home" xml:space="preserve"><value>首页</value></data>
-  <data name="Shell.Settings" xml:space="preserve"><value>设置</value></data>
-
-  <data name="Main.Subtitle" xml:space="preserve"><value>快速切换 Windows 电源计划</value></data>
-  <data name="Main.UnlockTitle" xml:space="preserve"><value>权限区</value></data>
-  <data name="Main.RequestAdminButton" xml:space="preserve"><value>请求管理员权限</value></data>
-  <data name="Main.PlansTitle" xml:space="preserve"><value>计划区</value></data>
-  <data name="Main.RefreshPlansButton" xml:space="preserve"><value>刷新计划</value></data>
-  <data name="Main.UltimateMissingTitle" xml:space="preserve"><value>未发现卓越性能计划</value></data>
-  <data name="Main.UltimateMissingMessage" xml:space="preserve"><value>可点击下方按钮创建卓越性能计划。</value></data>
-  <data name="Main.CreateUltimateButton" xml:space="preserve"><value>创建卓越性能计划</value></data>
-  <data name="Main.StatusAreaTitle" xml:space="preserve"><value>状态区</value></data>
-  <data name="Main.StatusTitle" xml:space="preserve"><value>状态</value></data>
-  <data name="Main.StatusWaiting" xml:space="preserve"><value>等待操作</value></data>
-  <data name="Main.Admin.Yes" xml:space="preserve"><value>当前已具备管理员权限，可修改电源计划。</value></data>
-  <data name="Main.Admin.No" xml:space="preserve"><value>当前非管理员权限，仅可读取电源计划。</value></data>
-  <data name="Main.Status.TitleWithTime" xml:space="preserve"><value>状态（{0}）</value></data>
-  <data name="Main.Status.InitSuccess" xml:space="preserve"><value>初始化完成</value></data>
-  <data name="Main.Status.InitFailed" xml:space="preserve"><value>初始化失败：{0}</value></data>
-  <data name="Main.Status.PlansLoaded" xml:space="preserve"><value>已读取电源计划：{0} 个</value></data>
-  <data name="Main.Status.RefreshFailed" xml:space="preserve"><value>刷新失败：{0}</value></data>
-  <data name="Main.Status.SwitchSuccess" xml:space="preserve"><value>切换电源计划成功：{0}</value></data>
-  <data name="Main.Status.SwitchFailed" xml:space="preserve"><value>切换失败：{0}</value></data>
-  <data name="Main.Status.UltimateExists" xml:space="preserve"><value>系统中已存在卓越性能计划</value></data>
-  <data name="Main.Status.UltimateCreated" xml:space="preserve"><value>已创建卓越性能计划</value></data>
-  <data name="Main.Status.UltimateCreateFailed" xml:space="preserve"><value>创建卓越性能计划失败：{0}</value></data>
-  <data name="Main.Status.ElevateRequested" xml:space="preserve"><value>已发起管理员权限重启请求</value></data>
-  <data name="Main.Status.ElevateFailed" xml:space="preserve"><value>管理员权限请求被取消或失败</value></data>
-  <data name="Main.CurrentTag" xml:space="preserve"><value>（当前）</value></data>
-  <data name="Main.SwitchButton" xml:space="preserve"><value>切换</value></data>
-
-  <data name="Settings.PageTitle" xml:space="preserve"><value>设置</value></data>
-  <data name="Settings.PageDesc" xml:space="preserve"><value>按 Windows 11 风格集中管理应用行为</value></data>
-  <data name="Settings.AutoStart.Title" xml:space="preserve"><value>开机自启动</value></data>
-  <data name="Settings.AutoStart.Desc" xml:space="preserve"><value>默认关闭，可在登录后自动启动 PowerPlan</value></data>
-  <data name="Settings.Tray.Title" xml:space="preserve"><value>启用托盘</value></data>
-  <data name="Settings.Tray.Desc" xml:space="preserve"><value>默认开启，关闭后点击窗口关闭将直接退出</value></data>
-  <data name="Settings.Status.Title" xml:space="preserve"><value>状态</value></data>
-  <data name="Settings.Status.Loaded" xml:space="preserve"><value>设置已加载</value></data>
-  <data name="Settings.Status.StartupApplyFailed" xml:space="preserve"><value>应用开机自启动状态失败：{0}</value></data>
-  <data name="Settings.Status.SaveSuccess" xml:space="preserve"><value>设置已保存</value></data>
-  <data name="Settings.Status.SaveFailed" xml:space="preserve"><value>设置保存失败：{0}</value></data>
-  <data name="Settings.PathLabel" xml:space="preserve"><value>settings.json: {0}</value></data>
-  <data name="Settings.Tools.Title" xml:space="preserve"><value>快捷入口</value></data>
-  <data name="Settings.Tools.PowerOptions" xml:space="preserve"><value>跳转到电源计划</value></data>
-  <data name="Settings.Tools.Website" xml:space="preserve"><value>打开开发者官网</value></data>
-  <data name="Settings.Tools.Feedback" xml:space="preserve"><value>反馈到开发者邮箱</value></data>
-  <data name="Settings.Status.OpenedExternal" xml:space="preserve"><value>已打开外部链接</value></data>
-  <data name="Settings.Status.OpenExternalFailed" xml:space="preserve"><value>打开失败：{0}</value></data>
-
-  <data name="App.Status.StartupSettingFailed" xml:space="preserve"><value>设置开机自启动失败：{0}</value></data>
-  <data name="App.Status.TraySwitched" xml:space="preserve"><value>[托盘] 已切换电源计划：{0}</value></data>
-  <data name="App.Status.TrayInitFailed" xml:space="preserve"><value>[托盘] 初始化失败：{0}</value></data>
-  <data name="App.Status.TrayAutoStart" xml:space="preserve"><value>[托盘] 开机自启动：{0}</value></data>
-  <data name="App.Status.On" xml:space="preserve"><value>开启</value></data>
-  <data name="App.Status.Off" xml:space="preserve"><value>关闭</value></data>
-  <data name="App.Status.TrayAutoStartFailed" xml:space="preserve"><value>[托盘] 自启动设置失败：{0}</value></data>
-
-  <data name="Tray.Init" xml:space="preserve"><value>[托盘] 已初始化。右键托盘图标可打开菜单。</value></data>
-  <data name="Tray.RefreshFailed" xml:space="preserve"><value>[托盘] 刷新失败：{0}</value></data>
-  <data name="Tray.BindWindowFailed" xml:space="preserve"><value>[托盘] 绑定窗口消息失败。托盘不可用。</value></data>
-  <data name="Tray.AddIconFailed" xml:space="preserve"><value>[托盘] 添加托盘图标失败。</value></data>
-  <data name="Tray.Menu.OpenMainWindow" xml:space="preserve"><value>打开主界面</value></data>
-  <data name="Tray.Menu.SwitchPlan" xml:space="preserve"><value>切换电源计划</value></data>
-  <data name="Tray.Menu.RefreshPlans" xml:space="preserve"><value>刷新计划</value></data>
-  <data name="Tray.Menu.DisableAutoStart" xml:space="preserve"><value>关闭开机自启动</value></data>
-  <data name="Tray.Menu.EnableAutoStart" xml:space="preserve"><value>开启开机自启动</value></data>
-  <data name="Tray.Menu.Exit" xml:space="preserve"><value>退出</value></data>
-  <data name="Tray.RefreshStarted" xml:space="preserve"><value>[托盘] 已开始刷新计划列表。</value></data>
-  <data name="Tray.SwitchTo" xml:space="preserve"><value>[托盘] 已切换到：{0}</value></data>
-  <data name="Tray.SwitchFailed" xml:space="preserve"><value>[托盘] 切换失败：{0}</value></data>
-  <data name="Tray.AutoStartState" xml:space="preserve"><value>[托盘] 开机自启动：{0}</value></data>
-  <data name="Tray.AutoStartToggleFailed" xml:space="preserve"><value>[托盘] 自启动切换失败：{0}</value></data>
-
-  <data name="Common.FailedKeyword" xml:space="preserve"><value>失败</value></data>
-  <data name="PowerPlan.UltimateKeywordZh" xml:space="preserve"><value>卓越性能</value></data>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
+  </resheader>
+  <data name="Shell.Home" xml:space="preserve">
+    <value>首页</value>
+  </data>
+  <data name="Shell.Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Main.Subtitle" xml:space="preserve">
+    <value>快速切换 Windows 电源计划</value>
+  </data>
+  <data name="Main.UnlockTitle" xml:space="preserve">
+    <value>权限区</value>
+  </data>
+  <data name="Main.RequestAdminButton" xml:space="preserve">
+    <value>请求管理员权限</value>
+  </data>
+  <data name="Main.PlansTitle" xml:space="preserve">
+    <value>计划区</value>
+  </data>
+  <data name="Main.RefreshPlansButton" xml:space="preserve">
+    <value>刷新计划</value>
+  </data>
+  <data name="Main.UltimateMissingTitle" xml:space="preserve">
+    <value>未发现卓越性能计划</value>
+  </data>
+  <data name="Main.UltimateMissingMessage" xml:space="preserve">
+    <value>可点击下方按钮创建卓越性能计划。</value>
+  </data>
+  <data name="Main.CreateUltimateButton" xml:space="preserve">
+    <value>创建卓越性能计划</value>
+  </data>
+  <data name="Main.StatusAreaTitle" xml:space="preserve">
+    <value>状态区</value>
+  </data>
+  <data name="Main.StatusTitle" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Main.StatusWaiting" xml:space="preserve">
+    <value>等待操作</value>
+  </data>
+  <data name="Main.Admin.Yes" xml:space="preserve">
+    <value>当前已具备管理员权限，可修改电源计划。</value>
+  </data>
+  <data name="Main.Admin.No" xml:space="preserve">
+    <value>当前非管理员权限，仅可读取电源计划。</value>
+  </data>
+  <data name="Main.Status.TitleWithTime" xml:space="preserve">
+    <value>状态（{0}）</value>
+  </data>
+  <data name="Main.Status.InitSuccess" xml:space="preserve">
+    <value>初始化完成</value>
+  </data>
+  <data name="Main.Status.InitFailed" xml:space="preserve">
+    <value>初始化失败：{0}</value>
+  </data>
+  <data name="Main.Status.PlansLoaded" xml:space="preserve">
+    <value>已读取电源计划：{0} 个</value>
+  </data>
+  <data name="Main.Status.RefreshFailed" xml:space="preserve">
+    <value>刷新失败：{0}</value>
+  </data>
+  <data name="Main.Status.SwitchSuccess" xml:space="preserve">
+    <value>切换电源计划成功：{0}</value>
+  </data>
+  <data name="Main.Status.SwitchFailed" xml:space="preserve">
+    <value>切换失败：{0}</value>
+  </data>
+  <data name="Main.Status.UltimateExists" xml:space="preserve">
+    <value>系统中已存在卓越性能计划</value>
+  </data>
+  <data name="Main.Status.UltimateCreated" xml:space="preserve">
+    <value>已创建卓越性能计划</value>
+  </data>
+  <data name="Main.Status.UltimateCreateFailed" xml:space="preserve">
+    <value>创建卓越性能计划失败：{0}</value>
+  </data>
+  <data name="Main.Status.ElevateRequested" xml:space="preserve">
+    <value>已发起管理员权限重启请求</value>
+  </data>
+  <data name="Main.Status.ElevateFailed" xml:space="preserve">
+    <value>管理员权限请求被取消或失败</value>
+  </data>
+  <data name="Main.CurrentTag" xml:space="preserve">
+    <value>（当前）</value>
+  </data>
+  <data name="Main.SwitchButton" xml:space="preserve">
+    <value>切换</value>
+  </data>
+  <data name="Settings.PageTitle" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Settings.PageDesc" xml:space="preserve">
+    <value>按 Windows 11 风格集中管理应用行为</value>
+  </data>
+  <data name="Settings.AutoStart.Title" xml:space="preserve">
+    <value>开机自启动</value>
+  </data>
+  <data name="Settings.AutoStart.Desc" xml:space="preserve">
+    <value>默认关闭，可在登录后自动启动 PowerPlan</value>
+  </data>
+  <data name="Settings.Tray.Title" xml:space="preserve">
+    <value>启用托盘</value>
+  </data>
+  <data name="Settings.Tray.Desc" xml:space="preserve">
+    <value>默认开启，关闭后点击窗口关闭将直接退出</value>
+  </data>
+  <data name="Settings.Status.Title" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Settings.Status.Loaded" xml:space="preserve">
+    <value>设置已加载</value>
+  </data>
+  <data name="Settings.Status.StartupApplyFailed" xml:space="preserve">
+    <value>应用开机自启动状态失败：{0}</value>
+  </data>
+  <data name="Settings.Status.SaveSuccess" xml:space="preserve">
+    <value>设置已保存</value>
+  </data>
+  <data name="Settings.Status.SaveFailed" xml:space="preserve">
+    <value>设置保存失败：{0}</value>
+  </data>
+  <data name="Settings.PathLabel" xml:space="preserve">
+    <value>settings.json: {0}</value>
+  </data>
+  <data name="Settings.Tools.Title" xml:space="preserve">
+    <value>快捷入口</value>
+  </data>
+  <data name="Settings.Tools.PowerOptions" xml:space="preserve">
+    <value>跳转到电源计划</value>
+  </data>
+  <data name="Settings.Tools.Website" xml:space="preserve">
+    <value>打开开发者官网</value>
+  </data>
+  <data name="Settings.Tools.Feedback" xml:space="preserve">
+    <value>反馈到开发者邮箱</value>
+  </data>
+  <data name="Settings.Status.OpenedExternal" xml:space="preserve">
+    <value>已打开外部链接</value>
+  </data>
+  <data name="Settings.Status.OpenExternalFailed" xml:space="preserve">
+    <value>打开失败：{0}</value>
+  </data>
+  <data name="App.Status.StartupSettingFailed" xml:space="preserve">
+    <value>设置开机自启动失败：{0}</value>
+  </data>
+  <data name="App.Status.TraySwitched" xml:space="preserve">
+    <value>[托盘] 已切换电源计划：{0}</value>
+  </data>
+  <data name="App.Status.TrayInitFailed" xml:space="preserve">
+    <value>[托盘] 初始化失败：{0}</value>
+  </data>
+  <data name="App.Status.TrayAutoStart" xml:space="preserve">
+    <value>[托盘] 开机自启动：{0}</value>
+  </data>
+  <data name="App.Status.On" xml:space="preserve">
+    <value>开启</value>
+  </data>
+  <data name="App.Status.Off" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="App.Status.TrayAutoStartFailed" xml:space="preserve">
+    <value>[托盘] 自启动设置失败：{0}</value>
+  </data>
+  <data name="Tray.Init" xml:space="preserve">
+    <value>[托盘] 已初始化。右键托盘图标可打开菜单。</value>
+  </data>
+  <data name="Tray.RefreshFailed" xml:space="preserve">
+    <value>[托盘] 刷新失败：{0}</value>
+  </data>
+  <data name="Tray.BindWindowFailed" xml:space="preserve">
+    <value>[托盘] 绑定窗口消息失败。托盘不可用。</value>
+  </data>
+  <data name="Tray.AddIconFailed" xml:space="preserve">
+    <value>[托盘] 添加托盘图标失败。</value>
+  </data>
+  <data name="Tray.Menu.OpenMainWindow" xml:space="preserve">
+    <value>打开主界面</value>
+  </data>
+  <data name="Tray.Menu.SwitchPlan" xml:space="preserve">
+    <value>切换电源计划</value>
+  </data>
+  <data name="Tray.Menu.RefreshPlans" xml:space="preserve">
+    <value>刷新计划</value>
+  </data>
+  <data name="Tray.Menu.DisableAutoStart" xml:space="preserve">
+    <value>关闭开机自启动</value>
+  </data>
+  <data name="Tray.Menu.EnableAutoStart" xml:space="preserve">
+    <value>开启开机自启动</value>
+  </data>
+  <data name="Tray.Menu.Exit" xml:space="preserve">
+    <value>退出</value>
+  </data>
+  <data name="Tray.RefreshStarted" xml:space="preserve">
+    <value>[托盘] 已开始刷新计划列表。</value>
+  </data>
+  <data name="Tray.SwitchTo" xml:space="preserve">
+    <value>[托盘] 已切换到：{0}</value>
+  </data>
+  <data name="Tray.SwitchFailed" xml:space="preserve">
+    <value>[托盘] 切换失败：{0}</value>
+  </data>
+  <data name="Tray.AutoStartState" xml:space="preserve">
+    <value>[托盘] 开机自启动：{0}</value>
+  </data>
+  <data name="Tray.AutoStartToggleFailed" xml:space="preserve">
+    <value>[托盘] 自启动切换失败：{0}</value>
+  </data>
+  <data name="Common.FailedKeyword" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="PowerPlan.UltimateKeywordZh" xml:space="preserve">
+    <value>卓越性能</value>
+  </data>
+  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve">
+    <value>复制反馈邮箱</value>
+  </data>
+  <data name="Settings.Status.FeedbackCopied" xml:space="preserve">
+    <value>邮箱已复制到剪贴板</value>
+  </data>
 </root>
