@@ -32,38 +32,48 @@ public partial class App : Application
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
 
-        _trayService ??= new TrayService(
-            mainWindowHandle: hwnd,
-            getPlansAsync: _powerPlanService.GetPlansAsync,
-            setActivePlanAsync: async guid =>
-            {
-                await _powerPlanService.SetActivePlanAsync(guid);
-                if (rootFrame.Content is MainPage page)
+        try
+        {
+            _trayService ??= new TrayService(
+                mainWindowHandle: hwnd,
+                getPlansAsync: _powerPlanService.GetPlansAsync,
+                setActivePlanAsync: async guid =>
                 {
-                    await page.RefreshFromExternalAsync();
-                    page.AddExternalStatus($"[\u6258\u76D8] \u5DF2\u5207\u6362\u7535\u6E90\u8BA1\u5212\uFF1A{guid}");
-                }
-            },
-            isStartupEnabled: _startupService.IsEnabled,
-            setStartupEnabled: enabled =>
-            {
-                _startupService.SetEnabled(enabled);
-                if (rootFrame.Content is MainPage page)
+                    await _powerPlanService.SetActivePlanAsync(guid);
+                    if (rootFrame.Content is MainPage page)
+                    {
+                        await page.RefreshFromExternalAsync();
+                        page.AddExternalStatus($"[\u6258\u76D8] \u5DF2\u5207\u6362\u7535\u6E90\u8BA1\u5212\uFF1A{guid}");
+                    }
+                },
+                isStartupEnabled: _startupService.IsEnabled,
+                setStartupEnabled: enabled =>
                 {
-                    page.AddExternalStatus($"[\u6258\u76D8] \u5F00\u673A\u81EA\u542F\u52A8\uFF1A{(enabled ? "\u5F00\u542F" : "\u5173\u95ED")}");
-                }
-            },
-            showMainWindow: () => _window.Activate(),
-            exitApplication: ExitApplication,
-            log: message =>
-            {
-                if (rootFrame.Content is MainPage page)
+                    _startupService.SetEnabled(enabled);
+                    if (rootFrame.Content is MainPage page)
+                    {
+                        page.AddExternalStatus($"[\u6258\u76D8] \u5F00\u673A\u81EA\u542F\u52A8\uFF1A{(enabled ? "\u5F00\u542F" : "\u5173\u95ED")}");
+                    }
+                },
+                showMainWindow: () => _window.Activate(),
+                exitApplication: ExitApplication,
+                log: message =>
                 {
-                    page.AddExternalStatus(message, message.Contains("\u5931\u8D25", StringComparison.Ordinal));
-                }
-            });
+                    if (rootFrame.Content is MainPage page)
+                    {
+                        page.AddExternalStatus(message, message.Contains("\u5931\u8D25", StringComparison.Ordinal));
+                    }
+                });
 
-        await _trayService.InitializeAsync();
+            await _trayService.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            if (rootFrame.Content is MainPage page)
+            {
+                page.AddExternalStatus($"[\u6258\u76D8] \u521D\u59CB\u5316\u5931\u8D25\uFF1A{ex.Message}", true);
+            }
+        }
     }
 
     private void ExitApplication()
