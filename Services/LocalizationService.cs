@@ -4,7 +4,7 @@ namespace PowerPlan.Services;
 
 public static class LocalizationService
 {
-    private static readonly ResourceLoader Loader = ResourceLoader.GetForViewIndependentUse();
+    private static readonly ResourceLoader Loader = new();
 
     public static string Get(string key, string? fallback = null)
     {
