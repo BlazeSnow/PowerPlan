@@ -6,7 +6,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     mc:Ignorable="d">
-    <NavigationView x:Name="AppNavigationView" IsBackEnabled="False" IsBackButtonVisible="Collapsed" PaneDisplayMode="Left" SelectionChanged="OnSelectionChanged">
+    <NavigationView
+        x:Name="AppNavigationView"
+        IsBackEnabled="False"
+        IsBackButtonVisible="Collapsed"
+        IsSettingsVisible="False"
+        OpenPaneLength="220"
+        CompactPaneLength="48"
+        PaneDisplayMode="Left"
+        SelectionChanged="OnSelectionChanged">
         <NavigationView.MenuItems>
             <NavigationViewItem x:Name="HomeItem" Tag="home" Icon="Home" Content="-" />
             <NavigationViewItem x:Name="SettingsItem" Tag="settings" Icon="Setting" Content="-" />
