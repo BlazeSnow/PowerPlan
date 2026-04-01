@@ -15,6 +15,8 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>PowerPlan</RootNamespace>
+        <DefaultLanguage>zh-CN</DefaultLanguage>
+        <NeutralLanguage>zh-CN</NeutralLanguage>
 
         <!-- App Options -->
         <UseRidGraph>true</UseRidGraph>
