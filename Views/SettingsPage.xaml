@@ -38,6 +38,14 @@
                     <ToggleSwitch x:Name="TrayToggle" Grid.Column="1" Toggled="OnTrayToggled" />
                 </Grid>
             </Border>
+            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+                <StackPanel Spacing="12">
+                    <TextBlock x:Name="ToolsTitleText" Text="-" FontSize="18" FontWeight="SemiBold" />
+                    <Button x:Name="OpenPowerOptionsButton" Content="-" HorizontalAlignment="Left" Click="OnOpenPowerOptionsClicked" />
+                    <Button x:Name="OpenWebsiteButton" Content="-" HorizontalAlignment="Left" Click="OnOpenWebsiteClicked" />
+                    <Button x:Name="SendFeedbackButton" Content="-" HorizontalAlignment="Left" Click="OnSendFeedbackClicked" />
+                </StackPanel>
+            </Border>
 
             <InfoBar x:Name="SettingsStatusBar" IsOpen="True" IsClosable="False" Severity="Informational" Title="-" Message="-" />
             <TextBlock x:Name="PathText" Opacity="0.65" TextWrapping="Wrap" />

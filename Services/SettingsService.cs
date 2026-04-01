@@ -120,7 +120,9 @@ public sealed class SettingsService
     {
         if (IsPackaged())
         {
-            return Path.Combine(AppContext.BaseDirectory, "settings.json");
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var packageFamilyName = Package.Current.Id.FamilyName;
+            return Path.Combine(localAppData, "Packages", packageFamilyName, "LocalState", "settings.json");
         }
 
         return ResolveFallbackPath();

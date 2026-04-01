@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using PowerPlan.Models;
 using PowerPlan.Services;
 
@@ -28,6 +29,11 @@ public sealed partial class SettingsPage : Page
 
         TrayTitleText.Text = LocalizationService.Get("Settings.Tray.Title");
         TrayDescText.Text = LocalizationService.Get("Settings.Tray.Desc");
+
+        ToolsTitleText.Text = LocalizationService.Get("Settings.Tools.Title");
+        OpenPowerOptionsButton.Content = LocalizationService.Get("Settings.Tools.PowerOptions");
+        OpenWebsiteButton.Content = LocalizationService.Get("Settings.Tools.Website");
+        SendFeedbackButton.Content = LocalizationService.Get("Settings.Tools.Feedback");
 
         SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
         SettingsStatusBar.Message = LocalizationService.Get("Settings.Status.Loaded");
@@ -101,5 +107,47 @@ public sealed partial class SettingsPage : Page
     private Task EnsureStartupStateAsync(bool enabled)
     {
         return Task.Run(() => _startupService.SetEnabled(enabled));
+    }
+
+    private void OnOpenPowerOptionsClicked(object sender, RoutedEventArgs e)
+    {
+        OpenExternal("control.exe", "/name Microsoft.PowerOptions");
+    }
+
+    private void OnOpenWebsiteClicked(object sender, RoutedEventArgs e)
+    {
+        OpenExternal("https://www.blazesnow.com");
+    }
+
+    private void OnSendFeedbackClicked(object sender, RoutedEventArgs e)
+    {
+        OpenExternal("mailto:powerplan@blazesnow.com");
+    }
+
+    private void OpenExternal(string target, string? args = null)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo(target)
+            {
+                UseShellExecute = true
+            };
+
+            if (!string.IsNullOrWhiteSpace(args))
+            {
+                startInfo.Arguments = args;
+            }
+
+            _ = Process.Start(startInfo);
+            SettingsStatusBar.Severity = InfoBarSeverity.Informational;
+            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
+            SettingsStatusBar.Message = LocalizationService.Get("Settings.Status.OpenedExternal");
+        }
+        catch (Exception ex)
+        {
+            SettingsStatusBar.Severity = InfoBarSeverity.Error;
+            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
+            SettingsStatusBar.Message = LocalizationService.Format("Settings.Status.OpenExternalFailed", ex.Message);
+        }
     }
 }
