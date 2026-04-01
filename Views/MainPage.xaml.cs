@@ -9,7 +9,6 @@ namespace PowerPlan.Views;
 public sealed partial class MainPage : Page
 {
     private readonly PowerPlanService _powerPlanService = new();
-    private readonly StartupService _startupService = new();
 
     public ObservableCollection<PowerPlanItemViewModel> Plans { get; } = new();
 
@@ -28,7 +27,6 @@ public sealed partial class MainPage : Page
 
         try
         {
-            StartupToggle.IsOn = _startupService.IsEnabled();
             await RefreshPlansAsync();
             SetStatus("\u521D\u59CB\u5316\u5B8C\u6210", InfoBarSeverity.Success);
         }
@@ -51,14 +49,9 @@ public sealed partial class MainPage : Page
         UltimateMissingInfoBar.Message = "\u53EF\u70B9\u51FB\u4E0B\u65B9\u6309\u94AE\u521B\u5EFA\u5353\u8D8A\u6027\u80FD\u8BA1\u5212\u3002";
         CreateUltimateButton.Content = "\u521B\u5EFA\u5353\u8D8A\u6027\u80FD\u8BA1\u5212";
 
-        StatusAreaTitleText.Text = "\u72B6\u6001\u533A";
+        StatusAreaTitleText.Text = "\u72B6\u6001";
         StatusInfoBar.Title = "\u72B6\u6001";
         StatusInfoBar.Message = "\u7B49\u5F85\u64CD\u4F5C";
-
-        SettingsTitleText.Text = "\u8BBE\u7F6E\u533A";
-        StartupToggle.Header = "\u5F00\u673A\u81EA\u542F\u52A8";
-        StartupToggle.OnContent = "\u5F00\u542F";
-        StartupToggle.OffContent = "\u5173\u95ED";
     }
 
     private async Task RefreshPlansAsync()
@@ -158,22 +151,6 @@ public sealed partial class MainPage : Page
         }
 
         SetStatus("\u7BA1\u7406\u5458\u6743\u9650\u8BF7\u6C42\u88AB\u53D6\u6D88\u6216\u5931\u8D25", InfoBarSeverity.Warning);
-    }
-
-    private void OnStartupToggled(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            _startupService.SetEnabled(StartupToggle.IsOn);
-            SetStatus($"\u5F00\u673A\u81EA\u542F\u52A8\uFF1A{(StartupToggle.IsOn ? "\u5F00\u542F" : "\u5173\u95ED")}", InfoBarSeverity.Success);
-        }
-        catch (Exception ex)
-        {
-            SetStatus($"\u8BBE\u7F6E\u5F00\u673A\u81EA\u542F\u52A8\u5931\u8D25\uFF1A{ex.Message}", InfoBarSeverity.Error);
-            StartupToggle.Toggled -= OnStartupToggled;
-            StartupToggle.IsOn = _startupService.IsEnabled();
-            StartupToggle.Toggled += OnStartupToggled;
-        }
     }
 
     public void AddExternalStatus(string message, bool isError = false)

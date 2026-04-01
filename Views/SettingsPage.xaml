@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Page
+    x:Class="PowerPlan.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    mc:Ignorable="d">
+    <ScrollViewer>
+        <StackPanel Padding="24" Spacing="16">
+            <TextBlock x:Name="PageTitleText" Text="-" FontSize="28" FontWeight="SemiBold" />
+            <TextBlock x:Name="PageDescText" Text="-" Opacity="0.75" />
+
+            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="6">
+                        <TextBlock x:Name="AutoStartTitleText" Text="-" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock x:Name="AutoStartDescText" Text="-" Opacity="0.7" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ToggleSwitch x:Name="AutoStartToggle" Grid.Column="1" Toggled="OnAutoStartToggled" />
+                </Grid>
+            </Border>
+
+            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="6">
+                        <TextBlock x:Name="TrayTitleText" Text="-" FontSize="18" FontWeight="SemiBold" />
+                        <TextBlock x:Name="TrayDescText" Text="-" Opacity="0.7" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ToggleSwitch x:Name="TrayToggle" Grid.Column="1" Toggled="OnTrayToggled" />
+                </Grid>
+            </Border>
+
+            <InfoBar x:Name="SettingsStatusBar" IsOpen="True" IsClosable="False" Severity="Informational" Title="-" Message="-" />
+            <TextBlock x:Name="PathText" Opacity="0.65" TextWrapping="Wrap" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

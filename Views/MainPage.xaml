@@ -90,18 +90,6 @@
                         Message="-" />
                 </StackPanel>
             </Border>
-
-            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
-                <StackPanel Spacing="10">
-                    <TextBlock x:Name="SettingsTitleText" FontSize="18" FontWeight="SemiBold" Text="-" />
-                    <ToggleSwitch
-                        x:Name="StartupToggle"
-                        Header="-"
-                        OffContent="-"
-                        OnContent="-"
-                        Toggled="OnStartupToggled" />
-                </StackPanel>
-            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>
