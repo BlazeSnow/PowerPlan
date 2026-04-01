@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <DefaultLanguage>zh-CN</DefaultLanguage>
         <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <OutputType>WinExe</OutputType>
@@ -15,8 +16,6 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>PowerPlan</RootNamespace>
-        <DefaultLanguage>zh-CN</DefaultLanguage>
-        <NeutralLanguage>zh-CN</NeutralLanguage>
 
         <!-- App Options -->
         <UseRidGraph>true</UseRidGraph>

@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value></resheader>
 
-  <data name="Shell.Home" xml:space="preserve"><value>主页</value></data>
+  <data name="Shell.Home" xml:space="preserve"><value>首页</value></data>
   <data name="Shell.Settings" xml:space="preserve"><value>设置</value></data>
 
   <data name="Main.Subtitle" xml:space="preserve"><value>快速切换 Windows 电源计划</value></data>
-  <data name="Main.UnlockTitle" xml:space="preserve"><value>解锁区</value></data>
+  <data name="Main.UnlockTitle" xml:space="preserve"><value>权限区</value></data>
   <data name="Main.RequestAdminButton" xml:space="preserve"><value>请求管理员权限</value></data>
-  <data name="Main.PlansTitle" xml:space="preserve"><value>表格区</value></data>
+  <data name="Main.PlansTitle" xml:space="preserve"><value>计划区</value></data>
   <data name="Main.RefreshPlansButton" xml:space="preserve"><value>刷新计划</value></data>
   <data name="Main.UltimateMissingTitle" xml:space="preserve"><value>未发现卓越性能计划</value></data>
   <data name="Main.UltimateMissingMessage" xml:space="preserve"><value>可点击下方按钮创建卓越性能计划。</value></data>
   <data name="Main.CreateUltimateButton" xml:space="preserve"><value>创建卓越性能计划</value></data>
-  <data name="Main.StatusAreaTitle" xml:space="preserve"><value>状态</value></data>
+  <data name="Main.StatusAreaTitle" xml:space="preserve"><value>状态区</value></data>
   <data name="Main.StatusTitle" xml:space="preserve"><value>状态</value></data>
   <data name="Main.StatusWaiting" xml:space="preserve"><value>等待操作</value></data>
   <data name="Main.Admin.Yes" xml:space="preserve"><value>当前已具备管理员权限，可修改电源计划。</value></data>
