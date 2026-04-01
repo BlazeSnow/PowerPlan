@@ -30,7 +30,10 @@ public partial class App : Application
         _ = rootFrame.Navigate(typeof(MainPage), e.Arguments);
         _window.Activate();
 
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+
         _trayService ??= new TrayService(
+            mainWindowHandle: hwnd,
             getPlansAsync: _powerPlanService.GetPlansAsync,
             setActivePlanAsync: async guid =>
             {
@@ -38,7 +41,7 @@ public partial class App : Application
                 if (rootFrame.Content is MainPage page)
                 {
                     await page.RefreshFromExternalAsync();
-                    page.AddExternalLog($"[Tray] Switched power plan: {guid}");
+                    page.AddExternalStatus($"[\u6258\u76D8] \u5DF2\u5207\u6362\u7535\u6E90\u8BA1\u5212\uFF1A{guid}");
                 }
             },
             isStartupEnabled: _startupService.IsEnabled,
@@ -47,7 +50,7 @@ public partial class App : Application
                 _startupService.SetEnabled(enabled);
                 if (rootFrame.Content is MainPage page)
                 {
-                    page.AddExternalLog($"[Tray] Launch at startup: {(enabled ? "On" : "Off")}");
+                    page.AddExternalStatus($"[\u6258\u76D8] \u5F00\u673A\u81EA\u542F\u52A8\uFF1A{(enabled ? "\u5F00\u542F" : "\u5173\u95ED")}");
                 }
             },
             showMainWindow: () => _window.Activate(),
@@ -56,7 +59,7 @@ public partial class App : Application
             {
                 if (rootFrame.Content is MainPage page)
                 {
-                    page.AddExternalLog(message);
+                    page.AddExternalStatus(message, message.Contains("\u5931\u8D25", StringComparison.Ordinal));
                 }
             });
 
@@ -72,6 +75,6 @@ public partial class App : Application
 
     private static void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
     {
-        throw new InvalidOperationException("Failed to load Page " + e.SourcePageType.FullName);
+        throw new InvalidOperationException("\u9875\u9762\u52A0\u8F7D\u5931\u8D25\uFF1A" + e.SourcePageType.FullName);
     }
 }

@@ -9,28 +9,33 @@ public sealed class PowerPlanService
     // Microsoft documented GUID for "Ultimate Performance".
     public const string UltimatePerformanceGuid = "e9a42b02-d5df-448d-aa00-03f14749eb61";
 
-    private static readonly Regex PlanLineRegex = new(
-        @"Power Scheme GUID:\s*(?<guid>[a-fA-F0-9\-]+)\s*\((?<name>.+?)\)\s*(?<active>\*)?",
+    private static readonly Regex GuidRegex = new(
+        @"(?<guid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})",
         RegexOptions.Compiled);
 
     public async Task<IReadOnlyList<PowerPlanInfo>> GetPlansAsync()
     {
         var output = await RunPowerCfgAsync("/list");
+        var activeGuid = await GetActivePlanGuidAsync();
         var plans = new List<PowerPlanInfo>();
 
         foreach (var line in output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries))
         {
-            var match = PlanLineRegex.Match(line.Trim());
+            var trimmed = line.Trim();
+            var match = GuidRegex.Match(trimmed);
             if (!match.Success)
             {
                 continue;
             }
 
+            var guid = match.Groups["guid"].Value;
+            var name = ExtractPlanName(trimmed);
+
             plans.Add(new PowerPlanInfo
             {
-                Guid = match.Groups["guid"].Value,
-                Name = match.Groups["name"].Value,
-                IsActive = match.Groups["active"].Success
+                Guid = guid,
+                Name = string.IsNullOrWhiteSpace(name) ? guid : name,
+                IsActive = guid.Equals(activeGuid, StringComparison.OrdinalIgnoreCase)
             });
         }
 
@@ -51,6 +56,30 @@ public sealed class PowerPlanService
     public async Task CreateUltimatePerformancePlanAsync()
     {
         await RunPowerCfgAsync($"/duplicatescheme {UltimatePerformanceGuid}");
+    }
+
+    private async Task<string?> GetActivePlanGuidAsync()
+    {
+        var output = await RunPowerCfgAsync("/getactivescheme");
+        var match = GuidRegex.Match(output);
+        return match.Success ? match.Groups["guid"].Value : null;
+    }
+
+    private static string ExtractPlanName(string line)
+    {
+        var start = line.IndexOf('(');
+        if (start < 0)
+        {
+            return string.Empty;
+        }
+
+        var end = line.IndexOf(')', start + 1);
+        if (end <= start)
+        {
+            return string.Empty;
+        }
+
+        return line[(start + 1)..end].Trim();
     }
 
     private static async Task<string> RunPowerCfgAsync(string args)

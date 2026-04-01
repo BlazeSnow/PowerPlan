@@ -10,16 +10,16 @@
     <ScrollViewer>
         <StackPanel Padding="24" Spacing="16">
             <TextBlock FontSize="24" FontWeight="SemiBold" Text="PowerPlan" />
-            <TextBlock Foreground="Gray" Text="Quickly switch Windows power plans" />
+            <TextBlock x:Name="SubtitleText" Foreground="Gray" Text="-" />
 
             <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel Spacing="10">
-                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Unlock" />
+                    <TextBlock x:Name="UnlockTitleText" FontSize="18" FontWeight="SemiBold" Text="-" />
                     <TextBlock x:Name="AdminStatusText" />
                     <Button
                         x:Name="ElevateButton"
                         Click="OnElevateClicked"
-                        Content="Request administrator permission"
+                        Content="-"
                         HorizontalAlignment="Left" />
                 </StackPanel>
             </Border>
@@ -27,8 +27,8 @@
             <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel Spacing="10">
                     <StackPanel Orientation="Horizontal" Spacing="10">
-                        <TextBlock FontSize="18" FontWeight="SemiBold" Text="Plans" />
-                        <Button Click="OnRefreshClicked" Content="Refresh plans" />
+                        <TextBlock x:Name="PlansTitleText" FontSize="18" FontWeight="SemiBold" Text="-" />
+                        <Button x:Name="RefreshPlansButton" Click="OnRefreshClicked" Content="-" />
                     </StackPanel>
 
                     <InfoBar
@@ -36,12 +36,12 @@
                         IsOpen="False"
                         IsClosable="False"
                         Severity="Informational"
-                        Title="Ultimate Performance plan not found"
-                        Message="Click the button below to create it." />
+                        Title="-"
+                        Message="-" />
                     <Button
                         x:Name="CreateUltimateButton"
                         Click="OnCreateUltimateClicked"
-                        Content="Create Ultimate Performance plan"
+                        Content="-"
                         HorizontalAlignment="Left"
                         Visibility="Collapsed" />
 
@@ -59,7 +59,7 @@
                                         <TextBlock FontWeight="SemiBold" Text="{x:Bind Name}" />
                                         <TextBlock
                                             Foreground="Green"
-                                            Text="(Current)"
+                                            Text="{x:Bind CurrentTagText}"
                                             Visibility="{x:Bind IsActiveVisibility}" />
                                     </StackPanel>
 
@@ -68,7 +68,7 @@
                                     <Button
                                         Grid.Column="2"
                                         Click="OnSwitchPlanClicked"
-                                        Content="Switch"
+                                        Content="{x:Bind SwitchButtonText}"
                                         IsEnabled="{x:Bind CanSwitch}"
                                         Tag="{x:Bind Guid}" />
                                 </Grid>
@@ -80,19 +80,25 @@
 
             <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel Spacing="10">
-                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Logs" />
-                    <ListView Height="220" ItemsSource="{x:Bind Logs}" />
+                    <TextBlock x:Name="StatusAreaTitleText" FontSize="18" FontWeight="SemiBold" Text="-" />
+                    <InfoBar
+                        x:Name="StatusInfoBar"
+                        IsClosable="False"
+                        IsOpen="True"
+                        Severity="Informational"
+                        Title="-"
+                        Message="-" />
                 </StackPanel>
             </Border>
 
             <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel Spacing="10">
-                    <TextBlock FontSize="18" FontWeight="SemiBold" Text="Settings" />
+                    <TextBlock x:Name="SettingsTitleText" FontSize="18" FontWeight="SemiBold" Text="-" />
                     <ToggleSwitch
                         x:Name="StartupToggle"
-                        Header="Launch at startup"
-                        OffContent="Off"
-                        OnContent="On"
+                        Header="-"
+                        OffContent="-"
+                        OnContent="-"
                         Toggled="OnStartupToggled" />
                 </StackPanel>
             </Border>
