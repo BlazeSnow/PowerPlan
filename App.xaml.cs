@@ -2,7 +2,6 @@ using PowerPlan.Models;
 using PowerPlan.Services;
 using PowerPlan.Views;
 using System.Runtime.InteropServices;
-using Windows.Globalization;
 
 namespace PowerPlan;
 
@@ -18,15 +17,6 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-
-        try
-        {
-            ApplicationLanguages.PrimaryLanguageOverride = "zh-CN";
-        }
-        catch
-        {
-            // Ignore when override is unavailable.
-        }
 
         SettingsService = new SettingsService();
         SettingsService.SettingsChanged += OnSettingsChanged;
