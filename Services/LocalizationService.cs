@@ -10,7 +10,8 @@ public static class LocalizationService
     {
         try
         {
-            var value = Loader.GetString(key);
+            var resourceKey = key.Replace('.', '/');
+            var value = Loader.GetString(resourceKey);
             if (!string.IsNullOrWhiteSpace(value))
             {
                 return value;
