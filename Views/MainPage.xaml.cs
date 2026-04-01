@@ -71,7 +71,7 @@ public sealed partial class MainPage : Page
             Plans.Add(new PowerPlanItemViewModel(plan));
         }
 
-        var hasUltimate = plans.Any(static p => p.Guid.Equals(PowerPlanService.UltimatePerformanceGuid, StringComparison.OrdinalIgnoreCase));
+        var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
         UltimateMissingInfoBar.IsOpen = !hasUltimate;
         CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
 
@@ -130,6 +130,13 @@ public sealed partial class MainPage : Page
     {
         try
         {
+            if (await _powerPlanService.HasUltimatePerformancePlanAsync())
+            {
+                SetStatus("\u7CFB\u7EDF\u4E2D\u5DF2\u5B58\u5728\u5353\u8D8A\u6027\u80FD\u8BA1\u5212", InfoBarSeverity.Informational);
+                await RefreshPlansAsync();
+                return;
+            }
+
             await _powerPlanService.CreateUltimatePerformancePlanAsync();
             SetStatus("\u5DF2\u521B\u5EFA\u5353\u8D8A\u6027\u80FD\u8BA1\u5212", InfoBarSeverity.Success);
             await RefreshPlansAsync();

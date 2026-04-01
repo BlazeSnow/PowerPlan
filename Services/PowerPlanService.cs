@@ -13,6 +13,12 @@ public sealed class PowerPlanService
         @"(?<guid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})",
         RegexOptions.Compiled);
 
+    private static readonly string[] UltimatePlanNameKeywords =
+    {
+        "Ultimate Performance",
+        "\u5353\u8D8A\u6027\u80FD"
+    };
+
     public async Task<IReadOnlyList<PowerPlanInfo>> GetPlansAsync()
     {
         var output = await RunPowerCfgAsync("/list");
@@ -50,12 +56,30 @@ public sealed class PowerPlanService
     public async Task<bool> HasUltimatePerformancePlanAsync()
     {
         var plans = await GetPlansAsync();
-        return plans.Any(static p => p.Guid.Equals(UltimatePerformanceGuid, StringComparison.OrdinalIgnoreCase));
+        return plans.Any(IsUltimatePerformancePlan);
     }
 
     public async Task CreateUltimatePerformancePlanAsync()
     {
         await RunPowerCfgAsync($"/duplicatescheme {UltimatePerformanceGuid}");
+    }
+
+    public bool IsUltimatePerformancePlan(PowerPlanInfo plan)
+    {
+        if (plan.Guid.Equals(UltimatePerformanceGuid, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        foreach (var keyword in UltimatePlanNameKeywords)
+        {
+            if (plan.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async Task<string?> GetActivePlanGuidAsync()
