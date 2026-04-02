@@ -51,8 +51,8 @@
 2. `settings.json`：
    1. 当软件为打包状态，保存到`%appdata%\Local\Packages\BlazeSnow.PowerPlan_cavwvnm5yrdtm\LocalState`
    2. 若软件为未打包状态，回退到`%appdata%/PowerPlan/`
-3. 开机自启动：`startup`
-4. 启用托盘：`tray`
+3. 开机自启动的id：`startup`
+4. 启用托盘的id：`tray`
 
 ## 侧边栏
 
