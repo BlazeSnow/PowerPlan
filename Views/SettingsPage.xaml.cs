@@ -103,9 +103,15 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private Task EnsureStartupStateAsync(bool enabled)
+    private async Task EnsureStartupStateAsync(bool enabled)
     {
-        return Task.Run(() => _startupService.SetEnabled(enabled));
+        var effective = await _startupService.SetEnabledAsync(enabled);
+        if (effective != enabled)
+        {
+            _updatingUi = true;
+            AutoStartToggle.IsOn = effective;
+            _updatingUi = false;
+        }
     }
 
     private void OnOpenPowerOptionsClicked(object sender, RoutedEventArgs e)

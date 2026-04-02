@@ -57,7 +57,13 @@ public partial class App : Application
     {
         try
         {
-            await Task.Run(() => _startupService.SetEnabled(SettingsService.Current.AutoStart));
+            var expected = SettingsService.Current.AutoStart;
+            var effective = await _startupService.SetEnabledAsync(expected);
+            if (effective != expected)
+            {
+                SettingsService.Current.AutoStart = effective;
+                await SettingsService.SaveCurrentAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -120,10 +126,10 @@ public partial class App : Application
     {
         try
         {
-            _startupService.SetEnabled(enabled);
-            SettingsService.Current.AutoStart = enabled;
+            var effective = await _startupService.SetEnabledAsync(enabled);
+            SettingsService.Current.AutoStart = effective;
             await SettingsService.SaveCurrentAsync();
-            var state = LocalizationService.Get(enabled ? "App.Status.On" : "App.Status.Off");
+            var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
             GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStart", state));
         }
         catch (Exception ex)
