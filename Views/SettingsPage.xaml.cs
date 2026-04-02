@@ -146,11 +146,25 @@ public sealed partial class SettingsPage : Page
 
     private async void OnRequestAdminClicked(object sender, RoutedEventArgs e)
     {
+        using var currentProcess = Process.GetCurrentProcess();
+        var processName = currentProcess.ProcessName;
+        var existingIds = Process.GetProcessesByName(processName).Select(p => p.Id).ToHashSet();
+
         var started = PrivilegeService.TryRestartAsAdministrator(out var error);
         if (started)
         {
-            Application.Current.Exit();
-            return;
+            for (var i = 0; i < 25; i++)
+            {
+                await Task.Delay(200);
+                var hasNewInstance = Process.GetProcessesByName(processName).Any(p => !existingIds.Contains(p.Id));
+                if (hasNewInstance)
+                {
+                    ((App)Application.Current).ExitForRestart();
+                    return;
+                }
+            }
+
+            error = "未检测到新的管理员实例启动。";
         }
 
         var prefix = LocalizationService.Get("Settings.Admin.StartFailed", "管理员提权启动失败");
