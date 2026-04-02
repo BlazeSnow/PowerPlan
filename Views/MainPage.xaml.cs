@@ -70,6 +70,11 @@ public sealed partial class MainPage : Page
         PlansListView.SelectedItem = Plans.FirstOrDefault(x => x.IsActive);
         _isUpdatingSelection = false;
 
+        if (Application.Current is App app)
+        {
+            await app.RefreshTrayPlansAsync();
+        }
+
         SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
     }
 
@@ -124,6 +129,10 @@ public sealed partial class MainPage : Page
             await _powerPlanService.SetActivePlanAsync(selectedPlan.Guid);
             SetStatus(LocalizationService.Format("Main.Status.SwitchSuccess", selectedPlan.Guid), InfoBarSeverity.Success);
             ApplyActivePlan(selectedPlan.Guid);
+            if (Application.Current is App app)
+            {
+                await app.RefreshTrayPlansAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -224,13 +233,8 @@ public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
 
             _isActive = value;
             OnPropertyChanged();
-            OnPropertyChanged(nameof(IsActiveVisibility));
-            OnPropertyChanged(nameof(IsInactiveVisibility));
         }
     }
-
-    public Visibility IsActiveVisibility => IsActive ? Visibility.Visible : Visibility.Collapsed;
-    public Visibility IsInactiveVisibility => IsActive ? Visibility.Collapsed : Visibility.Visible;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

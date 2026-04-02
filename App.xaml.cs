@@ -140,6 +140,16 @@ public partial class App : Application
         }
     }
 
+    public async Task RefreshTrayPlansAsync()
+    {
+        if (_trayService is null)
+        {
+            return;
+        }
+
+        await _trayService.RefreshPlansAsync();
+    }
+
     private MainPage? GetMainPage() => _shellPage?.GetMainPage();
 
     private void OnMainWindowClosed(object sender, WindowEventArgs args)

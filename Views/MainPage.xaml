@@ -72,26 +72,10 @@
                                             </Grid.ColumnDefinitions>
 
                                             <Grid Grid.Column="0" VerticalAlignment="Top" Margin="0,2,0,0">
-                                                <Border
-                                                    Width="20"
-                                                    Height="20"
-                                                    CornerRadius="10"
-                                                    BorderThickness="1.5"
-                                                    BorderBrush="{ThemeResource TextFillColorSecondaryBrush}"
-                                                    Visibility="{x:Bind IsInactiveVisibility, Mode=OneWay}" />
-                                                <Border
-                                                    Width="20"
-                                                    Height="20"
-                                                    CornerRadius="10"
-                                                    BorderThickness="2"
-                                                    BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
-                                                    Visibility="{x:Bind IsActiveVisibility, Mode=OneWay}" />
-                                                <Border
-                                                    Width="8"
-                                                    Height="8"
-                                                    CornerRadius="4"
-                                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                                    Visibility="{x:Bind IsActiveVisibility, Mode=OneWay}" />
+                                                <RadioButton
+                                                    IsChecked="{x:Bind IsActive, Mode=OneWay}"
+                                                    IsHitTestVisible="False"
+                                                    VerticalAlignment="Top" />
                                             </Grid>
 
                                             <StackPanel Grid.Column="1" Spacing="2">
