@@ -47,6 +47,26 @@
             </Border>
 
             <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="176" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="4">
+                        <TextBlock x:Name="AdminTitleText" Text="-" Style="{StaticResource SettingTitleTextStyle}" />
+                        <TextBlock x:Name="AdminDescText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
+                        <TextBlock x:Name="AdminStateText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
+                    </StackPanel>
+                    <Button
+                        x:Name="RequestAdminButton"
+                        Grid.Column="1"
+                        Click="OnRequestAdminClicked"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />

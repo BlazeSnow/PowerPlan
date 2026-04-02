@@ -26,8 +26,6 @@ public sealed partial class MainPage : Page
 
     private async void MainPage_Loaded(object sender, RoutedEventArgs e)
     {
-        RefreshAdminStatus();
-
         try
         {
             await RefreshPlansAsync();
@@ -42,7 +40,6 @@ public sealed partial class MainPage : Page
     private void ApplyLocalization()
     {
         SubtitleText.Text = LocalizationService.Get("Main.Subtitle");
-        ElevateButton.Content = LocalizationService.Get("Main.RequestAdminButton");
         RefreshPlansButton.Content = LocalizationService.Get("Main.RefreshPlansButton");
         PlanPickerTitleText.Text = LocalizationService.Get("Main.PlanPickerTitle", "选择要使用的电源计划");
         UltimateMissingInfoBar.Title = LocalizationService.Get("Main.UltimateMissingTitle");
@@ -76,15 +73,6 @@ public sealed partial class MainPage : Page
         }
 
         SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
-    }
-
-    private void RefreshAdminStatus()
-    {
-        var isAdmin = PrivilegeService.IsRunningAsAdministrator();
-        AdminStatusText.Text = isAdmin
-            ? LocalizationService.Get("Main.Admin.Yes")
-            : LocalizationService.Get("Main.Admin.No");
-        ElevateButton.Visibility = isAdmin ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void SetStatus(string message, InfoBarSeverity severity)
@@ -136,7 +124,16 @@ public sealed partial class MainPage : Page
         }
         catch (Exception ex)
         {
-            SetStatus(LocalizationService.Format("Main.Status.SwitchFailed", ex.Message), InfoBarSeverity.Error);
+            if (IsPermissionRelatedError(ex))
+            {
+                SetStatus("切换计划需要管理员权限，请前往“设置”页点击“请求管理员权限”。", InfoBarSeverity.Warning);
+                (Application.Current as App)?.NavigateToSettings();
+            }
+            else
+            {
+                SetStatus(LocalizationService.Format("Main.Status.SwitchFailed", ex.Message), InfoBarSeverity.Error);
+            }
+
             var activePlan = Plans.FirstOrDefault(x => x.IsActive);
             if (activePlan is not null)
             {
@@ -180,21 +177,16 @@ public sealed partial class MainPage : Page
         }
         catch (Exception ex)
         {
-            SetStatus(LocalizationService.Format("Main.Status.UltimateCreateFailed", ex.Message), InfoBarSeverity.Error);
+            if (IsPermissionRelatedError(ex))
+            {
+                SetStatus("创建卓越性能计划需要管理员权限，请前往“设置”页点击“请求管理员权限”。", InfoBarSeverity.Warning);
+                (Application.Current as App)?.NavigateToSettings();
+            }
+            else
+            {
+                SetStatus(LocalizationService.Format("Main.Status.UltimateCreateFailed", ex.Message), InfoBarSeverity.Error);
+            }
         }
-    }
-
-    private void OnElevateClicked(object sender, RoutedEventArgs e)
-    {
-        var started = PrivilegeService.TryRestartAsAdministrator();
-        if (started)
-        {
-            SetStatus(LocalizationService.Get("Main.Status.ElevateRequested"), InfoBarSeverity.Informational);
-            Application.Current.Exit();
-            return;
-        }
-
-        SetStatus(LocalizationService.Get("Main.Status.ElevateFailed"), InfoBarSeverity.Warning);
     }
 
     public void AddExternalStatus(string message, bool isError = false)
@@ -205,6 +197,17 @@ public sealed partial class MainPage : Page
     public async Task RefreshFromExternalAsync()
     {
         await RefreshPlansAsync();
+    }
+
+    private static bool IsPermissionRelatedError(Exception ex)
+    {
+        var message = ex.Message;
+        return message.Contains("access is denied", StringComparison.OrdinalIgnoreCase)
+               || message.Contains("拒绝访问", StringComparison.OrdinalIgnoreCase)
+               || message.Contains("requires elevation", StringComparison.OrdinalIgnoreCase)
+               || message.Contains("需要提升", StringComparison.OrdinalIgnoreCase)
+               || message.Contains("权限", StringComparison.OrdinalIgnoreCase)
+               || message.Contains("0x5", StringComparison.OrdinalIgnoreCase);
     }
 }
 

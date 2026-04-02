@@ -12,17 +12,6 @@
             <TextBlock FontSize="24" FontWeight="SemiBold" Text="PowerPlan" />
             <TextBlock x:Name="SubtitleText" Foreground="Gray" Text="-" />
 
-            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
-                <StackPanel Spacing="10">
-                    <TextBlock x:Name="AdminStatusText" />
-                    <Button
-                        x:Name="ElevateButton"
-                        Click="OnElevateClicked"
-                        Content="-"
-                        HorizontalAlignment="Left" />
-                </StackPanel>
-            </Border>
-
             <Border BorderThickness="0" Padding="0">
                 <StackPanel Spacing="10">
 

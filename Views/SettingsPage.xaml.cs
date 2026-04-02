@@ -32,6 +32,11 @@ public sealed partial class SettingsPage : Page
         TrayTitleText.Text = LocalizationService.Get("Settings.Tray.Title");
         TrayDescText.Text = LocalizationService.Get("Settings.Tray.Desc");
 
+        AdminTitleText.Text = LocalizationService.Get("Settings.Admin.Title", "管理员权限");
+        AdminDescText.Text = LocalizationService.Get("Settings.Admin.Desc", "创建卓越性能计划等操作需要管理员权限。");
+        RequestAdminButton.Content = LocalizationService.Get("Settings.Admin.Button", "请求管理员权限");
+        UpdateAdminStateText();
+
         PowerOptionsTitleText.Text = LocalizationService.Get("Settings.Tools.PowerOptions");
         PowerOptionsDescText.Text = LocalizationService.Get("Settings.Tools.PowerOptionsDesc");
         OpenPowerOptionsButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
@@ -57,6 +62,7 @@ public sealed partial class SettingsPage : Page
         try
         {
             await EnsureStartupStateAsync(settings.AutoStart);
+            UpdateAdminStateText();
         }
         catch
         {
@@ -136,6 +142,27 @@ public sealed partial class SettingsPage : Page
         {
             // Keep page silent when clipboard is unavailable.
         }
+    }
+
+    private void OnRequestAdminClicked(object sender, RoutedEventArgs e)
+    {
+        var started = PrivilegeService.TryRestartAsAdministrator();
+        if (started)
+        {
+            Application.Current.Exit();
+            return;
+        }
+
+        UpdateAdminStateText();
+    }
+
+    private void UpdateAdminStateText()
+    {
+        var isAdmin = PrivilegeService.IsRunningAsAdministrator();
+        AdminStateText.Text = isAdmin
+            ? LocalizationService.Get("Settings.Admin.State.Yes", "当前已管理员运行")
+            : LocalizationService.Get("Settings.Admin.State.No", "当前未以管理员运行");
+        RequestAdminButton.Visibility = isAdmin ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private static void OpenExternal(string target, string? args = null)
