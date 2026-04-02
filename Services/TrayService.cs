@@ -22,7 +22,6 @@ public sealed class TrayService : IDisposable
 
     private const uint MfString = 0x00000000;
     private const uint MfSeparator = 0x00000800;
-    private const uint MfPopup = 0x00000010;
     private const uint MfChecked = 0x00000008;
 
     private const uint TpmReturCmd = 0x0100;
@@ -216,7 +215,6 @@ public sealed class TrayService : IDisposable
     private void ShowContextMenu()
     {
         var menu = CreatePopupMenu();
-        var plansMenu = CreatePopupMenu();
 
         IReadOnlyList<PowerPlanInfo> plans;
         lock (_plansLock)
@@ -229,15 +227,16 @@ public sealed class TrayService : IDisposable
             _ = RefreshPlansAsync();
         }
 
+        _ = AppendMenu(menu, MfString, (nuint)MenuOpenMainWindow, LocalizationService.Get("Tray.Menu.OpenMainWindow"));
+        _ = AppendMenu(menu, MfSeparator, 0, string.Empty);
         for (var i = 0; i < plans.Count; i++)
         {
             var id = MenuPlanBase + (uint)i;
             var flags = MfString | (plans[i].IsActive ? MfChecked : 0);
-            _ = AppendMenu(plansMenu, flags, (nuint)id, plans[i].Name);
+            _ = AppendMenu(menu, flags, (nuint)id, plans[i].Name);
         }
 
-        _ = AppendMenu(menu, MfString, (nuint)MenuOpenMainWindow, LocalizationService.Get("Tray.Menu.OpenMainWindow"));
-        _ = AppendMenu(menu, MfPopup, (nuint)plansMenu, LocalizationService.Get("Tray.Menu.SwitchPlan"));
+        _ = AppendMenu(menu, MfSeparator, 0, string.Empty);
         _ = AppendMenu(menu, MfString, (nuint)MenuRefreshPlans, LocalizationService.Get("Tray.Menu.RefreshPlans"));
 
         var startupText = _isStartupEnabled()
@@ -260,7 +259,6 @@ public sealed class TrayService : IDisposable
             _mainWindowHandle,
             IntPtr.Zero);
 
-        _ = DestroyMenu(plansMenu);
         _ = DestroyMenu(menu);
 
         HandleMenuCommand(command, plans);
