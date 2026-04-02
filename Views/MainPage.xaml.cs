@@ -9,6 +9,7 @@ namespace PowerPlan.Views;
 public sealed partial class MainPage : Page
 {
     private readonly PowerPlanService _powerPlanService = new();
+    private bool _isUpdatingSelection;
 
     public ObservableCollection<PowerPlanItemViewModel> Plans { get; } = new();
 
@@ -41,6 +42,7 @@ public sealed partial class MainPage : Page
         SubtitleText.Text = LocalizationService.Get("Main.Subtitle");
         ElevateButton.Content = LocalizationService.Get("Main.RequestAdminButton");
         RefreshPlansButton.Content = LocalizationService.Get("Main.RefreshPlansButton");
+        PlanPickerTitleText.Text = LocalizationService.Get("Main.PlanPickerTitle", "选择要使用的电源计划");
         UltimateMissingInfoBar.Title = LocalizationService.Get("Main.UltimateMissingTitle");
         UltimateMissingInfoBar.Message = LocalizationService.Get("Main.UltimateMissingMessage");
         CreateUltimateButton.Content = LocalizationService.Get("Main.CreateUltimateButton");
@@ -61,6 +63,10 @@ public sealed partial class MainPage : Page
         var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
         UltimateMissingInfoBar.IsOpen = !hasUltimate;
         CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
+
+        _isUpdatingSelection = true;
+        PlansListView.SelectedItem = Plans.FirstOrDefault(x => x.IsActive);
+        _isUpdatingSelection = false;
 
         SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
     }
@@ -94,17 +100,27 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private async void OnSwitchPlanClicked(object sender, RoutedEventArgs e)
+    private async void OnPlansSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (sender is not Button button || button.Tag is not string planGuid)
+        if (_isUpdatingSelection)
+        {
+            return;
+        }
+
+        if (sender is not ListView listView || listView.SelectedItem is not PowerPlanItemViewModel selectedPlan)
+        {
+            return;
+        }
+
+        if (selectedPlan.IsActive)
         {
             return;
         }
 
         try
         {
-            await _powerPlanService.SetActivePlanAsync(planGuid);
-            SetStatus(LocalizationService.Format("Main.Status.SwitchSuccess", planGuid), InfoBarSeverity.Success);
+            await _powerPlanService.SetActivePlanAsync(selectedPlan.Guid);
+            SetStatus(LocalizationService.Format("Main.Status.SwitchSuccess", selectedPlan.Guid), InfoBarSeverity.Success);
             await RefreshPlansAsync();
         }
         catch (Exception ex)
@@ -170,8 +186,7 @@ public sealed class PowerPlanItemViewModel
     public string Guid { get; }
     public string Name { get; }
     public bool IsActive { get; }
-    public bool CanSwitch => !IsActive;
     public string CurrentTagText => LocalizationService.Get("Main.CurrentTag");
-    public string SwitchButtonText => LocalizationService.Get("Main.SwitchButton");
     public Visibility IsActiveVisibility => IsActive ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility IsInactiveVisibility => IsActive ? Visibility.Collapsed : Visibility.Visible;
 }

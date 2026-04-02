@@ -23,11 +23,8 @@
                 </StackPanel>
             </Border>
 
-            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
+            <Border BorderThickness="0" Padding="0">
                 <StackPanel Spacing="10">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <Button x:Name="RefreshPlansButton" Click="OnRefreshClicked" Content="-" />
-                    </StackPanel>
 
                     <InfoBar
                         x:Name="UltimateMissingInfoBar"
@@ -43,36 +40,78 @@
                         HorizontalAlignment="Left"
                         Visibility="Collapsed" />
 
-                    <ListView x:Name="PlansListView">
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="local:PowerPlanItemViewModel">
-                                <Grid ColumnSpacing="10">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <Grid Padding="16,12" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Spacing="2">
+                                <TextBlock x:Name="PlanPickerTitleText" FontSize="16" FontWeight="SemiBold" Text="-" />
+                            </StackPanel>
+                        </Grid>
 
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock FontWeight="SemiBold" Text="{x:Bind Name}" />
-                                        <TextBlock
-                                            Foreground="Green"
-                                            Text="{x:Bind CurrentTagText}"
-                                            Visibility="{x:Bind IsActiveVisibility}" />
-                                    </StackPanel>
+                        <ListView
+                            x:Name="PlansListView"
+                            SelectionMode="Single"
+                            SelectionChanged="OnPlansSelectionChanged"
+                            BorderThickness="0">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="local:PowerPlanItemViewModel">
+                                    <Border BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="16,12">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="1" Opacity="0.75" Text="{x:Bind Guid}" />
+                                            <Grid Grid.Column="0" VerticalAlignment="Top" Margin="0,2,0,0">
+                                                <Border
+                                                    Width="20"
+                                                    Height="20"
+                                                    CornerRadius="10"
+                                                    BorderThickness="1.5"
+                                                    BorderBrush="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Visibility="{x:Bind IsInactiveVisibility}" />
+                                                <Border
+                                                    Width="20"
+                                                    Height="20"
+                                                    CornerRadius="10"
+                                                    BorderThickness="2"
+                                                    BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    Visibility="{x:Bind IsActiveVisibility}" />
+                                                <Border
+                                                    Width="8"
+                                                    Height="8"
+                                                    CornerRadius="4"
+                                                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                                    Visibility="{x:Bind IsActiveVisibility}" />
+                                            </Grid>
 
-                                    <Button
-                                        Grid.Column="2"
-                                        Click="OnSwitchPlanClicked"
-                                        Content="{x:Bind SwitchButtonText}"
-                                        IsEnabled="{x:Bind CanSwitch}"
-                                        Tag="{x:Bind Guid}" />
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
+                                            <StackPanel Grid.Column="1" Spacing="2">
+                                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="{x:Bind Name}" />
+                                                <TextBlock FontSize="13" Opacity="0.75" Text="{x:Bind Guid}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <Grid Padding="16,12" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                            <Button
+                                x:Name="RefreshPlansButton"
+                                Click="OnRefreshClicked"
+                                Content="-"
+                                HorizontalAlignment="Right" />
+                        </Grid>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
