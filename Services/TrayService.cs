@@ -27,6 +27,8 @@ public sealed class TrayService : IDisposable
 
     private const uint TpmReturCmd = 0x0100;
     private const uint TpmRightButton = 0x0002;
+    private const uint ImageIcon = 1;
+    private const uint LrLoadFromFile = 0x00000010;
 
     private const uint MenuOpenMainWindow = 1001;
     private const uint MenuRefreshPlans = 1002;
@@ -47,6 +49,7 @@ public sealed class TrayService : IDisposable
     private IReadOnlyList<PowerPlanInfo> _cachedPlans = Array.Empty<PowerPlanInfo>();
 
     private readonly WndProc _wndProcDelegate;
+    private readonly nint _trayIconHandle;
     private nint _oldWndProc;
     private bool _iconAdded;
 
@@ -70,6 +73,7 @@ public sealed class TrayService : IDisposable
         _log = log;
 
         _wndProcDelegate = WindowProc;
+        _trayIconHandle = LoadTrayIcon();
     }
 
     public async Task InitializeAsync()
@@ -105,6 +109,10 @@ public sealed class TrayService : IDisposable
     {
         RemoveNotifyIcon();
         RestoreWindowProc();
+        if (_trayIconHandle != IntPtr.Zero)
+        {
+            _ = DestroyIcon(_trayIconHandle);
+        }
     }
 
     private void SubclassWindow()
@@ -157,11 +165,29 @@ public sealed class TrayService : IDisposable
             uID = 1,
             uFlags = NifMessage | NifIcon | NifTip,
             uCallbackMessage = WmTrayIcon,
-            hIcon = LoadIcon(IntPtr.Zero, (nint)0x7F00),
+            hIcon = _trayIconHandle != IntPtr.Zero ? _trayIconHandle : LoadIcon(IntPtr.Zero, (nint)0x7F00),
             szTip = "PowerPlan",
             szInfo = string.Empty,
             szInfoTitle = string.Empty
         };
+    }
+
+    private static nint LoadTrayIcon()
+    {
+        try
+        {
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "powerplan.ico");
+            if (!File.Exists(iconPath))
+            {
+                return IntPtr.Zero;
+            }
+
+            return LoadImage(IntPtr.Zero, iconPath, ImageIcon, 0, 0, LrLoadFromFile);
+        }
+        catch
+        {
+            return IntPtr.Zero;
+        }
     }
 
     private nint WindowProc(nint hWnd, uint msg, nint wParam, nint lParam)
@@ -375,4 +401,11 @@ public sealed class TrayService : IDisposable
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern nint LoadIcon(nint hInstance, nint lpIconName);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern nint LoadImage(nint hinst, string lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DestroyIcon(nint hIcon);
 }

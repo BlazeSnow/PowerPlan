@@ -16,6 +16,7 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>PowerPlan</RootNamespace>
+        <ApplicationIcon>Assets\powerplan.ico</ApplicationIcon>
 
         <!-- App Options -->
         <UseRidGraph>true</UseRidGraph>
@@ -27,17 +28,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="Assets\SplashScreen.scale-200.png" />
-        <Content Include="Assets\LockScreenLogo.scale-200.png" />
-        <Content Include="Assets\Square150x150Logo.scale-200.png" />
-        <Content Include="Assets\Square44x44Logo.scale-200.png" />
-        <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-        <Content Include="Assets\StoreLogo.png" />
-        <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+        <None Remove="PowerPlan.slnx" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="PowerPlan.slnx" />
+        <Content Include="Assets\powerplan.ico">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
