@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using PowerPlan.Models;
 using PowerPlan.Services;
 using Windows.ApplicationModel.DataTransfer;
@@ -25,7 +25,6 @@ public sealed partial class SettingsPage : Page
     private void ApplyLocalization()
     {
         PageTitleText.Text = LocalizationService.Get("Settings.PageTitle");
-        PageDescText.Text = LocalizationService.Get("Settings.PageDesc");
 
         AutoStartTitleText.Text = LocalizationService.Get("Settings.AutoStart.Title");
         AutoStartDescText.Text = LocalizationService.Get("Settings.AutoStart.Desc");
@@ -33,13 +32,17 @@ public sealed partial class SettingsPage : Page
         TrayTitleText.Text = LocalizationService.Get("Settings.Tray.Title");
         TrayDescText.Text = LocalizationService.Get("Settings.Tray.Desc");
 
-        ToolsTitleText.Text = LocalizationService.Get("Settings.Tools.Title");
-        OpenPowerOptionsButton.Content = LocalizationService.Get("Settings.Tools.PowerOptions");
-        OpenWebsiteButton.Content = LocalizationService.Get("Settings.Tools.Website");
-        SendFeedbackButton.Content = LocalizationService.Get("Settings.Tools.FeedbackCopy");
+        PowerOptionsTitleText.Text = LocalizationService.Get("Settings.Tools.PowerOptions");
+        PowerOptionsDescText.Text = LocalizationService.Get("Settings.Tools.PowerOptionsDesc");
+        OpenPowerOptionsButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
 
-        SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
-        SettingsStatusBar.Message = LocalizationService.Get("Settings.Status.Loaded");
+        WebsiteTitleText.Text = LocalizationService.Get("Settings.Tools.Website");
+        WebsiteDescText.Text = LocalizationService.Get("Settings.Tools.WebsiteDesc");
+        OpenWebsiteButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
+
+        FeedbackTitleText.Text = LocalizationService.Get("Settings.Tools.Feedback");
+        FeedbackDescText.Text = LocalizationService.Get("Settings.Tools.FeedbackDesc");
+        SendFeedbackButton.Content = LocalizationService.Get("Settings.Tools.FeedbackCopy");
     }
 
     private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
@@ -49,17 +52,15 @@ public sealed partial class SettingsPage : Page
 
         AutoStartToggle.IsOn = settings.AutoStart;
         TrayToggle.IsOn = settings.TrayEnabled;
-        PathText.Text = LocalizationService.Format("Settings.PathLabel", _settingsService.GetSettingsPath());
 
         _updatingUi = false;
         try
         {
             await EnsureStartupStateAsync(settings.AutoStart);
         }
-        catch (Exception ex)
+        catch
         {
-            SettingsStatusBar.Severity = InfoBarSeverity.Warning;
-            SettingsStatusBar.Message = LocalizationService.Format("Settings.Status.StartupApplyFailed", ex.Message);
+            // Keep page silent when startup registration is not accessible.
         }
     }
 
@@ -95,15 +96,10 @@ public sealed partial class SettingsPage : Page
         {
             await _settingsService.SaveAsync(settings);
             await EnsureStartupStateAsync(settings.AutoStart);
-            SettingsStatusBar.Severity = InfoBarSeverity.Success;
-            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
-            SettingsStatusBar.Message = LocalizationService.Get("Settings.Status.SaveSuccess");
         }
-        catch (Exception ex)
+        catch
         {
-            SettingsStatusBar.Severity = InfoBarSeverity.Error;
-            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
-            SettingsStatusBar.Message = LocalizationService.Format("Settings.Status.SaveFailed", ex.Message);
+            // Keep page silent when persistence/startup update fails.
         }
     }
 
@@ -129,20 +125,14 @@ public sealed partial class SettingsPage : Page
             var dataPackage = new DataPackage();
             dataPackage.SetText(FeedbackMail);
             Clipboard.SetContent(dataPackage);
-
-            SettingsStatusBar.Severity = InfoBarSeverity.Success;
-            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
-            SettingsStatusBar.Message = LocalizationService.Get("Settings.Status.FeedbackCopied");
         }
-        catch (Exception ex)
+        catch
         {
-            SettingsStatusBar.Severity = InfoBarSeverity.Error;
-            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
-            SettingsStatusBar.Message = LocalizationService.Format("Settings.Status.OpenExternalFailed", ex.Message);
+            // Keep page silent when clipboard is unavailable.
         }
     }
 
-    private void OpenExternal(string target, string? args = null)
+    private static void OpenExternal(string target, string? args = null)
     {
         try
         {
@@ -157,15 +147,10 @@ public sealed partial class SettingsPage : Page
             }
 
             _ = Process.Start(startInfo);
-            SettingsStatusBar.Severity = InfoBarSeverity.Informational;
-            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
-            SettingsStatusBar.Message = LocalizationService.Get("Settings.Status.OpenedExternal");
         }
-        catch (Exception ex)
+        catch
         {
-            SettingsStatusBar.Severity = InfoBarSeverity.Error;
-            SettingsStatusBar.Title = LocalizationService.Get("Settings.Status.Title");
-            SettingsStatusBar.Message = LocalizationService.Format("Settings.Status.OpenExternalFailed", ex.Message);
+            // Keep page silent when external process launch fails.
         }
     }
 }

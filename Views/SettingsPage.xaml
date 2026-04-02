@@ -6,22 +6,43 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     mc:Ignorable="d">
+    <Page.Resources>
+        <Style x:Key="SettingTitleTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Microsoft YaHei UI" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="SettingDescTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Microsoft YaHei UI" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Opacity" Value="0.72" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+    </Page.Resources>
+
     <ScrollViewer>
         <StackPanel Padding="24" Spacing="16">
             <TextBlock x:Name="PageTitleText" Text="-" FontSize="28" FontWeight="SemiBold" />
-            <TextBlock x:Name="PageDescText" Text="-" Opacity="0.75" />
 
             <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="176" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Spacing="6">
-                        <TextBlock x:Name="AutoStartTitleText" Text="-" FontSize="18" FontWeight="SemiBold" />
-                        <TextBlock x:Name="AutoStartDescText" Text="-" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock x:Name="AutoStartTitleText" Text="-" Style="{StaticResource SettingTitleTextStyle}" />
+                        <TextBlock x:Name="AutoStartDescText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
                     </StackPanel>
-                    <ToggleSwitch x:Name="AutoStartToggle" Grid.Column="1" Toggled="OnAutoStartToggled" />
+                        <ToggleSwitch
+                            x:Name="AutoStartToggle"
+                            Grid.Column="1"
+                            Toggled="OnAutoStartToggled"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Margin="8,0,0,0" />
                 </Grid>
             </Border>
 
@@ -29,26 +50,78 @@
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="176" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Spacing="6">
-                        <TextBlock x:Name="TrayTitleText" Text="-" FontSize="18" FontWeight="SemiBold" />
-                        <TextBlock x:Name="TrayDescText" Text="-" Opacity="0.7" TextWrapping="Wrap" />
+                        <TextBlock x:Name="TrayTitleText" Text="-" Style="{StaticResource SettingTitleTextStyle}" />
+                        <TextBlock x:Name="TrayDescText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
                     </StackPanel>
-                    <ToggleSwitch x:Name="TrayToggle" Grid.Column="1" Toggled="OnTrayToggled" />
+                        <ToggleSwitch
+                            x:Name="TrayToggle"
+                            Grid.Column="1"
+                            Toggled="OnTrayToggled"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Margin="8,0,0,0" />
                 </Grid>
             </Border>
+
             <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
-                <StackPanel Spacing="12">
-                    <TextBlock x:Name="ToolsTitleText" Text="-" FontSize="18" FontWeight="SemiBold" />
-                    <Button x:Name="OpenPowerOptionsButton" Content="-" HorizontalAlignment="Left" Click="OnOpenPowerOptionsClicked" />
-                    <Button x:Name="OpenWebsiteButton" Content="-" HorizontalAlignment="Left" Click="OnOpenWebsiteClicked" />
-                    <Button x:Name="SendFeedbackButton" Content="-" HorizontalAlignment="Left" Click="OnSendFeedbackClicked" />
-                </StackPanel>
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="176" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="2">
+                        <TextBlock x:Name="PowerOptionsTitleText" Text="-" Style="{StaticResource SettingTitleTextStyle}" />
+                        <TextBlock x:Name="PowerOptionsDescText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
+                    </StackPanel>
+                    <Button
+                        x:Name="OpenPowerOptionsButton"
+                        Grid.Column="1"
+                        Click="OnOpenPowerOptionsClicked"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center" />
+                </Grid>
             </Border>
 
-            <InfoBar x:Name="SettingsStatusBar" IsOpen="True" IsClosable="False" Severity="Informational" Title="-" Message="-" />
-            <TextBlock x:Name="PathText" Opacity="0.65" TextWrapping="Wrap" />
+            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="176" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="2">
+                        <TextBlock x:Name="WebsiteTitleText" Text="-" Style="{StaticResource SettingTitleTextStyle}" />
+                        <TextBlock x:Name="WebsiteDescText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
+                    </StackPanel>
+                    <Button
+                        x:Name="OpenWebsiteButton"
+                        Grid.Column="1"
+                        Click="OnOpenWebsiteClicked"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="176" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="2">
+                        <TextBlock x:Name="FeedbackTitleText" Text="-" Style="{StaticResource SettingTitleTextStyle}" />
+                        <TextBlock x:Name="FeedbackDescText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
+                    </StackPanel>
+                    <Button
+                        x:Name="SendFeedbackButton"
+                        Grid.Column="1"
+                        Click="OnSendFeedbackClicked"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center" />
+                </Grid>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>
