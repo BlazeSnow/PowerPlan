@@ -52,7 +52,7 @@ jobs:
           /p:WindowsPackageType=MSIX `
           /p:GenerateAppxPackageOnBuild=true `
           /p:AppxBundle=Always `
-          "/p:AppxBundlePlatforms=x64|ARM64" `
+          "/p:AppxBundlePlatforms=x64|ARM64|x86" `
           /p:Platform=x64 `
           /p:AppxPackageSigningEnabled=true `
           /p:PackageCertificateThumbprint="${{ steps.cert.outputs.THUMBPRINT }}"
