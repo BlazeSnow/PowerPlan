@@ -47,7 +47,6 @@
 
     <ItemGroup Condition="'$(PublishTrimmed)'=='true'">
         <!-- Keep WinUI/WinRT runtime assemblies from being trimmed away in Release publish. -->
-        <TrimmerRootAssembly Include="Microsoft.Windows.SDK.NET" />
         <TrimmerRootAssembly Include="WinRT.Runtime" />
         <TrimmerRootAssembly Include="Microsoft.WinUI" />
     </ItemGroup>
