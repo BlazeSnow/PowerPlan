@@ -144,16 +144,20 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private void OnRequestAdminClicked(object sender, RoutedEventArgs e)
+    private async void OnRequestAdminClicked(object sender, RoutedEventArgs e)
     {
-        var started = PrivilegeService.TryRestartAsAdministrator();
+        var started = PrivilegeService.TryRestartAsAdministrator(out var error);
         if (started)
         {
             Application.Current.Exit();
             return;
         }
 
-        UpdateAdminStateText();
+        var prefix = LocalizationService.Get("Settings.Admin.StartFailed", "管理员提权启动失败");
+        var content = string.IsNullOrWhiteSpace(error)
+            ? prefix
+            : $"{prefix}：{error}";
+        await ShowMessageAsync(prefix, content);
     }
 
     private void UpdateAdminStateText()
@@ -185,5 +189,18 @@ public sealed partial class SettingsPage : Page
         {
             // Keep page silent when external process launch fails.
         }
+    }
+
+    private async Task ShowMessageAsync(string title, string content)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = content,
+            CloseButtonText = "确定",
+            XamlRoot = this.XamlRoot
+        };
+
+        _ = await dialog.ShowAsync();
     }
 }
