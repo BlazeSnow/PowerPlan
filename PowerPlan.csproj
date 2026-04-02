@@ -1,6 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <DefaultLanguage>zh-CN</DefaultLanguage>
         <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <OutputType>WinExe</OutputType>
@@ -8,35 +9,32 @@
         <!-- WinUI 3 -->
         <UseWinUI>true</UseWinUI>
         <EnableMsixTooling>true</EnableMsixTooling>
-        <WindowsPackageType>None</WindowsPackageType>
+        <WindowsPackageType>MSIX</WindowsPackageType>
 
         <!-- Project Options -->
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>PowerPlan</RootNamespace>
+        <ApplicationIcon>Assets\powerplan.ico</ApplicationIcon>
 
         <!-- App Options -->
         <UseRidGraph>true</UseRidGraph>
         <Platforms>x86;x64;ARM64</Platforms>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <PublishProfile>win-$(Platform).pubxml</PublishProfile>
-        <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) >= 8">win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+        <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) &gt;= 8">win-x86;win-x64;win-arm64</RuntimeIdentifiers>
         <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) &lt; 8">win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="Assets\SplashScreen.scale-200.png" />
-        <Content Include="Assets\LockScreenLogo.scale-200.png" />
-        <Content Include="Assets\Square150x150Logo.scale-200.png" />
-        <Content Include="Assets\Square44x44Logo.scale-200.png" />
-        <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-        <Content Include="Assets\StoreLogo.png" />
-        <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+        <None Remove="PowerPlan.slnx" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="PowerPlan.slnx" />
+        <Content Include="Assets\powerplan.ico">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -47,13 +45,20 @@
         <Manifest Include="$(ApplicationManifest)" />
     </ItemGroup>
 
+    <ItemGroup Condition="'$(PublishTrimmed)'=='true'">
+        <!-- Keep WinUI/WinRT runtime assemblies from being trimmed away in Release publish. -->
+        <TrimmerRootAssembly Include="Microsoft.Windows.SDK.NET" />
+        <TrimmerRootAssembly Include="WinRT.Runtime" />
+        <TrimmerRootAssembly Include="Microsoft.WinUI" />
+    </ItemGroup>
+
     <!-- 
         Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
         Tools extension to be activated for this project even if the Windows App SDK Nuget
         package has not yet been restored.
     -->
     <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-        <ProjectCapability Include="Msix"/>
+        <ProjectCapability Include="Msix" />
     </ItemGroup>
 
     <!-- 
