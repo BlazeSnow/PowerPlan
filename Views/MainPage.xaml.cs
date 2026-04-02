@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using PowerPlan.Models;
@@ -121,11 +123,34 @@ public sealed partial class MainPage : Page
         {
             await _powerPlanService.SetActivePlanAsync(selectedPlan.Guid);
             SetStatus(LocalizationService.Format("Main.Status.SwitchSuccess", selectedPlan.Guid), InfoBarSeverity.Success);
-            await RefreshPlansAsync();
+            ApplyActivePlan(selectedPlan.Guid);
         }
         catch (Exception ex)
         {
             SetStatus(LocalizationService.Format("Main.Status.SwitchFailed", ex.Message), InfoBarSeverity.Error);
+            var activePlan = Plans.FirstOrDefault(x => x.IsActive);
+            if (activePlan is not null)
+            {
+                _isUpdatingSelection = true;
+                PlansListView.SelectedItem = activePlan;
+                _isUpdatingSelection = false;
+            }
+        }
+    }
+
+    private void ApplyActivePlan(string activePlanGuid)
+    {
+        foreach (var plan in Plans)
+        {
+            plan.IsActive = string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase);
+        }
+
+        var selected = Plans.FirstOrDefault(x => x.IsActive);
+        if (selected is not null)
+        {
+            _isUpdatingSelection = true;
+            PlansListView.SelectedItem = selected;
+            _isUpdatingSelection = false;
         }
     }
 
@@ -174,19 +199,43 @@ public sealed partial class MainPage : Page
     }
 }
 
-public sealed class PowerPlanItemViewModel
+public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
 {
+    private bool _isActive;
+
     public PowerPlanItemViewModel(PowerPlanInfo model)
     {
         Guid = model.Guid;
         Name = model.Name;
-        IsActive = model.IsActive;
+        _isActive = model.IsActive;
     }
 
     public string Guid { get; }
     public string Name { get; }
-    public bool IsActive { get; }
-    public string CurrentTagText => LocalizationService.Get("Main.CurrentTag");
+    public bool IsActive
+    {
+        get => _isActive;
+        set
+        {
+            if (_isActive == value)
+            {
+                return;
+            }
+
+            _isActive = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsActiveVisibility));
+            OnPropertyChanged(nameof(IsInactiveVisibility));
+        }
+    }
+
     public Visibility IsActiveVisibility => IsActive ? Visibility.Visible : Visibility.Collapsed;
     public Visibility IsInactiveVisibility => IsActive ? Visibility.Collapsed : Visibility.Visible;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }
