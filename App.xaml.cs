@@ -150,16 +150,6 @@ public partial class App : Application
         await _trayService.RefreshPlansAsync();
     }
 
-    public void NavigateToSettings()
-    {
-        _shellPage?.NavigateToSettings();
-    }
-
-    public void ExitForRestart()
-    {
-        ExitApplication();
-    }
-
     private MainPage? GetMainPage() => _shellPage?.GetMainPage();
 
     private void OnMainWindowClosed(object sender, WindowEventArgs args)

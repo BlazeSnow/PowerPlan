@@ -33,14 +33,5 @@ public sealed partial class ShellPage : Page
         }
     }
 
-    public void NavigateToSettings()
-    {
-        AppNavigationView.SelectedItem = SettingsItem;
-        if (ContentFrame.CurrentSourcePageType != typeof(SettingsPage))
-        {
-            _ = ContentFrame.Navigate(typeof(SettingsPage));
-        }
-    }
-
     public MainPage? GetMainPage() => ContentFrame.Content as MainPage;
 }

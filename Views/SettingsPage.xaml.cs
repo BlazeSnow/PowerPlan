@@ -32,11 +32,6 @@ public sealed partial class SettingsPage : Page
         TrayTitleText.Text = LocalizationService.Get("Settings.Tray.Title");
         TrayDescText.Text = LocalizationService.Get("Settings.Tray.Desc");
 
-        AdminTitleText.Text = LocalizationService.Get("Settings.Admin.Title", "管理员权限");
-        AdminDescText.Text = LocalizationService.Get("Settings.Admin.Desc", "创建卓越性能计划等操作需要管理员权限。");
-        RequestAdminButton.Content = LocalizationService.Get("Settings.Admin.Button", "请求管理员权限");
-        UpdateAdminStateText();
-
         PowerOptionsTitleText.Text = LocalizationService.Get("Settings.Tools.PowerOptions");
         PowerOptionsDescText.Text = LocalizationService.Get("Settings.Tools.PowerOptionsDesc");
         OpenPowerOptionsButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
@@ -62,7 +57,6 @@ public sealed partial class SettingsPage : Page
         try
         {
             await EnsureStartupStateAsync(settings.AutoStart);
-            UpdateAdminStateText();
         }
         catch
         {
@@ -144,45 +138,6 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private async void OnRequestAdminClicked(object sender, RoutedEventArgs e)
-    {
-        using var currentProcess = Process.GetCurrentProcess();
-        var processName = currentProcess.ProcessName;
-        var existingIds = Process.GetProcessesByName(processName).Select(p => p.Id).ToHashSet();
-
-        var started = PrivilegeService.TryRestartAsAdministrator(out var error);
-        if (started)
-        {
-            for (var i = 0; i < 25; i++)
-            {
-                await Task.Delay(200);
-                var hasNewInstance = Process.GetProcessesByName(processName).Any(p => !existingIds.Contains(p.Id));
-                if (hasNewInstance)
-                {
-                    ((App)Application.Current).ExitForRestart();
-                    return;
-                }
-            }
-
-            error = "未检测到新的管理员实例启动。";
-        }
-
-        var prefix = LocalizationService.Get("Settings.Admin.StartFailed", "管理员提权启动失败");
-        var content = string.IsNullOrWhiteSpace(error)
-            ? prefix
-            : $"{prefix}：{error}";
-        await ShowMessageAsync(prefix, content);
-    }
-
-    private void UpdateAdminStateText()
-    {
-        var isAdmin = PrivilegeService.IsRunningAsAdministrator();
-        AdminStateText.Text = isAdmin
-            ? LocalizationService.Get("Settings.Admin.State.Yes", "当前已管理员运行")
-            : LocalizationService.Get("Settings.Admin.State.No", "当前未以管理员运行");
-        RequestAdminButton.Visibility = isAdmin ? Visibility.Collapsed : Visibility.Visible;
-    }
-
     private static void OpenExternal(string target, string? args = null)
     {
         try
@@ -203,18 +158,5 @@ public sealed partial class SettingsPage : Page
         {
             // Keep page silent when external process launch fails.
         }
-    }
-
-    private async Task ShowMessageAsync(string title, string content)
-    {
-        var dialog = new ContentDialog
-        {
-            Title = title,
-            Content = content,
-            CloseButtonText = "确定",
-            XamlRoot = this.XamlRoot
-        };
-
-        _ = await dialog.ShowAsync();
     }
 }

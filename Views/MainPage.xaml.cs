@@ -124,16 +124,7 @@ public sealed partial class MainPage : Page
         }
         catch (Exception ex)
         {
-            if (IsPermissionRelatedError(ex))
-            {
-                SetStatus("切换计划需要管理员权限，请前往“设置”页点击“请求管理员权限”。", InfoBarSeverity.Warning);
-                (Application.Current as App)?.NavigateToSettings();
-            }
-            else
-            {
-                SetStatus(LocalizationService.Format("Main.Status.SwitchFailed", ex.Message), InfoBarSeverity.Error);
-            }
-
+            SetStatus(LocalizationService.Format("Main.Status.SwitchFailed", ex.Message), InfoBarSeverity.Error);
             var activePlan = Plans.FirstOrDefault(x => x.IsActive);
             if (activePlan is not null)
             {
@@ -177,15 +168,7 @@ public sealed partial class MainPage : Page
         }
         catch (Exception ex)
         {
-            if (IsPermissionRelatedError(ex))
-            {
-                SetStatus("创建卓越性能计划需要管理员权限，请前往“设置”页点击“请求管理员权限”。", InfoBarSeverity.Warning);
-                (Application.Current as App)?.NavigateToSettings();
-            }
-            else
-            {
-                SetStatus(LocalizationService.Format("Main.Status.UltimateCreateFailed", ex.Message), InfoBarSeverity.Error);
-            }
+            SetStatus(LocalizationService.Format("Main.Status.UltimateCreateFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -197,17 +180,6 @@ public sealed partial class MainPage : Page
     public async Task RefreshFromExternalAsync()
     {
         await RefreshPlansAsync();
-    }
-
-    private static bool IsPermissionRelatedError(Exception ex)
-    {
-        var message = ex.Message;
-        return message.Contains("access is denied", StringComparison.OrdinalIgnoreCase)
-               || message.Contains("拒绝访问", StringComparison.OrdinalIgnoreCase)
-               || message.Contains("requires elevation", StringComparison.OrdinalIgnoreCase)
-               || message.Contains("需要提升", StringComparison.OrdinalIgnoreCase)
-               || message.Contains("权限", StringComparison.OrdinalIgnoreCase)
-               || message.Contains("0x5", StringComparison.OrdinalIgnoreCase);
     }
 }
 

@@ -36,33 +36,13 @@
                         <TextBlock x:Name="AutoStartTitleText" Text="-" Style="{StaticResource SettingTitleTextStyle}" />
                         <TextBlock x:Name="AutoStartDescText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
                     </StackPanel>
-                        <ToggleSwitch
-                            x:Name="AutoStartToggle"
-                            Grid.Column="1"
-                            Toggled="OnAutoStartToggled"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Margin="8,0,0,0" />
-                </Grid>
-            </Border>
-
-            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="176" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Spacing="4">
-                        <TextBlock x:Name="AdminTitleText" Text="-" Style="{StaticResource SettingTitleTextStyle}" />
-                        <TextBlock x:Name="AdminDescText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
-                        <TextBlock x:Name="AdminStateText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
-                    </StackPanel>
-                    <Button
-                        x:Name="RequestAdminButton"
+                    <ToggleSwitch
+                        x:Name="AutoStartToggle"
                         Grid.Column="1"
-                        Click="OnRequestAdminClicked"
+                        Toggled="OnAutoStartToggled"
                         HorizontalAlignment="Right"
-                        VerticalAlignment="Center" />
+                        VerticalAlignment="Center"
+                        Margin="8,0,0,0" />
                 </Grid>
             </Border>
 
@@ -76,13 +56,13 @@
                         <TextBlock x:Name="TrayTitleText" Text="-" Style="{StaticResource SettingTitleTextStyle}" />
                         <TextBlock x:Name="TrayDescText" Text="-" Style="{StaticResource SettingDescTextStyle}" />
                     </StackPanel>
-                        <ToggleSwitch
-                            x:Name="TrayToggle"
-                            Grid.Column="1"
-                            Toggled="OnTrayToggled"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Margin="8,0,0,0" />
+                    <ToggleSwitch
+                        x:Name="TrayToggle"
+                        Grid.Column="1"
+                        Toggled="OnTrayToggled"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="8,0,0,0" />
                 </Grid>
             </Border>
 
