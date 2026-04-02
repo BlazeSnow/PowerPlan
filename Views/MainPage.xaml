@@ -14,7 +14,6 @@
 
             <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel Spacing="10">
-                    <TextBlock x:Name="UnlockTitleText" FontSize="18" FontWeight="SemiBold" Text="-" />
                     <TextBlock x:Name="AdminStatusText" />
                     <Button
                         x:Name="ElevateButton"
@@ -27,7 +26,6 @@
             <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
                 <StackPanel Spacing="10">
                     <StackPanel Orientation="Horizontal" Spacing="10">
-                        <TextBlock x:Name="PlansTitleText" FontSize="18" FontWeight="SemiBold" Text="-" />
                         <Button x:Name="RefreshPlansButton" Click="OnRefreshClicked" Content="-" />
                     </StackPanel>
 
@@ -78,18 +76,13 @@
                 </StackPanel>
             </Border>
 
-            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" Padding="16">
-                <StackPanel Spacing="10">
-                    <TextBlock x:Name="StatusAreaTitleText" FontSize="18" FontWeight="SemiBold" Text="-" />
-                    <InfoBar
-                        x:Name="StatusInfoBar"
-                        IsClosable="False"
-                        IsOpen="True"
-                        Severity="Informational"
-                        Title="-"
-                        Message="-" />
-                </StackPanel>
-            </Border>
+            <InfoBar
+                x:Name="StatusInfoBar"
+                IsClosable="False"
+                IsOpen="True"
+                Severity="Informational"
+                Title="-"
+                Message="-" />
         </StackPanel>
     </ScrollViewer>
 </Page>

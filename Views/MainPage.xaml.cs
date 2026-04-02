@@ -39,17 +39,11 @@ public sealed partial class MainPage : Page
     private void ApplyLocalization()
     {
         SubtitleText.Text = LocalizationService.Get("Main.Subtitle");
-
-        UnlockTitleText.Text = LocalizationService.Get("Main.UnlockTitle");
         ElevateButton.Content = LocalizationService.Get("Main.RequestAdminButton");
-
-        PlansTitleText.Text = LocalizationService.Get("Main.PlansTitle");
         RefreshPlansButton.Content = LocalizationService.Get("Main.RefreshPlansButton");
         UltimateMissingInfoBar.Title = LocalizationService.Get("Main.UltimateMissingTitle");
         UltimateMissingInfoBar.Message = LocalizationService.Get("Main.UltimateMissingMessage");
         CreateUltimateButton.Content = LocalizationService.Get("Main.CreateUltimateButton");
-
-        StatusAreaTitleText.Text = LocalizationService.Get("Main.StatusAreaTitle");
         StatusInfoBar.Title = LocalizationService.Get("Main.StatusTitle");
         StatusInfoBar.Message = LocalizationService.Get("Main.StatusWaiting");
     }
