@@ -227,25 +227,26 @@ public sealed class TrayService : IDisposable
             _ = RefreshPlansAsync();
         }
 
-        _ = AppendMenu(menu, MfString, (nuint)MenuOpenMainWindow, LocalizationService.Get("Tray.Menu.OpenMainWindow"));
+        _ = AppendMenu(menu, MfString, (nuint)MenuOpenMainWindow, "\u2302 " + LocalizationService.Get("Tray.Menu.OpenMainWindow"));
         _ = AppendMenu(menu, MfSeparator, 0, string.Empty);
+
         for (var i = 0; i < plans.Count; i++)
         {
             var id = MenuPlanBase + (uint)i;
             var flags = MfString | (plans[i].IsActive ? MfChecked : 0);
-            _ = AppendMenu(menu, flags, (nuint)id, plans[i].Name);
+            _ = AppendMenu(menu, flags, (nuint)id, "\u26A1 " + plans[i].Name);
         }
 
         _ = AppendMenu(menu, MfSeparator, 0, string.Empty);
-        _ = AppendMenu(menu, MfString, (nuint)MenuRefreshPlans, LocalizationService.Get("Tray.Menu.RefreshPlans"));
+        _ = AppendMenu(menu, MfString, (nuint)MenuRefreshPlans, "\u21BB " + LocalizationService.Get("Tray.Menu.RefreshPlans"));
 
         var startupText = _isStartupEnabled()
             ? LocalizationService.Get("Tray.Menu.DisableAutoStart")
             : LocalizationService.Get("Tray.Menu.EnableAutoStart");
-        _ = AppendMenu(menu, MfString, (nuint)MenuToggleStartup, startupText);
+        _ = AppendMenu(menu, MfString, (nuint)MenuToggleStartup, "\u23FB " + startupText);
 
         _ = AppendMenu(menu, MfSeparator, 0, string.Empty);
-        _ = AppendMenu(menu, MfString, (nuint)MenuExit, LocalizationService.Get("Tray.Menu.Exit"));
+        _ = AppendMenu(menu, MfString, (nuint)MenuExit, "\u2715 " + LocalizationService.Get("Tray.Menu.Exit"));
 
         _ = SetForegroundWindow(_mainWindowHandle);
         _ = GetCursorPos(out var point);
