@@ -47,6 +47,7 @@ public sealed partial class MainPage : Page
         CreateUltimateButton.Content = LocalizationService.Get("Main.CreateUltimateButton");
         StatusInfoBar.Title = LocalizationService.Get("Main.StatusTitle");
         StatusInfoBar.Message = LocalizationService.Get("Main.StatusWaiting");
+        DeletePlanHintText.Text = LocalizationService.Get("Main.DeletePlanHint", "如需删除计划，请前往控制面板操作");
     }
 
     private async Task RefreshPlansAsync()

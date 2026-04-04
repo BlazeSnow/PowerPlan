@@ -103,11 +103,22 @@
                         <Grid Padding="16,12"
                             BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
                             BorderThickness="0,1,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
                             <Button
                                 x:Name="RefreshPlansButton"
                                 Click="OnRefreshClicked"
                                 Content="-"
-                                HorizontalAlignment="Right" />
+                                HorizontalAlignment="Left" />
+                            <TextBlock
+                                x:Name="DeletePlanHintText"
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Right"
+                                Opacity="0.75"
+                                Text="-" />
                         </Grid>
                     </StackPanel>
                 </StackPanel>
