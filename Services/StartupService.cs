@@ -8,6 +8,7 @@ public sealed class StartupService
     private const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string AppValueName = "PowerPlan";
     private const string StartupTaskId = "PowerPlanStartupTask";
+    public const string TrayStartupArgument = "--tray-startup";
 
     public async Task<bool> IsEnabledAsync()
     {
@@ -21,7 +22,7 @@ public sealed class StartupService
         return key?.GetValue(AppValueName) is string;
     }
 
-    public async Task<bool> SetEnabledAsync(bool enabled)
+    public async Task<bool> SetEnabledAsync(bool enabled, bool startInTray)
     {
         if (IsPackaged())
         {
@@ -52,7 +53,10 @@ public sealed class StartupService
                 throw new InvalidOperationException("Cannot locate application executable path.");
             }
 
-            key.SetValue(AppValueName, $"\"{processPath}\"");
+            var command = startInTray
+                ? $"\"{processPath}\" {TrayStartupArgument}"
+                : $"\"{processPath}\"";
+            key.SetValue(AppValueName, command);
             return true;
         }
 
