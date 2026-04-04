@@ -166,7 +166,7 @@
     <value>跳转到电源计划</value>
   </data>
   <data name="Settings.Tools.Website" xml:space="preserve">
-    <value>打开开发者官网</value>
+    <value>前往本软件代码仓库</value>
   </data>
   <data name="Settings.Tools.Feedback" xml:space="preserve">
     <value>反馈到开发者邮箱</value>
@@ -262,7 +262,7 @@
     <value>打开 Windows 控制面板中的电源选项页面。</value>
   </data>
   <data name="Settings.Tools.WebsiteDesc" xml:space="preserve">
-    <value>访问开发者官网获取最新版本与说明。</value>
+    <value>打开 GitHub 仓库查看源代码与发布信息。</value>
   </data>
   <data name="Settings.Tools.FeedbackDesc" xml:space="preserve">
     <value>使用本软件时遇到问题，欢迎反馈。</value>

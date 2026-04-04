@@ -121,7 +121,7 @@ public sealed partial class SettingsPage : Page
 
     private void OnOpenWebsiteClicked(object sender, RoutedEventArgs e)
     {
-        OpenExternal("https://www.blazesnow.com");
+        OpenExternal("https://github.com/BlazeSnow/PowerPlan");
     }
 
     private void OnSendFeedbackClicked(object sender, RoutedEventArgs e)
