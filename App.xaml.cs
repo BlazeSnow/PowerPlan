@@ -107,7 +107,11 @@ public partial class App : Application
                 var page = GetMainPage();
                 if (page is not null)
                 {
-                    await page.RefreshFromExternalAsync();
+                    if (!page.TryApplyActivePlanFromExternal(guid))
+                    {
+                        await page.RefreshFromExternalAsync();
+                    }
+
                     page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid));
                 }
             },
@@ -145,6 +149,12 @@ public partial class App : Application
         {
             GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStartFailed", ex.Message), true);
         }
+    }
+
+
+    public void UpdateTrayPlans(IReadOnlyList<PowerPlanInfo> plans)
+    {
+        _trayService?.UpdatePlansSnapshot(plans);
     }
 
     public async Task RefreshTrayPlansAsync()

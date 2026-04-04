@@ -70,7 +70,7 @@ public sealed partial class MainPage : Page
 
         if (Application.Current is App app)
         {
-            await app.RefreshTrayPlansAsync();
+            app.UpdateTrayPlans(plans);
         }
 
         SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
@@ -169,7 +169,7 @@ public sealed partial class MainPage : Page
             ApplyActivePlan(selectedPlan.Guid);
             if (Application.Current is App app)
             {
-                await app.RefreshTrayPlansAsync();
+                app.UpdateTrayPlans(BuildPlanSnapshot());
             }
         }
         catch (Exception ex)
@@ -232,10 +232,33 @@ public sealed partial class MainPage : Page
         await RefreshPlansAsync();
     }
 
+    public bool TryApplyActivePlanFromExternal(string activePlanGuid)
+    {
+        if (!Plans.Any(plan => string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase)))
+        {
+            return false;
+        }
+
+        ApplyActivePlan(activePlanGuid);
+        return true;
+    }
+
     private static string BuildCopyPlanName(string? planName)
     {
         var baseName = string.IsNullOrWhiteSpace(planName) ? "电源计划" : planName.Trim();
         return $"{baseName} - 副本";
+    }
+
+    private IReadOnlyList<PowerPlanInfo> BuildPlanSnapshot()
+    {
+        return Plans
+            .Select(plan => new PowerPlanInfo
+            {
+                Guid = plan.Guid,
+                Name = plan.Name,
+                IsActive = plan.IsActive
+            })
+            .ToArray();
     }
 }
 

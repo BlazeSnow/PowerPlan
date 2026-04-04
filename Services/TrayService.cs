@@ -91,10 +91,7 @@ public sealed class TrayService : IDisposable
         try
         {
             var plans = await _getPlansAsync();
-            lock (_plansLock)
-            {
-                _cachedPlans = plans;
-            }
+            UpdatePlansSnapshot(plans);
         }
         catch (Exception ex)
         {
@@ -102,6 +99,20 @@ public sealed class TrayService : IDisposable
         }
     }
 
+    public void UpdatePlansSnapshot(IReadOnlyList<PowerPlanInfo> plans)
+    {
+        lock (_plansLock)
+        {
+            _cachedPlans = plans
+                .Select(plan => new PowerPlanInfo
+                {
+                    Guid = plan.Guid,
+                    Name = plan.Name,
+                    IsActive = plan.IsActive
+                })
+                .ToArray();
+        }
+    }
     public void ShowBalloon(string message)
     {
         _log(message);
@@ -311,8 +322,8 @@ public sealed class TrayService : IDisposable
         try
         {
             await _setActivePlanAsync(planGuid);
+            SetActivePlanInCache(planGuid);
             _log(LocalizationService.Format("Tray.SwitchTo", planName));
-            await RefreshPlansAsync();
         }
         catch (Exception ex)
         {
@@ -320,6 +331,20 @@ public sealed class TrayService : IDisposable
         }
     }
 
+    private void SetActivePlanInCache(string activePlanGuid)
+    {
+        lock (_plansLock)
+        {
+            _cachedPlans = _cachedPlans
+                .Select(plan => new PowerPlanInfo
+                {
+                    Guid = plan.Guid,
+                    Name = plan.Name,
+                    IsActive = string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase)
+                })
+                .ToArray();
+        }
+    }
     private void ToggleStartup()
     {
         try
