@@ -44,6 +44,12 @@ public partial class App : Application
         ConfigureWindowAppearance();
 
         _window.Activate();
+        if (_window.Content is FrameworkElement rootElement)
+        {
+            rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
+            rootElement.ActualThemeChanged += OnRootActualThemeChanged;
+        }
+        ApplySystemTitleBarTheme();
         _window.Closed -= OnMainWindowClosed;
         _window.Closed += OnMainWindowClosed;
 
@@ -245,6 +251,29 @@ public partial class App : Application
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconBig, _windowIconHandle);
     }
 
+    private void OnRootActualThemeChanged(FrameworkElement sender, object args)
+    {
+        ApplySystemTitleBarTheme();
+    }
+
+    private void ApplySystemTitleBarTheme()
+    {
+        if (_window is null)
+        {
+            return;
+        }
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        var useDarkMode = _window.Content is FrameworkElement root && root.ActualTheme == ElementTheme.Dark ? 1 : 0;
+        var size = Marshal.SizeOf<int>();
+
+        var result = DwmSetWindowAttribute(hwnd, DwmaUseImmersiveDarkMode, ref useDarkMode, size);
+        if (result != 0)
+        {
+            _ = DwmSetWindowAttribute(hwnd, DwmaUseImmersiveDarkModeBefore20H1, ref useDarkMode, size);
+        }
+    }
+
     private static bool IsTrayStartupLaunch(string? launchArguments)
     {
         if (!string.IsNullOrWhiteSpace(launchArguments) &&
@@ -269,6 +298,8 @@ public partial class App : Application
     private const int IconBig = 1;
     private const uint ImageIcon = 1;
     private const uint LrLoadFromFile = 0x00000010;
+    private const uint DwmaUseImmersiveDarkMode = 20;
+    private const uint DwmaUseImmersiveDarkModeBefore20H1 = 19;
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
@@ -282,4 +313,7 @@ public partial class App : Application
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool DestroyIcon(nint hIcon);
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(nint hwnd, uint dwAttribute, ref int pvAttribute, int cbAttribute);
 }

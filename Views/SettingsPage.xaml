@@ -26,7 +26,7 @@
         <StackPanel Padding="24" Spacing="16">
             <TextBlock x:Name="PageTitleText" Text="-" FontSize="28" FontWeight="SemiBold" />
 
-            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+            <Border BorderThickness="1" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" CornerRadius="12" Padding="16">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -46,7 +46,7 @@
                 </Grid>
             </Border>
 
-            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+            <Border BorderThickness="1" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" CornerRadius="12" Padding="16">
                 <Grid ColumnSpacing="16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -66,7 +66,7 @@
                 </Grid>
             </Border>
 
-            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+            <Border BorderThickness="1" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" CornerRadius="12" Padding="16">
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -85,7 +85,7 @@
                 </Grid>
             </Border>
 
-            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+            <Border BorderThickness="1" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" CornerRadius="12" Padding="16">
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -104,7 +104,7 @@
                 </Grid>
             </Border>
 
-            <Border BorderThickness="1" BorderBrush="LightGray" CornerRadius="12" Padding="16">
+            <Border BorderThickness="1" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" CornerRadius="12" Padding="16">
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
