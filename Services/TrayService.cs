@@ -15,6 +15,7 @@ public sealed class TrayService : IDisposable
     private const uint NimDelete = 0x00000002;
 
     private const int WmLButtonDblClk = 0x0203;
+    private const int WmLButtonUp = 0x0202;
     private const int WmRButtonUp = 0x0205;
     private const int WmContextMenu = 0x007B;
 
@@ -23,6 +24,8 @@ public sealed class TrayService : IDisposable
     private const uint MfString = 0x00000000;
     private const uint MfSeparator = 0x00000800;
     private const uint MfChecked = 0x00000008;
+    private const uint MfDisabled = 0x00000002;
+    private const uint MfGrayed = 0x00000001;
 
     private const uint TpmReturCmd = 0x0100;
     private const uint TpmRightButton = 0x0002;
@@ -88,10 +91,7 @@ public sealed class TrayService : IDisposable
         try
         {
             var plans = await _getPlansAsync();
-            lock (_plansLock)
-            {
-                _cachedPlans = plans;
-            }
+            UpdatePlansSnapshot(plans);
         }
         catch (Exception ex)
         {
@@ -99,6 +99,20 @@ public sealed class TrayService : IDisposable
         }
     }
 
+    public void UpdatePlansSnapshot(IReadOnlyList<PowerPlanInfo> plans)
+    {
+        lock (_plansLock)
+        {
+            _cachedPlans = plans
+                .Select(plan => new PowerPlanInfo
+                {
+                    Guid = plan.Guid,
+                    Name = plan.Name,
+                    IsActive = plan.IsActive
+                })
+                .ToArray();
+        }
+    }
     public void ShowBalloon(string message)
     {
         _log(message);
@@ -194,7 +208,7 @@ public sealed class TrayService : IDisposable
         if (msg == WmTrayIcon)
         {
             var eventMessage = (int)lParam;
-            if (eventMessage == WmLButtonDblClk)
+            if (eventMessage == WmLButtonUp || eventMessage == WmLButtonDblClk)
             {
                 _showMainWindow();
                 return IntPtr.Zero;
@@ -227,6 +241,7 @@ public sealed class TrayService : IDisposable
             _ = RefreshPlansAsync();
         }
 
+        _ = AppendMenu(menu, MfString | MfDisabled | MfGrayed, 0, LocalizationService.Get("App.WindowTitle", "PowerPlan"));
         _ = AppendMenu(menu, MfString, (nuint)MenuOpenMainWindow, "\u2302 " + LocalizationService.Get("Tray.Menu.OpenMainWindow"));
         _ = AppendMenu(menu, MfSeparator, 0, string.Empty);
 
@@ -307,8 +322,8 @@ public sealed class TrayService : IDisposable
         try
         {
             await _setActivePlanAsync(planGuid);
+            SetActivePlanInCache(planGuid);
             _log(LocalizationService.Format("Tray.SwitchTo", planName));
-            await RefreshPlansAsync();
         }
         catch (Exception ex)
         {
@@ -316,6 +331,20 @@ public sealed class TrayService : IDisposable
         }
     }
 
+    private void SetActivePlanInCache(string activePlanGuid)
+    {
+        lock (_plansLock)
+        {
+            _cachedPlans = _cachedPlans
+                .Select(plan => new PowerPlanInfo
+                {
+                    Guid = plan.Guid,
+                    Name = plan.Name,
+                    IsActive = string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase)
+                })
+                .ToArray();
+        }
+    }
     private void ToggleStartup()
     {
         try

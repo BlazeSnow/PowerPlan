@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Page
     x:Class="PowerPlan.Views.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -35,7 +35,8 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Spacing="2">
-                                <TextBlock x:Name="PlanPickerTitleText" FontSize="16" FontWeight="SemiBold" Text="-" />
+                                <TextBlock x:Name="PlanPickerTitleText" FontSize="16"
+                                    FontWeight="SemiBold" Text="-" />
                             </StackPanel>
                         </Grid>
 
@@ -53,36 +54,71 @@
                             </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="local:PowerPlanItemViewModel">
-                                    <Border BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="16,12">
-                                        <Grid ColumnSpacing="12">
+                                    <Border
+                                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                        BorderThickness="0,1,0,0" Padding="16,12">
+                                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" ColumnSpacing="12">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
 
-                                            <Grid Grid.Column="0" VerticalAlignment="Top" Margin="0,2,0,0">
-                                                <RadioButton
-                                                    IsChecked="{x:Bind IsActive, Mode=OneWay}"
-                                                    IsHitTestVisible="False"
-                                                    VerticalAlignment="Top" />
-                                            </Grid>
+                                            <RadioButton
+                                                Grid.Column="0"
+                                                IsChecked="{x:Bind IsActive, Mode=OneWay}"
+                                                IsHitTestVisible="False"
+                                                MinWidth="0"
+                                                Padding="0"
+                                                Margin="0,0,10,0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center" />
 
                                             <StackPanel Grid.Column="1" Spacing="2">
-                                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="{x:Bind Name}" />
-                                                <TextBlock FontSize="13" Opacity="0.75" Text="{x:Bind Guid}" />
+                                                <TextBlock
+                                                    FontSize="16"
+                                                    FontWeight="SemiBold"
+                                                    VerticalAlignment="Center"
+                                                    Text="{x:Bind Name}" />
+                                                <TextBlock
+                                                    FontSize="13"
+                                                    Opacity="0.75"
+                                                    VerticalAlignment="Center"
+                                                    Text="{x:Bind Guid}" />
                                             </StackPanel>
+
+                                            <Button
+                                                Grid.Column="2"
+                                                Content="{x:Bind CopyButtonText}"
+                                                Tag="{x:Bind Guid}"
+                                                Click="OnCopyPlanClicked"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center" />
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
 
-                        <Grid Padding="16,12" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                        <Grid Padding="16,12"
+                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                            BorderThickness="0,1,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
                             <Button
                                 x:Name="RefreshPlansButton"
                                 Click="OnRefreshClicked"
                                 Content="-"
-                                HorizontalAlignment="Right" />
+                                HorizontalAlignment="Left" />
+                            <TextBlock
+                                x:Name="DeletePlanHintText"
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Right"
+                                Opacity="0.75"
+                                Text="-" />
                         </Grid>
                     </StackPanel>
                 </StackPanel>

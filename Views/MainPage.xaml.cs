@@ -47,6 +47,7 @@ public sealed partial class MainPage : Page
         CreateUltimateButton.Content = LocalizationService.Get("Main.CreateUltimateButton");
         StatusInfoBar.Title = LocalizationService.Get("Main.StatusTitle");
         StatusInfoBar.Message = LocalizationService.Get("Main.StatusWaiting");
+        DeletePlanHintText.Text = LocalizationService.Get("Main.DeletePlanHint", "如需删除计划，请前往控制面板操作");
     }
 
     private async Task RefreshPlansAsync()
@@ -69,7 +70,7 @@ public sealed partial class MainPage : Page
 
         if (Application.Current is App app)
         {
-            await app.RefreshTrayPlansAsync();
+            app.UpdateTrayPlans(plans);
         }
 
         SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
@@ -92,6 +93,55 @@ public sealed partial class MainPage : Page
         catch (Exception ex)
         {
             SetStatus(LocalizationService.Format("Main.Status.RefreshFailed", ex.Message), InfoBarSeverity.Error);
+        }
+    }
+
+    private async void OnCopyPlanClicked(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string planGuid })
+        {
+            return;
+        }
+
+        try
+        {
+            var targetPlan = Plans.FirstOrDefault(x => string.Equals(x.Guid, planGuid, StringComparison.OrdinalIgnoreCase));
+            var inputBox = new TextBox
+            {
+                Text = BuildCopyPlanName(targetPlan?.Name),
+                PlaceholderText = LocalizationService.Get("Main.CopyDialogPlaceholder", "请输入新计划名称")
+            };
+
+            var dialog = new ContentDialog
+            {
+                Title = LocalizationService.Get("Main.CopyDialogTitle", "复制电源计划"),
+                PrimaryButtonText = LocalizationService.Get("Main.CopyDialogConfirm", "复制"),
+                CloseButtonText = LocalizationService.Get("Main.CopyDialogCancel", "取消"),
+                DefaultButton = ContentDialogButton.Primary,
+                Content = inputBox,
+                XamlRoot = XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result != ContentDialogResult.Primary)
+            {
+                return;
+            }
+
+            var newName = inputBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(newName))
+            {
+                SetStatus(LocalizationService.Get("Main.Status.CopyNameEmpty", "复制失败：名称不能为空"), InfoBarSeverity.Error);
+                return;
+            }
+
+            await _powerPlanService.CopyPlanAsync(planGuid, newName);
+            await RefreshPlansAsync();
+            SetStatus(LocalizationService.Format("Main.Status.CopySuccess", newName), InfoBarSeverity.Success);
+        }
+        catch (Exception ex)
+        {
+            SetStatus(LocalizationService.Format("Main.Status.CopyFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -119,7 +169,7 @@ public sealed partial class MainPage : Page
             ApplyActivePlan(selectedPlan.Guid);
             if (Application.Current is App app)
             {
-                await app.RefreshTrayPlansAsync();
+                app.UpdateTrayPlans(BuildPlanSnapshot());
             }
         }
         catch (Exception ex)
@@ -181,6 +231,35 @@ public sealed partial class MainPage : Page
     {
         await RefreshPlansAsync();
     }
+
+    public bool TryApplyActivePlanFromExternal(string activePlanGuid)
+    {
+        if (!Plans.Any(plan => string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase)))
+        {
+            return false;
+        }
+
+        ApplyActivePlan(activePlanGuid);
+        return true;
+    }
+
+    private static string BuildCopyPlanName(string? planName)
+    {
+        var baseName = string.IsNullOrWhiteSpace(planName) ? "电源计划" : planName.Trim();
+        return $"{baseName} - 副本";
+    }
+
+    private IReadOnlyList<PowerPlanInfo> BuildPlanSnapshot()
+    {
+        return Plans
+            .Select(plan => new PowerPlanInfo
+            {
+                Guid = plan.Guid,
+                Name = plan.Name,
+                IsActive = plan.IsActive
+            })
+            .ToArray();
+    }
 }
 
 public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
@@ -196,6 +275,7 @@ public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
 
     public string Guid { get; }
     public string Name { get; }
+    public string CopyButtonText => LocalizationService.Get("Main.CopyPlanButton", "复制计划");
     public bool IsActive
     {
         get => _isActive;

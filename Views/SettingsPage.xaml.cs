@@ -56,7 +56,7 @@ public sealed partial class SettingsPage : Page
         _updatingUi = false;
         try
         {
-            await EnsureStartupStateAsync(settings.AutoStart);
+            await EnsureStartupStateAsync(settings.AutoStart, settings.TrayEnabled);
         }
         catch
         {
@@ -95,7 +95,7 @@ public sealed partial class SettingsPage : Page
         try
         {
             await _settingsService.SaveAsync(settings);
-            await EnsureStartupStateAsync(settings.AutoStart);
+            await EnsureStartupStateAsync(settings.AutoStart, settings.TrayEnabled);
         }
         catch
         {
@@ -103,9 +103,9 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private async Task EnsureStartupStateAsync(bool enabled)
+    private async Task EnsureStartupStateAsync(bool enabled, bool trayEnabled)
     {
-        var effective = await _startupService.SetEnabledAsync(enabled);
+        var effective = await _startupService.SetEnabledAsync(enabled, trayEnabled);
         if (effective != enabled)
         {
             _updatingUi = true;
@@ -121,7 +121,7 @@ public sealed partial class SettingsPage : Page
 
     private void OnOpenWebsiteClicked(object sender, RoutedEventArgs e)
     {
-        OpenExternal("https://www.blazesnow.com");
+        OpenExternal("https://github.com/BlazeSnow/PowerPlan");
     }
 
     private void OnSendFeedbackClicked(object sender, RoutedEventArgs e)

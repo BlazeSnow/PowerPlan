@@ -27,6 +27,8 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
+        var startInTray = IsTrayStartupLaunch(e?.Arguments);
+
         try
         {
             await SettingsService.InitializeAsync();
@@ -47,6 +49,11 @@ public partial class App : Application
 
         await ApplyStartupSettingAsync();
         await EnsureTrayStateAsync();
+
+        if (startInTray && SettingsService.Current.TrayEnabled && _trayService is not null)
+        {
+            HideMainWindow();
+        }
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
@@ -60,7 +67,7 @@ public partial class App : Application
         try
         {
             var expected = SettingsService.Current.AutoStart;
-            var effective = await _startupService.SetEnabledAsync(expected);
+            var effective = await _startupService.SetEnabledAsync(expected, SettingsService.Current.TrayEnabled);
             if (effective != expected)
             {
                 SettingsService.Current.AutoStart = effective;
@@ -100,7 +107,11 @@ public partial class App : Application
                 var page = GetMainPage();
                 if (page is not null)
                 {
-                    await page.RefreshFromExternalAsync();
+                    if (!page.TryApplyActivePlanFromExternal(guid))
+                    {
+                        await page.RefreshFromExternalAsync();
+                    }
+
                     page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid));
                 }
             },
@@ -128,7 +139,7 @@ public partial class App : Application
     {
         try
         {
-            var effective = await _startupService.SetEnabledAsync(enabled);
+            var effective = await _startupService.SetEnabledAsync(enabled, SettingsService.Current.TrayEnabled);
             SettingsService.Current.AutoStart = effective;
             await SettingsService.SaveCurrentAsync();
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
@@ -138,6 +149,12 @@ public partial class App : Application
         {
             GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStartFailed", ex.Message), true);
         }
+    }
+
+
+    public void UpdateTrayPlans(IReadOnlyList<PowerPlanInfo> plans)
+    {
+        _trayService?.UpdatePlansSnapshot(plans);
     }
 
     public async Task RefreshTrayPlansAsync()
@@ -226,6 +243,25 @@ public partial class App : Application
 
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconSmall, _windowIconHandle);
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconBig, _windowIconHandle);
+    }
+
+    private static bool IsTrayStartupLaunch(string? launchArguments)
+    {
+        if (!string.IsNullOrWhiteSpace(launchArguments) &&
+            launchArguments.Contains(StartupService.TrayStartupArgument, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        foreach (var arg in Environment.GetCommandLineArgs())
+        {
+            if (arg.Equals(StartupService.TrayStartupArgument, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private const uint WmSetIcon = 0x0080;

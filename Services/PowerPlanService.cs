@@ -21,7 +21,6 @@ public sealed class PowerPlanService
     public async Task<IReadOnlyList<PowerPlanInfo>> GetPlansAsync()
     {
         var output = await RunPowerCfgAsync("/list");
-        var activeGuid = await GetActivePlanGuidAsync();
         var plans = new List<PowerPlanInfo>();
 
         foreach (var line in output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries))
@@ -40,7 +39,7 @@ public sealed class PowerPlanService
             {
                 Guid = guid,
                 Name = string.IsNullOrWhiteSpace(name) ? guid : name,
-                IsActive = guid.Equals(activeGuid, StringComparison.OrdinalIgnoreCase)
+                IsActive = IsActivePlanLine(trimmed)
             });
         }
 
@@ -50,6 +49,21 @@ public sealed class PowerPlanService
     public async Task SetActivePlanAsync(string planGuid)
     {
         await RunPowerCfgAsync($"/setactive {planGuid}");
+    }
+
+    public async Task<string> CopyPlanAsync(string sourcePlanGuid, string newName)
+    {
+        var duplicateOutput = await RunPowerCfgAsync($"/duplicatescheme {sourcePlanGuid}");
+        var guidMatch = GuidRegex.Match(duplicateOutput);
+        if (!guidMatch.Success)
+        {
+            throw new InvalidOperationException("复制失败：无法获取新计划 GUID。");
+        }
+
+        var newPlanGuid = guidMatch.Groups["guid"].Value;
+        var safeName = newName.Trim().Replace("\"", "'");
+        await RunPowerCfgAsync($"/changename {newPlanGuid} \"{safeName}\"");
+        return newPlanGuid;
     }
 
     public async Task<bool> HasUltimatePerformancePlanAsync()
@@ -81,12 +95,6 @@ public sealed class PowerPlanService
         return false;
     }
 
-    private async Task<string?> GetActivePlanGuidAsync()
-    {
-        var output = await RunPowerCfgAsync("/getactivescheme");
-        var match = GuidRegex.Match(output);
-        return match.Success ? match.Groups["guid"].Value : null;
-    }
 
     private static string ExtractPlanName(string line)
     {
@@ -105,6 +113,11 @@ public sealed class PowerPlanService
         return line[(start + 1)..end].Trim();
     }
 
+
+    private static bool IsActivePlanLine(string line)
+    {
+        return line.Contains('*');
+    }
     private static async Task<string> RunPowerCfgAsync(string args)
     {
         var startInfo = new ProcessStartInfo
