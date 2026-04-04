@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Page
     x:Class="PowerPlan.Views.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -35,7 +35,8 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Spacing="2">
-                                <TextBlock x:Name="PlanPickerTitleText" FontSize="16" FontWeight="SemiBold" Text="-" />
+                                <TextBlock x:Name="PlanPickerTitleText" FontSize="16"
+                                    FontWeight="SemiBold" Text="-" />
                             </StackPanel>
                         </Grid>
 
@@ -53,23 +54,27 @@
                             </ListView.ItemContainerStyle>
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="local:PowerPlanItemViewModel">
-                                    <Border BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="16,12">
-                                        <Grid ColumnSpacing="12">
+                                    <Border
+                                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                        BorderThickness="0,1,0,0" Padding="16,12">
+                                        <Grid HorizontalAlignment="Left" VerticalAlignment="Center">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
 
-                                            <Grid Grid.Column="0" VerticalAlignment="Top" Margin="0,2,0,0">
+                                            <Grid Grid.Column="0">
                                                 <RadioButton
                                                     IsChecked="{x:Bind IsActive, Mode=OneWay}"
                                                     IsHitTestVisible="False"
-                                                    VerticalAlignment="Top" />
+                                                    VerticalAlignment="Center" />
                                             </Grid>
 
                                             <StackPanel Grid.Column="1" Spacing="2">
-                                                <TextBlock FontSize="16" FontWeight="SemiBold" Text="{x:Bind Name}" />
-                                                <TextBlock FontSize="13" Opacity="0.75" Text="{x:Bind Guid}" />
+                                                <TextBlock FontSize="16" FontWeight="SemiBold"
+                                                    Text="{x:Bind Name}" />
+                                                <TextBlock FontSize="13" Opacity="0.75"
+                                                    Text="{x:Bind Guid}" />
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -77,7 +82,9 @@
                             </ListView.ItemTemplate>
                         </ListView>
 
-                        <Grid Padding="16,12" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+                        <Grid Padding="16,12"
+                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                            BorderThickness="0,1,0,0">
                             <Button
                                 x:Name="RefreshPlansButton"
                                 Click="OnRefreshClicked"
