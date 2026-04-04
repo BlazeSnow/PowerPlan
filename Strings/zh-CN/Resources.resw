@@ -99,6 +99,30 @@
   <data name="Main.SwitchButton" xml:space="preserve">
     <value>切换</value>
   </data>
+  <data name="Main.CopyPlanButton" xml:space="preserve">
+    <value>复制计划</value>
+  </data>
+  <data name="Main.CopyDialogTitle" xml:space="preserve">
+    <value>复制电源计划</value>
+  </data>
+  <data name="Main.CopyDialogConfirm" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="Main.CopyDialogCancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Main.CopyDialogPlaceholder" xml:space="preserve">
+    <value>请输入新计划名称</value>
+  </data>
+  <data name="Main.Status.CopyNameEmpty" xml:space="preserve">
+    <value>复制失败：名称不能为空</value>
+  </data>
+  <data name="Main.Status.CopySuccess" xml:space="preserve">
+    <value>已复制电源计划：{0}</value>
+  </data>
+  <data name="Main.Status.CopyFailed" xml:space="preserve">
+    <value>复制失败：{0}</value>
+  </data>
   <data name="Settings.PageTitle" xml:space="preserve">
     <value>设置</value>
   </data>

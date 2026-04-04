@@ -52,6 +52,21 @@ public sealed class PowerPlanService
         await RunPowerCfgAsync($"/setactive {planGuid}");
     }
 
+    public async Task<string> CopyPlanAsync(string sourcePlanGuid, string newName)
+    {
+        var duplicateOutput = await RunPowerCfgAsync($"/duplicatescheme {sourcePlanGuid}");
+        var guidMatch = GuidRegex.Match(duplicateOutput);
+        if (!guidMatch.Success)
+        {
+            throw new InvalidOperationException("复制失败：无法获取新计划 GUID。");
+        }
+
+        var newPlanGuid = guidMatch.Groups["guid"].Value;
+        var safeName = newName.Trim().Replace("\"", "'");
+        await RunPowerCfgAsync($"/changename {newPlanGuid} \"{safeName}\"");
+        return newPlanGuid;
+    }
+
     public async Task<bool> HasUltimatePerformancePlanAsync()
     {
         var plans = await GetPlansAsync();

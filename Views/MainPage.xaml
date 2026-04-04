@@ -57,25 +57,43 @@
                                     <Border
                                         BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
                                         BorderThickness="0,1,0,0" Padding="16,12">
-                                        <Grid HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" ColumnSpacing="12">
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
 
-                                            <Grid Grid.Column="0">
-                                                <RadioButton
-                                                    IsChecked="{x:Bind IsActive, Mode=OneWay}"
-                                                    IsHitTestVisible="False"
-                                                    VerticalAlignment="Center" />
-                                            </Grid>
+                                            <RadioButton
+                                                Grid.Column="0"
+                                                IsChecked="{x:Bind IsActive, Mode=OneWay}"
+                                                IsHitTestVisible="False"
+                                                MinWidth="0"
+                                                Padding="0"
+                                                Margin="0,0,10,0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center" />
 
                                             <StackPanel Grid.Column="1" Spacing="2">
-                                                <TextBlock FontSize="16" FontWeight="SemiBold"
+                                                <TextBlock
+                                                    FontSize="16"
+                                                    FontWeight="SemiBold"
+                                                    VerticalAlignment="Center"
                                                     Text="{x:Bind Name}" />
-                                                <TextBlock FontSize="13" Opacity="0.75"
+                                                <TextBlock
+                                                    FontSize="13"
+                                                    Opacity="0.75"
+                                                    VerticalAlignment="Center"
                                                     Text="{x:Bind Guid}" />
                                             </StackPanel>
+
+                                            <Button
+                                                Grid.Column="2"
+                                                Content="{x:Bind CopyButtonText}"
+                                                Tag="{x:Bind Guid}"
+                                                Click="OnCopyPlanClicked"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center" />
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
