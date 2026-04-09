@@ -29,7 +29,6 @@ public sealed class TrayService : IDisposable
     private bool _disposed;
 
     public TrayService(
-        nint mainWindowHandle,
         Func<Task<IReadOnlyList<PowerPlanInfo>>> getPlansAsync,
         Func<string, Task> setActivePlanAsync,
         Func<bool> isStartupEnabled,
@@ -295,7 +294,11 @@ public sealed class TrayService : IDisposable
             _execute = execute;
         }
 
-        public event EventHandler? CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged
+        {
+            add { }
+            remove { }
+        }
 
         public bool CanExecute(object? parameter) => true;
 

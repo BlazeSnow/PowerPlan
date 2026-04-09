@@ -113,10 +113,7 @@ public partial class App : Application
             return;
         }
 
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
-
         _trayService = new TrayService(
-            mainWindowHandle: hwnd,
             getPlansAsync: _powerPlanService.GetPlansAsync,
             setActivePlanAsync: async guid =>
             {
