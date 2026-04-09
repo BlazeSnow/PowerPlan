@@ -45,6 +45,10 @@ public partial class App : Application
         ConfigureWindowAppearance();
 
         _window.Activate();
+        if (startupTaskLaunch && SettingsService.Current.TrayEnabled)
+        {
+            HideMainWindow();
+        }
         if (_window.Content is FrameworkElement rootElement)
         {
             rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
@@ -57,10 +61,7 @@ public partial class App : Application
         await ApplyStartupSettingAsync();
         await EnsureTrayStateAsync();
 
-        if (startupTaskLaunch && SettingsService.Current.TrayEnabled && _trayService is not null)
-        {
-            HideMainWindow();
-        }
+        // For startup-task launch with tray enabled, window is already hidden before async initialization.
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)

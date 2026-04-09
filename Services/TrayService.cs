@@ -185,17 +185,6 @@ public sealed class TrayService : IDisposable
                     () => _ = OnSwitchPlanAsync(planGuid, planName)));
             }
 
-            if (plans.Count == 0)
-            {
-                _contextFlyout.Items.Add(CreateActionItem(
-                    "\u21BB " + LocalizationService.Get("Tray.Menu.RefreshPlans"),
-                    () =>
-                    {
-                        _ = RefreshPlansAsync();
-                        _log(LocalizationService.Get("Tray.RefreshStarted"));
-                    }));
-            }
-
             _contextFlyout.Items.Add(new MenuFlyoutSeparator());
             _contextFlyout.Items.Add(CreateActionItem(
                 "\u21BB " + LocalizationService.Get("Tray.Menu.RefreshPlans"),
@@ -280,7 +269,7 @@ public sealed class TrayService : IDisposable
         var dispatcher = _dispatcherQueue;
         if (dispatcher is null)
         {
-            action();
+            _log(LocalizationService.Get("Tray.BindWindowFailed"));
             return;
         }
 
