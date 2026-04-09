@@ -11,7 +11,7 @@
   <Identity
     Name="BlazeSnow.PowerPlan"
     Publisher="CN=C171AF55-419C-4E73-B34E-CB98C8F1EB78"
-    Version="2026.4.5.0" />
+    Version="2026.4.9.0" />
 
   <mp:PhoneIdentity PhoneProductId="9879b0b7-c14f-45c6-bfb6-e5f131d51336"
     PhonePublisherId="00000000-0000-0000-0000-000000000000" />
