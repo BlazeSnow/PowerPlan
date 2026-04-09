@@ -5,6 +5,7 @@ namespace PowerPlan.Services;
 public sealed class StartupService
 {
     private const string StartupTaskId = "PowerPlanStartupTask";
+    public bool IsSupported => IsPackaged();
 
     public async Task<bool> IsEnabledAsync()
     {

@@ -49,11 +49,35 @@ public sealed partial class SettingsPage : Page
     {
         _updatingUi = true;
         var settings = _settingsService.Current;
+        var startupSupported = _startupService.IsSupported;
 
-        AutoStartToggle.IsOn = settings.AutoStart;
+        AutoStartToggle.IsEnabled = startupSupported;
+        AutoStartToggle.IsOn = startupSupported && settings.AutoStart;
         TrayToggle.IsOn = settings.TrayEnabled;
+        if (!startupSupported)
+        {
+            AutoStartDescText.Text = LocalizationService.Get("Settings.AutoStart.Unsupported", "仅 MSIX 打包安装后可用");
+        }
 
         _updatingUi = false;
+        if (!startupSupported)
+        {
+            if (settings.AutoStart)
+            {
+                _settingsService.Current.AutoStart = false;
+                try
+                {
+                    await _settingsService.SaveCurrentAsync();
+                }
+                catch
+                {
+                    // Keep page silent when persistence is unavailable.
+                }
+            }
+
+            return;
+        }
+
         try
         {
             var effective = await _startupService.GetEffectiveEnabledAsync();
