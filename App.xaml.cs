@@ -1,6 +1,7 @@
 using PowerPlan.Models;
 using PowerPlan.Services;
 using PowerPlan.Views;
+using Microsoft.Windows.AppLifecycle;
 using System.Runtime.InteropServices;
 
 namespace PowerPlan;
@@ -27,7 +28,7 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
-        var startInTray = IsTrayStartupLaunch(e?.Arguments);
+        var startupTaskLaunch = IsStartupTaskLaunch();
 
         try
         {
@@ -56,7 +57,7 @@ public partial class App : Application
         await ApplyStartupSettingAsync();
         await EnsureTrayStateAsync();
 
-        if (startInTray && SettingsService.Current.TrayEnabled && _trayService is not null)
+        if (startupTaskLaunch && SettingsService.Current.TrayEnabled && _trayService is not null)
         {
             HideMainWindow();
         }
@@ -73,7 +74,7 @@ public partial class App : Application
         try
         {
             var expected = SettingsService.Current.AutoStart;
-            var effective = await _startupService.SetEnabledAsync(expected, SettingsService.Current.TrayEnabled);
+            var effective = await _startupService.SetEnabledAsync(expected);
             if (effective != expected)
             {
                 SettingsService.Current.AutoStart = effective;
@@ -145,7 +146,7 @@ public partial class App : Application
     {
         try
         {
-            var effective = await _startupService.SetEnabledAsync(enabled, SettingsService.Current.TrayEnabled);
+            var effective = await _startupService.SetEnabledAsync(enabled);
             SettingsService.Current.AutoStart = effective;
             await SettingsService.SaveCurrentAsync();
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
@@ -274,23 +275,16 @@ public partial class App : Application
         }
     }
 
-    private static bool IsTrayStartupLaunch(string? launchArguments)
+    private static bool IsStartupTaskLaunch()
     {
-        if (!string.IsNullOrWhiteSpace(launchArguments) &&
-            launchArguments.Contains(StartupService.TrayStartupArgument, StringComparison.OrdinalIgnoreCase))
+        try
         {
-            return true;
+            return AppInstance.GetCurrent().GetActivatedEventArgs().Kind == ExtendedActivationKind.StartupTask;
         }
-
-        foreach (var arg in Environment.GetCommandLineArgs())
+        catch
         {
-            if (arg.Equals(StartupService.TrayStartupArgument, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
+            return false;
         }
-
-        return false;
     }
 
     private const uint WmSetIcon = 0x0080;

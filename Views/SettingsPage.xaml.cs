@@ -56,7 +56,7 @@ public sealed partial class SettingsPage : Page
         _updatingUi = false;
         try
         {
-            await EnsureStartupStateAsync(settings.AutoStart, settings.TrayEnabled);
+            await EnsureStartupStateAsync(settings.AutoStart);
         }
         catch
         {
@@ -95,7 +95,7 @@ public sealed partial class SettingsPage : Page
         try
         {
             await _settingsService.SaveAsync(settings);
-            await EnsureStartupStateAsync(settings.AutoStart, settings.TrayEnabled);
+            await EnsureStartupStateAsync(settings.AutoStart);
         }
         catch
         {
@@ -103,9 +103,9 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private async Task EnsureStartupStateAsync(bool enabled, bool trayEnabled)
+    private async Task EnsureStartupStateAsync(bool enabled)
     {
-        var effective = await _startupService.SetEnabledAsync(enabled, trayEnabled);
+        var effective = await _startupService.SetEnabledAsync(enabled);
         if (effective != enabled)
         {
             _updatingUi = true;
