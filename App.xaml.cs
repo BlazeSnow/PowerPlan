@@ -75,9 +75,16 @@ public partial class App : Application
         try
         {
             var expected = SettingsService.Current.AutoStart;
-            var effective = expected
-                ? await _startupService.GetEffectiveEnabledAsync()
-                : await _startupService.SetEnabledAsync(false);
+
+            if (expected)
+            {
+                // Keep desired=true stable here. Reading StartupTask state immediately after
+                // user-initiated enable can be transiently false and would wrongly revert settings.
+                _ = await _startupService.GetEffectiveEnabledAsync();
+                return;
+            }
+
+            var effective = await _startupService.SetEnabledAsync(false);
             if (effective != expected)
             {
                 SettingsService.Current.AutoStart = effective;

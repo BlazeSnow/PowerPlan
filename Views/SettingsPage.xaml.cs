@@ -92,16 +92,19 @@ public sealed partial class SettingsPage : Page
 
     private async Task SaveSettingsAsync()
     {
-        var settings = new AppSettings
-        {
-            AutoStart = AutoStartToggle.IsOn,
-            TrayEnabled = TrayToggle.IsOn
-        };
-
         try
         {
+            var desiredAutoStart = AutoStartToggle.IsOn;
+            var trayEnabled = TrayToggle.IsOn;
+            var effectiveAutoStart = await EnsureStartupStateAsync(desiredAutoStart);
+
+            var settings = new AppSettings
+            {
+                AutoStart = effectiveAutoStart,
+                TrayEnabled = trayEnabled
+            };
+
             await _settingsService.SaveAsync(settings);
-            await EnsureStartupStateAsync(settings.AutoStart);
         }
         catch
         {
@@ -109,7 +112,7 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private async Task EnsureStartupStateAsync(bool enabled)
+    private async Task<bool> EnsureStartupStateAsync(bool enabled)
     {
         var effective = await _startupService.SetEnabledAsync(enabled);
         if (effective != enabled)
@@ -118,6 +121,8 @@ public sealed partial class SettingsPage : Page
             AutoStartToggle.IsOn = effective;
             _updatingUi = false;
         }
+
+        return effective;
     }
 
     private void OnOpenPowerOptionsClicked(object sender, RoutedEventArgs e)
