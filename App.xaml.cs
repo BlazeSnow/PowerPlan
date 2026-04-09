@@ -123,7 +123,7 @@ public partial class App : Application
                 }
             },
             isStartupEnabled: () => SettingsService.Current.AutoStart,
-            setStartupEnabled: enabled => _ = UpdateAutoStartFromTrayAsync(enabled),
+            setStartupEnabled: UpdateAutoStartFromTrayAsync,
             showMainWindow: ShowMainWindow,
             exitApplication: ExitApplication,
             log: message => GetMainPage()?.AddExternalStatus(
