@@ -62,6 +62,9 @@ public sealed partial class SettingsPage : Page
                 _updatingUi = true;
                 AutoStartToggle.IsOn = effective;
                 _updatingUi = false;
+
+                _settingsService.Current.AutoStart = effective;
+                await _settingsService.SaveCurrentAsync();
             }
         }
         catch
