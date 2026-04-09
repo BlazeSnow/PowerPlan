@@ -15,7 +15,7 @@ public sealed class TrayService : IDisposable
     private readonly Func<Task<IReadOnlyList<PowerPlanInfo>>> _getPlansAsync;
     private readonly Func<string, Task> _setActivePlanAsync;
     private readonly Func<bool> _isStartupEnabled;
-    private readonly Func<bool, Task> _setStartupEnabled;
+    private readonly Func<bool, Task<bool>> _setStartupEnabled;
     private readonly Action _showMainWindow;
     private readonly Action _exitApplication;
     private readonly Action<string> _log;
@@ -33,7 +33,7 @@ public sealed class TrayService : IDisposable
         Func<Task<IReadOnlyList<PowerPlanInfo>>> getPlansAsync,
         Func<string, Task> setActivePlanAsync,
         Func<bool> isStartupEnabled,
-        Func<bool, Task> setStartupEnabled,
+        Func<bool, Task<bool>> setStartupEnabled,
         Action showMainWindow,
         Action exitApplication,
         Action<string> log)
@@ -224,7 +224,6 @@ public sealed class TrayService : IDisposable
         var item = new MenuFlyoutItem { Text = text };
         var command = new ActionCommand(action);
         item.Command = command;
-        item.Click += (_, _) => command.Execute(null);
         return item;
     }
 
@@ -264,8 +263,8 @@ public sealed class TrayService : IDisposable
         try
         {
             var next = !_isStartupEnabled();
-            await _setStartupEnabled(next);
-            var state = LocalizationService.Get(next ? "App.Status.On" : "App.Status.Off");
+            var effective = await _setStartupEnabled(next);
+            var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
             _log(LocalizationService.Format("Tray.AutoStartState", state));
             RebuildMenu();
         }
@@ -281,6 +280,7 @@ public sealed class TrayService : IDisposable
         var dispatcher = _dispatcherQueue;
         if (dispatcher is null)
         {
+            action();
             return;
         }
 

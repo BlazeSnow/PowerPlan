@@ -142,7 +142,7 @@ public partial class App : Application
         }
     }
 
-    private async Task UpdateAutoStartFromTrayAsync(bool enabled)
+    private async Task<bool> UpdateAutoStartFromTrayAsync(bool enabled)
     {
         try
         {
@@ -151,10 +151,12 @@ public partial class App : Application
             await SettingsService.SaveCurrentAsync();
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
             GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStart", state));
+            return effective;
         }
         catch (Exception ex)
         {
             GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStartFailed", ex.Message), true);
+            return SettingsService.Current.AutoStart;
         }
     }
 
