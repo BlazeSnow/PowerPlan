@@ -2,6 +2,7 @@ using PowerPlan.Models;
 using PowerPlan.Services;
 using PowerPlan.Views;
 using Microsoft.Windows.AppLifecycle;
+using Microsoft.UI.Dispatching;
 using System.Runtime.InteropServices;
 
 namespace PowerPlan;
@@ -113,7 +114,15 @@ public partial class App : Application
             return;
         }
 
+        var uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        if (uiDispatcherQueue is null)
+        {
+            GetMainPage()?.AddExternalStatus(LocalizationService.Get("Tray.DispatcherUnavailable"), true);
+            return;
+        }
+
         _trayService = new TrayService(
+            uiDispatcherQueue: uiDispatcherQueue,
             getPlansAsync: _powerPlanService.GetPlansAsync,
             setActivePlanAsync: async guid =>
             {

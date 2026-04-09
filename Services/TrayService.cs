@@ -19,16 +19,17 @@ public sealed class TrayService : IDisposable
     private readonly Action _showMainWindow;
     private readonly Action _exitApplication;
     private readonly Action<string> _log;
+    private readonly DispatcherQueue _uiDispatcherQueue;
 
     private readonly object _plansLock = new();
     private IReadOnlyList<PowerPlanInfo> _cachedPlans = Array.Empty<PowerPlanInfo>();
 
     private TaskbarIcon? _taskbarIcon;
     private MenuFlyout? _contextFlyout;
-    private DispatcherQueue? _dispatcherQueue;
     private bool _disposed;
 
     public TrayService(
+        DispatcherQueue uiDispatcherQueue,
         Func<Task<IReadOnlyList<PowerPlanInfo>>> getPlansAsync,
         Func<string, Task> setActivePlanAsync,
         Func<bool> isStartupEnabled,
@@ -37,6 +38,7 @@ public sealed class TrayService : IDisposable
         Action exitApplication,
         Action<string> log)
     {
+        _uiDispatcherQueue = uiDispatcherQueue ?? throw new ArgumentNullException(nameof(uiDispatcherQueue));
         _getPlansAsync = getPlansAsync;
         _setActivePlanAsync = setActivePlanAsync;
         _isStartupEnabled = isStartupEnabled;
@@ -53,9 +55,8 @@ public sealed class TrayService : IDisposable
             return;
         }
 
-        RunOnUiThread(() =>
+        await RunOnUiThreadAsync(() =>
         {
-            _dispatcherQueue ??= DispatcherQueue.GetForCurrentThread();
             _contextFlyout = new MenuFlyout();
             _taskbarIcon = new TaskbarIcon
             {
@@ -264,25 +265,47 @@ public sealed class TrayService : IDisposable
 
     private void RunOnUiThread(Action action)
     {
-        _dispatcherQueue ??= DispatcherQueue.GetForCurrentThread();
-        var dispatcher = _dispatcherQueue;
-        if (dispatcher is null)
-        {
-            _log(LocalizationService.Get("Tray.DispatcherUnavailable"));
-            return;
-        }
-
-        if (dispatcher.HasThreadAccess)
+        if (_uiDispatcherQueue.HasThreadAccess)
         {
             action();
             return;
         }
 
-        var enqueued = dispatcher.TryEnqueue(() => action());
-        if (!enqueued)
+        if (!_uiDispatcherQueue.TryEnqueue(() => action()))
         {
             _log(LocalizationService.Get("Tray.DispatcherUnavailable"));
         }
+    }
+
+    private Task RunOnUiThreadAsync(Action action)
+    {
+        if (_uiDispatcherQueue.HasThreadAccess)
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var enqueued = _uiDispatcherQueue.TryEnqueue(() =>
+        {
+            try
+            {
+                action();
+                completion.SetResult();
+            }
+            catch (Exception ex)
+            {
+                completion.SetException(ex);
+            }
+        });
+
+        if (!enqueued)
+        {
+            var message = LocalizationService.Get("Tray.DispatcherUnavailable");
+            completion.SetException(new InvalidOperationException(message));
+        }
+
+        return completion.Task;
     }
 
     private sealed class ActionCommand : ICommand
