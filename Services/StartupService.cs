@@ -40,6 +40,11 @@ public sealed class StartupService
         return false;
     }
 
+    public async Task<bool> GetEffectiveEnabledAsync()
+    {
+        return await IsEnabledAsync();
+    }
+
     private static bool IsPackaged()
     {
         try

@@ -56,7 +56,13 @@ public sealed partial class SettingsPage : Page
         _updatingUi = false;
         try
         {
-            await EnsureStartupStateAsync(settings.AutoStart);
+            var effective = await _startupService.GetEffectiveEnabledAsync();
+            if (effective != settings.AutoStart)
+            {
+                _updatingUi = true;
+                AutoStartToggle.IsOn = effective;
+                _updatingUi = false;
+            }
         }
         catch
         {

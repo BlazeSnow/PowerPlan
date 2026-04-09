@@ -207,6 +207,9 @@
   <data name="Tray.BindWindowFailed" xml:space="preserve">
     <value>[托盘] 绑定窗口消息失败。托盘不可用。</value>
   </data>
+  <data name="Tray.DispatcherUnavailable" xml:space="preserve">
+    <value>[托盘] UI 线程不可用，菜单刷新失败。</value>
+  </data>
   <data name="Tray.AddIconFailed" xml:space="preserve">
     <value>[托盘] 添加托盘图标失败。</value>
   </data>

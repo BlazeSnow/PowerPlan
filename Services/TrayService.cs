@@ -269,7 +269,7 @@ public sealed class TrayService : IDisposable
         var dispatcher = _dispatcherQueue;
         if (dispatcher is null)
         {
-            _log(LocalizationService.Get("Tray.BindWindowFailed"));
+            _log(LocalizationService.Get("Tray.DispatcherUnavailable"));
             return;
         }
 
@@ -279,7 +279,11 @@ public sealed class TrayService : IDisposable
             return;
         }
 
-        _ = dispatcher.TryEnqueue(() => action());
+        var enqueued = dispatcher.TryEnqueue(() => action());
+        if (!enqueued)
+        {
+            _log(LocalizationService.Get("Tray.DispatcherUnavailable"));
+        }
     }
 
     private sealed class ActionCommand : ICommand
