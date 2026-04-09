@@ -49,14 +49,47 @@ public sealed partial class SettingsPage : Page
     {
         _updatingUi = true;
         var settings = _settingsService.Current;
+        var startupSupported = _startupService.IsSupported;
 
-        AutoStartToggle.IsOn = settings.AutoStart;
+        AutoStartToggle.IsEnabled = startupSupported;
+        AutoStartToggle.IsOn = startupSupported && settings.AutoStart;
         TrayToggle.IsOn = settings.TrayEnabled;
+        if (!startupSupported)
+        {
+            AutoStartDescText.Text = LocalizationService.Get("Settings.AutoStart.Unsupported", "仅 MSIX 打包安装后可用");
+        }
 
         _updatingUi = false;
+        if (!startupSupported)
+        {
+            if (settings.AutoStart)
+            {
+                _settingsService.Current.AutoStart = false;
+                try
+                {
+                    await _settingsService.SaveCurrentAsync();
+                }
+                catch
+                {
+                    // Keep page silent when persistence is unavailable.
+                }
+            }
+
+            return;
+        }
+
         try
         {
-            await EnsureStartupStateAsync(settings.AutoStart, settings.TrayEnabled);
+            var effective = await _startupService.GetEffectiveEnabledAsync();
+            if (effective != settings.AutoStart)
+            {
+                _updatingUi = true;
+                AutoStartToggle.IsOn = effective;
+                _updatingUi = false;
+
+                _settingsService.Current.AutoStart = effective;
+                await _settingsService.SaveCurrentAsync();
+            }
         }
         catch
         {
@@ -86,16 +119,19 @@ public sealed partial class SettingsPage : Page
 
     private async Task SaveSettingsAsync()
     {
-        var settings = new AppSettings
-        {
-            AutoStart = AutoStartToggle.IsOn,
-            TrayEnabled = TrayToggle.IsOn
-        };
-
         try
         {
+            var desiredAutoStart = AutoStartToggle.IsOn;
+            var trayEnabled = TrayToggle.IsOn;
+            var effectiveAutoStart = await EnsureStartupStateAsync(desiredAutoStart);
+
+            var settings = new AppSettings
+            {
+                AutoStart = effectiveAutoStart,
+                TrayEnabled = trayEnabled
+            };
+
             await _settingsService.SaveAsync(settings);
-            await EnsureStartupStateAsync(settings.AutoStart, settings.TrayEnabled);
         }
         catch
         {
@@ -103,15 +139,17 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private async Task EnsureStartupStateAsync(bool enabled, bool trayEnabled)
+    private async Task<bool> EnsureStartupStateAsync(bool enabled)
     {
-        var effective = await _startupService.SetEnabledAsync(enabled, trayEnabled);
+        var effective = await _startupService.SetEnabledAsync(enabled);
         if (effective != enabled)
         {
             _updatingUi = true;
             AutoStartToggle.IsOn = effective;
             _updatingUi = false;
         }
+
+        return effective;
     }
 
     private void OnOpenPowerOptionsClicked(object sender, RoutedEventArgs e)

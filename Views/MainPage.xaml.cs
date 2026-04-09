@@ -245,8 +245,11 @@ public sealed partial class MainPage : Page
 
     private static string BuildCopyPlanName(string? planName)
     {
-        var baseName = string.IsNullOrWhiteSpace(planName) ? "电源计划" : planName.Trim();
-        return $"{baseName} - 副本";
+        var baseName = string.IsNullOrWhiteSpace(planName)
+            ? LocalizationService.Get("Main.DefaultPlanName", "电源计划")
+            : planName.Trim();
+        var suffix = LocalizationService.Get("Main.CopySuffix", "副本");
+        return $"{baseName} - {suffix}";
     }
 
     private IReadOnlyList<PowerPlanInfo> BuildPlanSnapshot()

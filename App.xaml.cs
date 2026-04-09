@@ -1,6 +1,8 @@
 using PowerPlan.Models;
 using PowerPlan.Services;
 using PowerPlan.Views;
+using Microsoft.Windows.AppLifecycle;
+using Microsoft.UI.Dispatching;
 using System.Runtime.InteropServices;
 
 namespace PowerPlan;
@@ -27,7 +29,7 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
-        var startInTray = IsTrayStartupLaunch(e?.Arguments);
+        var startupTaskLaunch = IsStartupTaskLaunch();
 
         try
         {
@@ -44,6 +46,10 @@ public partial class App : Application
         ConfigureWindowAppearance();
 
         _window.Activate();
+        if (startupTaskLaunch && SettingsService.Current.TrayEnabled)
+        {
+            HideMainWindow();
+        }
         if (_window.Content is FrameworkElement rootElement)
         {
             rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
@@ -56,10 +62,7 @@ public partial class App : Application
         await ApplyStartupSettingAsync();
         await EnsureTrayStateAsync();
 
-        if (startInTray && SettingsService.Current.TrayEnabled && _trayService is not null)
-        {
-            HideMainWindow();
-        }
+        // For startup-task launch with tray enabled, window is already hidden before async initialization.
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
@@ -73,7 +76,16 @@ public partial class App : Application
         try
         {
             var expected = SettingsService.Current.AutoStart;
-            var effective = await _startupService.SetEnabledAsync(expected, SettingsService.Current.TrayEnabled);
+
+            if (expected)
+            {
+                // Keep desired=true stable here. Reading StartupTask state immediately after
+                // user-initiated enable can be transiently false and would wrongly revert settings.
+                _ = await _startupService.GetEffectiveEnabledAsync();
+                return;
+            }
+
+            var effective = await _startupService.SetEnabledAsync(false);
             if (effective != expected)
             {
                 SettingsService.Current.AutoStart = effective;
@@ -102,10 +114,15 @@ public partial class App : Application
             return;
         }
 
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        var uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        if (uiDispatcherQueue is null)
+        {
+            GetMainPage()?.AddExternalStatus(LocalizationService.Get("Tray.DispatcherUnavailable"), true);
+            return;
+        }
 
         _trayService = new TrayService(
-            mainWindowHandle: hwnd,
+            uiDispatcherQueue: uiDispatcherQueue,
             getPlansAsync: _powerPlanService.GetPlansAsync,
             setActivePlanAsync: async guid =>
             {
@@ -122,7 +139,7 @@ public partial class App : Application
                 }
             },
             isStartupEnabled: () => SettingsService.Current.AutoStart,
-            setStartupEnabled: enabled => _ = UpdateAutoStartFromTrayAsync(enabled),
+            setStartupEnabled: UpdateAutoStartFromTrayAsync,
             showMainWindow: ShowMainWindow,
             exitApplication: ExitApplication,
             log: message => GetMainPage()?.AddExternalStatus(
@@ -141,19 +158,21 @@ public partial class App : Application
         }
     }
 
-    private async Task UpdateAutoStartFromTrayAsync(bool enabled)
+    private async Task<bool> UpdateAutoStartFromTrayAsync(bool enabled)
     {
         try
         {
-            var effective = await _startupService.SetEnabledAsync(enabled, SettingsService.Current.TrayEnabled);
+            var effective = await _startupService.SetEnabledAsync(enabled);
             SettingsService.Current.AutoStart = effective;
             await SettingsService.SaveCurrentAsync();
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
             GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStart", state));
+            return effective;
         }
         catch (Exception ex)
         {
             GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStartFailed", ex.Message), true);
+            return SettingsService.Current.AutoStart;
         }
     }
 
@@ -274,23 +293,16 @@ public partial class App : Application
         }
     }
 
-    private static bool IsTrayStartupLaunch(string? launchArguments)
+    private static bool IsStartupTaskLaunch()
     {
-        if (!string.IsNullOrWhiteSpace(launchArguments) &&
-            launchArguments.Contains(StartupService.TrayStartupArgument, StringComparison.OrdinalIgnoreCase))
+        try
         {
-            return true;
+            return AppInstance.GetCurrent().GetActivatedEventArgs().Kind == ExtendedActivationKind.StartupTask;
         }
-
-        foreach (var arg in Environment.GetCommandLineArgs())
+        catch
         {
-            if (arg.Equals(StartupService.TrayStartupArgument, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
+            return false;
         }
-
-        return false;
     }
 
     private const uint WmSetIcon = 0x0080;
