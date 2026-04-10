@@ -6,7 +6,9 @@
 
 ## 二、如何下载
 
-正在发布中……
+<a href="https://apps.microsoft.com/detail/9N39P41XBKPJ" target="_blank">
+  <img src="https://get.microsoft.com/images/zh-cn%20dark.svg" alt="从 Microsoft 获取" />
+</a>
 
 ## 三、软件截图
 
