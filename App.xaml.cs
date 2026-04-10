@@ -135,16 +135,14 @@ public partial class App : Application
                         await page.RefreshFromExternalAsync();
                     }
 
-                    page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid));
+                    page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid), InfoBarSeverity.Success);
                 }
             },
             isStartupEnabled: () => SettingsService.Current.AutoStart,
             setStartupEnabled: UpdateAutoStartFromTrayAsync,
             showMainWindow: ShowMainWindow,
             exitApplication: ExitApplication,
-            log: message => GetMainPage()?.AddExternalStatus(
-                message,
-                message.Contains(LocalizationService.Get("Common.FailedKeyword"), StringComparison.Ordinal)));
+            log: (message, severity) => GetMainPage()?.AddExternalStatus(message, severity));
 
         try
         {
@@ -166,7 +164,7 @@ public partial class App : Application
             SettingsService.Current.AutoStart = effective;
             await SettingsService.SaveCurrentAsync();
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
-            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStart", state));
+            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStart", state), InfoBarSeverity.Success);
             return effective;
         }
         catch (Exception ex)

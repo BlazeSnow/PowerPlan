@@ -18,7 +18,7 @@ public sealed class TrayService : IDisposable
     private readonly Func<bool, Task<bool>> _setStartupEnabled;
     private readonly Action _showMainWindow;
     private readonly Action _exitApplication;
-    private readonly Action<string> _log;
+    private readonly Action<string, InfoBarSeverity> _log;
     private readonly DispatcherQueue _uiDispatcherQueue;
 
     private readonly object _plansLock = new();
@@ -36,7 +36,7 @@ public sealed class TrayService : IDisposable
         Func<bool, Task<bool>> setStartupEnabled,
         Action showMainWindow,
         Action exitApplication,
-        Action<string> log)
+        Action<string, InfoBarSeverity> log)
     {
         _uiDispatcherQueue = uiDispatcherQueue ?? throw new ArgumentNullException(nameof(uiDispatcherQueue));
         _getPlansAsync = getPlansAsync;
@@ -87,7 +87,7 @@ public sealed class TrayService : IDisposable
         });
 
         await RefreshPlansAsync();
-        _log(LocalizationService.Get("Tray.Init"));
+        _log(LocalizationService.Get("Tray.Init"), InfoBarSeverity.Success);
     }
 
     public async Task RefreshPlansAsync()
@@ -99,7 +99,7 @@ public sealed class TrayService : IDisposable
         }
         catch (Exception ex)
         {
-            _log(LocalizationService.Format("Tray.RefreshFailed", ex.Message));
+            _log(LocalizationService.Format("Tray.RefreshFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -122,7 +122,7 @@ public sealed class TrayService : IDisposable
 
     public void ShowBalloon(string message)
     {
-        _log(message);
+        _log(message, InfoBarSeverity.Informational);
     }
 
     public void Dispose()
@@ -191,7 +191,7 @@ public sealed class TrayService : IDisposable
                 () =>
                 {
                     _ = RefreshPlansAsync();
-                    _log(LocalizationService.Get("Tray.RefreshStarted"));
+                    _log(LocalizationService.Get("Tray.RefreshStarted"), InfoBarSeverity.Informational);
                 }));
 
             var startupText = _isStartupEnabled()
@@ -222,11 +222,11 @@ public sealed class TrayService : IDisposable
         {
             await _setActivePlanAsync(planGuid);
             SetActivePlanInCache(planGuid);
-            _log(LocalizationService.Format("Tray.SwitchTo", planName));
+            _log(LocalizationService.Format("Tray.SwitchTo", planName), InfoBarSeverity.Success);
         }
         catch (Exception ex)
         {
-            _log(LocalizationService.Format("Tray.SwitchFailed", ex.Message));
+            _log(LocalizationService.Format("Tray.SwitchFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -254,12 +254,12 @@ public sealed class TrayService : IDisposable
             var next = !_isStartupEnabled();
             var effective = await _setStartupEnabled(next);
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
-            _log(LocalizationService.Format("Tray.AutoStartState", state));
+            _log(LocalizationService.Format("Tray.AutoStartState", state), InfoBarSeverity.Success);
             RebuildMenu();
         }
         catch (Exception ex)
         {
-            _log(LocalizationService.Format("Tray.AutoStartToggleFailed", ex.Message));
+            _log(LocalizationService.Format("Tray.AutoStartToggleFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -273,7 +273,7 @@ public sealed class TrayService : IDisposable
 
         if (!_uiDispatcherQueue.TryEnqueue(() => action()))
         {
-            _log(LocalizationService.Get("Tray.DispatcherUnavailable"));
+            _log(LocalizationService.Get("Tray.DispatcherUnavailable"), InfoBarSeverity.Error);
         }
     }
 

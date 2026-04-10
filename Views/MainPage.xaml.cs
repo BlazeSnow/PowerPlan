@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
@@ -40,14 +40,14 @@ public sealed partial class MainPage : Page
     private void ApplyLocalization()
     {
         SubtitleText.Text = LocalizationService.Get("Main.Subtitle");
+        UltimateCard.Header = LocalizationService.Get("Main.UltimateMissingTitle");
+        UltimateCard.Description = LocalizationService.Get("Main.UltimateMissingMessage");
         RefreshPlansButton.Content = LocalizationService.Get("Main.RefreshPlansButton");
-        PlanPickerTitleText.Text = LocalizationService.Get("Main.PlanPickerTitle", "选择要使用的电源计划");
-        UltimateMissingInfoBar.Title = LocalizationService.Get("Main.UltimateMissingTitle");
-        UltimateMissingInfoBar.Message = LocalizationService.Get("Main.UltimateMissingMessage");
+        PlanPickerTitleText.Text = LocalizationService.Get("Main.PlanPickerTitle");
         CreateUltimateButton.Content = LocalizationService.Get("Main.CreateUltimateButton");
         StatusInfoBar.Title = LocalizationService.Get("Main.StatusTitle");
         StatusInfoBar.Message = LocalizationService.Get("Main.StatusWaiting");
-        DeletePlanHintText.Text = LocalizationService.Get("Main.DeletePlanHint", "如需删除计划，请前往控制面板操作");
+        DeletePlanHintText.Text = LocalizationService.Get("Main.DeletePlanHint");
     }
 
     private async Task RefreshPlansAsync()
@@ -61,7 +61,7 @@ public sealed partial class MainPage : Page
         }
 
         var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
-        UltimateMissingInfoBar.IsOpen = !hasUltimate;
+        UltimateCard.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
         CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
 
         _isUpdatingSelection = true;
@@ -109,14 +109,14 @@ public sealed partial class MainPage : Page
             var inputBox = new TextBox
             {
                 Text = BuildCopyPlanName(targetPlan?.Name),
-                PlaceholderText = LocalizationService.Get("Main.CopyDialogPlaceholder", "请输入新计划名称")
+                PlaceholderText = LocalizationService.Get("Main.CopyDialogPlaceholder")
             };
 
             var dialog = new ContentDialog
             {
-                Title = LocalizationService.Get("Main.CopyDialogTitle", "复制电源计划"),
-                PrimaryButtonText = LocalizationService.Get("Main.CopyDialogConfirm", "复制"),
-                CloseButtonText = LocalizationService.Get("Main.CopyDialogCancel", "取消"),
+                Title = LocalizationService.Get("Main.CopyDialogTitle"),
+                PrimaryButtonText = LocalizationService.Get("Main.CopyDialogConfirm"),
+                CloseButtonText = LocalizationService.Get("Main.CopyDialogCancel"),
                 DefaultButton = ContentDialogButton.Primary,
                 Content = inputBox,
                 XamlRoot = XamlRoot
@@ -131,7 +131,7 @@ public sealed partial class MainPage : Page
             var newName = inputBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(newName))
             {
-                SetStatus(LocalizationService.Get("Main.Status.CopyNameEmpty", "复制失败：名称不能为空"), InfoBarSeverity.Error);
+                SetStatus(LocalizationService.Get("Main.Status.CopyNameEmpty"), InfoBarSeverity.Error);
                 return;
             }
 
@@ -227,6 +227,11 @@ public sealed partial class MainPage : Page
         SetStatus(message, isError ? InfoBarSeverity.Error : InfoBarSeverity.Informational);
     }
 
+    public void AddExternalStatus(string message, InfoBarSeverity severity)
+    {
+        SetStatus(message, severity);
+    }
+
     public async Task RefreshFromExternalAsync()
     {
         await RefreshPlansAsync();
@@ -246,9 +251,9 @@ public sealed partial class MainPage : Page
     private static string BuildCopyPlanName(string? planName)
     {
         var baseName = string.IsNullOrWhiteSpace(planName)
-            ? LocalizationService.Get("Main.DefaultPlanName", "电源计划")
+            ? LocalizationService.Get("Main.DefaultPlanName")
             : planName.Trim();
-        var suffix = LocalizationService.Get("Main.CopySuffix", "副本");
+        var suffix = LocalizationService.Get("Main.CopySuffix");
         return $"{baseName} - {suffix}";
     }
 
@@ -278,7 +283,8 @@ public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
 
     public string Guid { get; }
     public string Name { get; }
-    public string CopyButtonText => LocalizationService.Get("Main.CopyPlanButton", "复制计划");
+    public string CopyButtonText => LocalizationService.Get("Main.CopyPlanButton");
+
     public bool IsActive
     {
         get => _isActive;

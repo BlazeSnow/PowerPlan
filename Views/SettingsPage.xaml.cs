@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using PowerPlan.Models;
 using PowerPlan.Services;
 using Windows.ApplicationModel.DataTransfer;
@@ -26,22 +26,22 @@ public sealed partial class SettingsPage : Page
     {
         PageTitleText.Text = LocalizationService.Get("Settings.PageTitle");
 
-        AutoStartTitleText.Text = LocalizationService.Get("Settings.AutoStart.Title");
-        AutoStartDescText.Text = LocalizationService.Get("Settings.AutoStart.Desc");
+        AutoStartCard.Header = LocalizationService.Get("Settings.AutoStart.Title");
+        AutoStartCard.Description = LocalizationService.Get("Settings.AutoStart.Desc");
 
-        TrayTitleText.Text = LocalizationService.Get("Settings.Tray.Title");
-        TrayDescText.Text = LocalizationService.Get("Settings.Tray.Desc");
+        TrayCard.Header = LocalizationService.Get("Settings.Tray.Title");
+        TrayCard.Description = LocalizationService.Get("Settings.Tray.Desc");
 
-        PowerOptionsTitleText.Text = LocalizationService.Get("Settings.Tools.PowerOptions");
-        PowerOptionsDescText.Text = LocalizationService.Get("Settings.Tools.PowerOptionsDesc");
+        PowerOptionsCard.Header = LocalizationService.Get("Settings.Tools.PowerOptions");
+        PowerOptionsCard.Description = LocalizationService.Get("Settings.Tools.PowerOptionsDesc");
         OpenPowerOptionsButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
 
-        WebsiteTitleText.Text = LocalizationService.Get("Settings.Tools.Website");
-        WebsiteDescText.Text = LocalizationService.Get("Settings.Tools.WebsiteDesc");
+        WebsiteCard.Header = LocalizationService.Get("Settings.Tools.Website");
+        WebsiteCard.Description = LocalizationService.Get("Settings.Tools.WebsiteDesc");
         OpenWebsiteButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
 
-        FeedbackTitleText.Text = LocalizationService.Get("Settings.Tools.Feedback");
-        FeedbackDescText.Text = LocalizationService.Get("Settings.Tools.FeedbackDesc");
+        FeedbackCard.Header = LocalizationService.Get("Settings.Tools.Feedback");
+        FeedbackCard.Description = LocalizationService.Get("Settings.Tools.FeedbackDesc");
         SendFeedbackButton.Content = LocalizationService.Get("Settings.Tools.FeedbackCopy");
     }
 
@@ -54,9 +54,10 @@ public sealed partial class SettingsPage : Page
         AutoStartToggle.IsEnabled = startupSupported;
         AutoStartToggle.IsOn = startupSupported && settings.AutoStart;
         TrayToggle.IsOn = settings.TrayEnabled;
+
         if (!startupSupported)
         {
-            AutoStartDescText.Text = LocalizationService.Get("Settings.AutoStart.Unsupported", "仅 MSIX 打包安装后可用");
+            AutoStartCard.Description = LocalizationService.Get("Settings.AutoStart.Unsupported");
         }
 
         _updatingUi = false;
