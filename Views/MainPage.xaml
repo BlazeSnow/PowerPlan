@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <Page
     x:Class="PowerPlan.Views.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -13,120 +13,126 @@
             <TextBlock FontSize="24" FontWeight="SemiBold" Text="PowerPlan" />
             <TextBlock x:Name="SubtitleText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="-" />
 
-            <controls:SettingsExpander x:Name="PlansSection" Header="-">
-                <StackPanel Spacing="8">
-                    <controls:SettingsCard>
-                        <StackPanel Spacing="10">
-                            <InfoBar
-                                x:Name="UltimateMissingInfoBar"
-                                IsOpen="False"
-                                IsClosable="False"
-                                Severity="Informational"
-                                Title="-"
-                                Message="-" />
-                            <Button
-                                x:Name="CreateUltimateButton"
-                                Click="OnCreateUltimateClicked"
-                                Content="-"
-                                HorizontalAlignment="Left"
-                                Visibility="Collapsed" />
-                        </StackPanel>
-                    </controls:SettingsCard>
-
-                    <controls:SettingsCard>
-                        <ListView
-                            x:Name="PlansListView"
-                            SelectionMode="Single"
-                            SelectionChanged="OnPlansSelectionChanged"
-                            BorderThickness="0">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                    <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Margin" Value="0" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="local:PowerPlanItemViewModel">
-                                    <Border
-                                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                                        BorderThickness="0,1,0,0" Padding="16,12">
-                                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" ColumnSpacing="12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <RadioButton
-                                                Grid.Column="0"
-                                                IsChecked="{x:Bind IsActive, Mode=OneWay}"
-                                                IsHitTestVisible="False"
-                                                MinWidth="0"
-                                                Padding="0"
-                                                Margin="0,0,10,0"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Center" />
-
-                                            <StackPanel Grid.Column="1" Spacing="2">
-                                                <TextBlock
-                                                    FontSize="16"
-                                                    FontWeight="SemiBold"
-                                                    VerticalAlignment="Center"
-                                                    Text="{x:Bind Name}" />
-                                                <TextBlock
-                                                    FontSize="13"
-                                                    Opacity="0.75"
-                                                    VerticalAlignment="Center"
-                                                    Text="{x:Bind Guid}" />
-                                            </StackPanel>
-
-                                            <Button
-                                                Grid.Column="2"
-                                                Content="{x:Bind CopyButtonText}"
-                                                Tag="{x:Bind Guid}"
-                                                Click="OnCopyPlanClicked"
-                                                HorizontalAlignment="Right"
-                                                VerticalAlignment="Center" />
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </controls:SettingsCard>
-
-                    <controls:SettingsCard>
-                        <Grid ColumnSpacing="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Button
-                                x:Name="RefreshPlansButton"
-                                Click="OnRefreshClicked"
-                                Content="-"
-                                HorizontalAlignment="Left" />
-                            <TextBlock
-                                x:Name="DeletePlanHintText"
-                                Grid.Column="1"
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Right"
-                                Opacity="0.75"
-                                Text="-" />
-                        </Grid>
-                    </controls:SettingsCard>
+            <controls:SettingsExpander x:Name="UltimateExpander" Header="-">
+                <StackPanel Padding="8,4,8,8" Spacing="10">
+                    <InfoBar
+                        x:Name="UltimateMissingInfoBar"
+                        IsOpen="False"
+                        IsClosable="False"
+                        Severity="Informational"
+                        Title="-"
+                        Message="-" />
+                    <Button
+                        x:Name="CreateUltimateButton"
+                        Click="OnCreateUltimateClicked"
+                        Content="-"
+                        HorizontalAlignment="Left"
+                        Visibility="Collapsed" />
                 </StackPanel>
             </controls:SettingsExpander>
 
-            <controls:SettingsCard>
-                <InfoBar
-                    x:Name="StatusInfoBar"
-                    IsClosable="False"
-                    IsOpen="True"
-                    Severity="Informational"
-                    Title="-"
-                    Message="-" />
-            </controls:SettingsCard>
+            <Border BorderThickness="1" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" CornerRadius="12" Padding="0">
+                <StackPanel>
+                    <Grid Padding="16,12" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            x:Name="PlanPickerTitleText"
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="-" />
+                    </Grid>
+
+                    <ListView
+                        x:Name="PlansListView"
+                        SelectionMode="Single"
+                        SelectionChanged="OnPlansSelectionChanged"
+                        BorderThickness="0">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:PowerPlanItemViewModel">
+                                <Border
+                                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                    BorderThickness="0,1,0,0" Padding="16,12">
+                                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <RadioButton
+                                            Grid.Column="0"
+                                            IsChecked="{x:Bind IsActive, Mode=OneWay}"
+                                            IsHitTestVisible="False"
+                                            MinWidth="0"
+                                            Padding="0"
+                                            Margin="0,0,10,0"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center" />
+
+                                        <StackPanel Grid.Column="1" Spacing="2">
+                                            <TextBlock
+                                                FontSize="16"
+                                                FontWeight="SemiBold"
+                                                VerticalAlignment="Center"
+                                                Text="{x:Bind Name}" />
+                                            <TextBlock
+                                                FontSize="13"
+                                                Opacity="0.75"
+                                                VerticalAlignment="Center"
+                                                Text="{x:Bind Guid}" />
+                                        </StackPanel>
+
+                                        <Button
+                                            Grid.Column="2"
+                                            Content="{x:Bind CopyButtonText}"
+                                            Tag="{x:Bind Guid}"
+                                            Click="OnCopyPlanClicked"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                    <Grid Padding="16,12" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            x:Name="RefreshPlansButton"
+                            Click="OnRefreshClicked"
+                            Content="-"
+                            HorizontalAlignment="Left" />
+                        <TextBlock
+                            x:Name="DeletePlanHintText"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Opacity="0.75"
+                            Text="-" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <InfoBar
+                x:Name="StatusInfoBar"
+                IsClosable="False"
+                IsOpen="True"
+                Severity="Informational"
+                Margin="0,6,0,0"
+                Title="-"
+                Message="-" />
         </StackPanel>
     </ScrollViewer>
 </Page>
