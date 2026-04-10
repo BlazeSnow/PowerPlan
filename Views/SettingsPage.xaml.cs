@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using PowerPlan.Models;
 using PowerPlan.Services;
 using Windows.ApplicationModel.DataTransfer;
@@ -54,9 +54,10 @@ public sealed partial class SettingsPage : Page
         AutoStartToggle.IsEnabled = startupSupported;
         AutoStartToggle.IsOn = startupSupported && settings.AutoStart;
         TrayToggle.IsOn = settings.TrayEnabled;
+
         if (!startupSupported)
         {
-            AutoStartDescText.Text = LocalizationService.Get("Settings.AutoStart.Unsupported", "仅 MSIX 打包安装后可用");
+            AutoStartDescText.Text = LocalizationService.Get("Settings.AutoStart.Unsupported");
         }
 
         _updatingUi = false;

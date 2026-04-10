@@ -1,5 +1,110 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -7,84 +112,219 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-
-  <data name="App.WindowTitle" xml:space="preserve"><value>PowerPlan</value></data>
-  <data name="App.Status.StartupSettingFailed" xml:space="preserve"><value>设置开机自启动失败：{0}</value></data>
-  <data name="App.Status.TraySwitched" xml:space="preserve"><value>[托盘] 已切换电源计划：{0}</value></data>
-  <data name="App.Status.TrayInitFailed" xml:space="preserve"><value>[托盘] 初始化失败：{0}</value></data>
-  <data name="App.Status.TrayAutoStart" xml:space="preserve"><value>[托盘] 开机自启动：{0}</value></data>
-  <data name="App.Status.TrayAutoStartFailed" xml:space="preserve"><value>[托盘] 自启动设置失败：{0}</value></data>
-  <data name="App.Status.On" xml:space="preserve"><value>开启</value></data>
-  <data name="App.Status.Off" xml:space="preserve"><value>关闭</value></data>
-
-  <data name="Shell.Home" xml:space="preserve"><value>首页</value></data>
-  <data name="Shell.Settings" xml:space="preserve"><value>设置</value></data>
-
-  <data name="Main.Subtitle" xml:space="preserve"><value>快速切换 Windows 电源计划</value></data>
-  <data name="Main.RefreshPlansButton" xml:space="preserve"><value>刷新计划</value></data>
-  <data name="Main.PlanPickerTitle" xml:space="preserve"><value>选择要使用的电源计划</value></data>
-  <data name="Main.UltimateMissingTitle" xml:space="preserve"><value>未发现卓越性能计划</value></data>
-  <data name="Main.UltimateMissingMessage" xml:space="preserve"><value>可点击下方按钮创建卓越性能计划</value></data>
-  <data name="Main.CreateUltimateButton" xml:space="preserve"><value>创建卓越性能计划</value></data>
-  <data name="Main.StatusTitle" xml:space="preserve"><value>状态</value></data>
-  <data name="Main.StatusWaiting" xml:space="preserve"><value>等待操作</value></data>
-  <data name="Main.Status.TitleWithTime" xml:space="preserve"><value>状态（{0}）</value></data>
-  <data name="Main.Status.InitSuccess" xml:space="preserve"><value>初始化完成</value></data>
-  <data name="Main.Status.InitFailed" xml:space="preserve"><value>初始化失败：{0}</value></data>
-  <data name="Main.Status.PlansLoaded" xml:space="preserve"><value>已读取电源计划：{0} 项</value></data>
-  <data name="Main.Status.RefreshFailed" xml:space="preserve"><value>刷新失败：{0}</value></data>
-  <data name="Main.Status.SwitchSuccess" xml:space="preserve"><value>切换电源计划成功：{0}</value></data>
-  <data name="Main.Status.SwitchFailed" xml:space="preserve"><value>切换失败：{0}</value></data>
-  <data name="Main.Status.UltimateExists" xml:space="preserve"><value>系统中已存在卓越性能计划</value></data>
-  <data name="Main.Status.UltimateCreated" xml:space="preserve"><value>已创建卓越性能计划</value></data>
-  <data name="Main.Status.UltimateCreateFailed" xml:space="preserve"><value>创建卓越性能计划失败：{0}</value></data>
-  <data name="Main.CopyPlanButton" xml:space="preserve"><value>复制计划</value></data>
-  <data name="Main.CopyDialogTitle" xml:space="preserve"><value>复制电源计划</value></data>
-  <data name="Main.CopyDialogConfirm" xml:space="preserve"><value>复制</value></data>
-  <data name="Main.CopyDialogCancel" xml:space="preserve"><value>取消</value></data>
-  <data name="Main.CopyDialogPlaceholder" xml:space="preserve"><value>请输入新计划名称</value></data>
-  <data name="Main.Status.CopyNameEmpty" xml:space="preserve"><value>复制失败：名称不能为空</value></data>
-  <data name="Main.Status.CopySuccess" xml:space="preserve"><value>已复制电源计划：{0}</value></data>
-  <data name="Main.Status.CopyFailed" xml:space="preserve"><value>复制失败：{0}</value></data>
-  <data name="Main.DeletePlanHint" xml:space="preserve"><value>如需删除计划，请前往控制面板操作</value></data>
-  <data name="Main.DefaultPlanName" xml:space="preserve"><value>电源计划</value></data>
-  <data name="Main.CopySuffix" xml:space="preserve"><value>副本</value></data>
-
-  <data name="Settings.PageTitle" xml:space="preserve"><value>设置</value></data>
-  <data name="Settings.AutoStart.Title" xml:space="preserve"><value>开机自启动</value></data>
-  <data name="Settings.AutoStart.Desc" xml:space="preserve"><value>默认关闭，可在登录后自动启动 PowerPlan</value></data>
-  <data name="Settings.AutoStart.Unsupported" xml:space="preserve"><value>仅 MSIX 打包安装后可用</value></data>
-  <data name="Settings.Tray.Title" xml:space="preserve"><value>启用托盘</value></data>
-  <data name="Settings.Tray.Desc" xml:space="preserve"><value>默认开启，关闭后点击窗口关闭将直接退出</value></data>
-  <data name="Settings.Tools.PowerOptions" xml:space="preserve"><value>前往电源选项</value></data>
-  <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve"><value>打开 Windows 控制面板中的电源选项页面</value></data>
-  <data name="Settings.Tools.Website" xml:space="preserve"><value>前往本软件代码仓库</value></data>
-  <data name="Settings.Tools.WebsiteDesc" xml:space="preserve"><value>打开 GitHub 仓库查看源代码与发布信息</value></data>
-  <data name="Settings.Tools.Feedback" xml:space="preserve"><value>反馈到开发者邮箱</value></data>
-  <data name="Settings.Tools.FeedbackDesc" xml:space="preserve"><value>使用本软件时遇到问题，欢迎反馈</value></data>
-  <data name="Settings.Tools.OpenButton" xml:space="preserve"><value>打开</value></data>
-  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve"><value>复制反馈邮箱</value></data>
-  <data name="Settings.Status.FeedbackCopied" xml:space="preserve"><value>邮箱已复制到剪贴板</value></data>
-
-  <data name="Tray.Init" xml:space="preserve"><value>[托盘] 已初始化，左右键托盘图标可打开菜单</value></data>
-  <data name="Tray.RefreshFailed" xml:space="preserve"><value>[托盘] 刷新失败：{0}</value></data>
-  <data name="Tray.DispatcherUnavailable" xml:space="preserve"><value>[托盘] UI 线程不可用，菜单刷新失败</value></data>
-  <data name="Tray.Menu.OpenMainWindow" xml:space="preserve"><value>打开主界面</value></data>
-  <data name="Tray.Menu.RefreshPlans" xml:space="preserve"><value>刷新计划</value></data>
-  <data name="Tray.Menu.DisableAutoStart" xml:space="preserve"><value>关闭开机自启动</value></data>
-  <data name="Tray.Menu.EnableAutoStart" xml:space="preserve"><value>开启开机自启动</value></data>
-  <data name="Tray.Menu.Exit" xml:space="preserve"><value>退出</value></data>
-  <data name="Tray.RefreshStarted" xml:space="preserve"><value>[托盘] 已开始刷新计划列表</value></data>
-  <data name="Tray.SwitchTo" xml:space="preserve"><value>[托盘] 已切换到：{0}</value></data>
-  <data name="Tray.SwitchFailed" xml:space="preserve"><value>[托盘] 切换失败：{0}</value></data>
-  <data name="Tray.AutoStartState" xml:space="preserve"><value>[托盘] 开机自启动：{0}</value></data>
-  <data name="Tray.AutoStartToggleFailed" xml:space="preserve"><value>[托盘] 自启动切换失败：{0}</value></data>
-
-  <data name="Common.FailedKeyword" xml:space="preserve"><value>失败</value></data>
-  <data name="PowerPlan.UltimateKeywordZh" xml:space="preserve"><value>卓越性能</value></data>
+  <data name="App.WindowTitle" xml:space="preserve">
+    <value>PowerPlan</value>
+  </data>
+  <data name="App.Status.StartupSettingFailed" xml:space="preserve">
+    <value>设置开机自启动失败：{0}</value>
+  </data>
+  <data name="App.Status.TraySwitched" xml:space="preserve">
+    <value>[托盘] 已切换电源计划：{0}</value>
+  </data>
+  <data name="App.Status.TrayInitFailed" xml:space="preserve">
+    <value>[托盘] 初始化失败：{0}</value>
+  </data>
+  <data name="App.Status.TrayAutoStart" xml:space="preserve">
+    <value>[托盘] 开机自启动：{0}</value>
+  </data>
+  <data name="App.Status.TrayAutoStartFailed" xml:space="preserve">
+    <value>[托盘] 自启动设置失败：{0}</value>
+  </data>
+  <data name="App.Status.On" xml:space="preserve">
+    <value>开启</value>
+  </data>
+  <data name="App.Status.Off" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="Shell.Home" xml:space="preserve">
+    <value>首页</value>
+  </data>
+  <data name="Shell.Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Main.Subtitle" xml:space="preserve">
+    <value>快速切换 Windows 电源计划</value>
+  </data>
+  <data name="Main.RefreshPlansButton" xml:space="preserve">
+    <value>刷新计划</value>
+  </data>
+  <data name="Main.PlanPickerTitle" xml:space="preserve">
+    <value>选择要使用的电源计划</value>
+  </data>
+  <data name="Main.UltimateMissingTitle" xml:space="preserve">
+    <value>未发现卓越性能计划</value>
+  </data>
+  <data name="Main.UltimateMissingMessage" xml:space="preserve">
+    <value>可点击下方按钮创建卓越性能计划</value>
+  </data>
+  <data name="Main.CreateUltimateButton" xml:space="preserve">
+    <value>创建卓越性能计划</value>
+  </data>
+  <data name="Main.StatusTitle" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Main.StatusWaiting" xml:space="preserve">
+    <value>等待操作</value>
+  </data>
+  <data name="Main.Status.TitleWithTime" xml:space="preserve">
+    <value>状态（{0}）</value>
+  </data>
+  <data name="Main.Status.InitSuccess" xml:space="preserve">
+    <value>初始化完成</value>
+  </data>
+  <data name="Main.Status.InitFailed" xml:space="preserve">
+    <value>初始化失败：{0}</value>
+  </data>
+  <data name="Main.Status.PlansLoaded" xml:space="preserve">
+    <value>已读取电源计划：{0} 项</value>
+  </data>
+  <data name="Main.Status.RefreshFailed" xml:space="preserve">
+    <value>刷新失败：{0}</value>
+  </data>
+  <data name="Main.Status.SwitchSuccess" xml:space="preserve">
+    <value>切换电源计划成功：{0}</value>
+  </data>
+  <data name="Main.Status.SwitchFailed" xml:space="preserve">
+    <value>切换失败：{0}</value>
+  </data>
+  <data name="Main.Status.UltimateExists" xml:space="preserve">
+    <value>系统中已存在卓越性能计划</value>
+  </data>
+  <data name="Main.Status.UltimateCreated" xml:space="preserve">
+    <value>已创建卓越性能计划</value>
+  </data>
+  <data name="Main.Status.UltimateCreateFailed" xml:space="preserve">
+    <value>创建卓越性能计划失败：{0}</value>
+  </data>
+  <data name="Main.CopyPlanButton" xml:space="preserve">
+    <value>复制计划</value>
+  </data>
+  <data name="Main.CopyDialogTitle" xml:space="preserve">
+    <value>复制电源计划</value>
+  </data>
+  <data name="Main.CopyDialogConfirm" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="Main.CopyDialogCancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Main.CopyDialogPlaceholder" xml:space="preserve">
+    <value>请输入新计划名称</value>
+  </data>
+  <data name="Main.Status.CopyNameEmpty" xml:space="preserve">
+    <value>复制失败：名称不能为空</value>
+  </data>
+  <data name="Main.Status.CopySuccess" xml:space="preserve">
+    <value>已复制电源计划：{0}</value>
+  </data>
+  <data name="Main.Status.CopyFailed" xml:space="preserve">
+    <value>复制失败：{0}</value>
+  </data>
+  <data name="Main.DeletePlanHint" xml:space="preserve">
+    <value>如需删除计划，请前往控制面板操作</value>
+  </data>
+  <data name="Main.DefaultPlanName" xml:space="preserve">
+    <value>电源计划</value>
+  </data>
+  <data name="Main.CopySuffix" xml:space="preserve">
+    <value>副本</value>
+  </data>
+  <data name="Settings.PageTitle" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Settings.Tools.Title" xml:space="preserve">
+    <value>工具</value>
+  </data>
+  <data name="Settings.AutoStart.Title" xml:space="preserve">
+    <value>开机自启动</value>
+  </data>
+  <data name="Settings.AutoStart.Desc" xml:space="preserve">
+    <value>默认关闭，可在登录后自动启动 PowerPlan</value>
+  </data>
+  <data name="Settings.AutoStart.Unsupported" xml:space="preserve">
+    <value>仅 MSIX 打包安装后可用</value>
+  </data>
+  <data name="Settings.Tray.Title" xml:space="preserve">
+    <value>启用托盘</value>
+  </data>
+  <data name="Settings.Tray.Desc" xml:space="preserve">
+    <value>默认开启，关闭后点击窗口关闭将直接退出</value>
+  </data>
+  <data name="Settings.Tools.PowerOptions" xml:space="preserve">
+    <value>前往电源选项</value>
+  </data>
+  <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve">
+    <value>打开 Windows 控制面板中的电源选项页面</value>
+  </data>
+  <data name="Settings.Tools.Website" xml:space="preserve">
+    <value>前往本软件代码仓库</value>
+  </data>
+  <data name="Settings.Tools.WebsiteDesc" xml:space="preserve">
+    <value>打开 GitHub 仓库查看源代码与发布信息</value>
+  </data>
+  <data name="Settings.Tools.Feedback" xml:space="preserve">
+    <value>反馈到开发者邮箱</value>
+  </data>
+  <data name="Settings.Tools.FeedbackDesc" xml:space="preserve">
+    <value>使用本软件时遇到问题，欢迎反馈</value>
+  </data>
+  <data name="Settings.Tools.OpenButton" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve">
+    <value>复制反馈邮箱</value>
+  </data>
+  <data name="Settings.Status.FeedbackCopied" xml:space="preserve">
+    <value>邮箱已复制到剪贴板</value>
+  </data>
+  <data name="Tray.Init" xml:space="preserve">
+    <value>[托盘] 已初始化，左右键托盘图标可打开菜单</value>
+  </data>
+  <data name="Tray.RefreshFailed" xml:space="preserve">
+    <value>[托盘] 刷新失败：{0}</value>
+  </data>
+  <data name="Tray.DispatcherUnavailable" xml:space="preserve">
+    <value>[托盘] UI 线程不可用，菜单刷新失败</value>
+  </data>
+  <data name="Tray.Menu.OpenMainWindow" xml:space="preserve">
+    <value>打开主界面</value>
+  </data>
+  <data name="Tray.Menu.RefreshPlans" xml:space="preserve">
+    <value>刷新计划</value>
+  </data>
+  <data name="Tray.Menu.DisableAutoStart" xml:space="preserve">
+    <value>关闭开机自启动</value>
+  </data>
+  <data name="Tray.Menu.EnableAutoStart" xml:space="preserve">
+    <value>开启开机自启动</value>
+  </data>
+  <data name="Tray.Menu.Exit" xml:space="preserve">
+    <value>退出</value>
+  </data>
+  <data name="Tray.RefreshStarted" xml:space="preserve">
+    <value>[托盘] 已开始刷新计划列表</value>
+  </data>
+  <data name="Tray.SwitchTo" xml:space="preserve">
+    <value>[托盘] 已切换到：{0}</value>
+  </data>
+  <data name="Tray.SwitchFailed" xml:space="preserve">
+    <value>[托盘] 切换失败：{0}</value>
+  </data>
+  <data name="Tray.AutoStartState" xml:space="preserve">
+    <value>[托盘] 开机自启动：{0}</value>
+  </data>
+  <data name="Tray.AutoStartToggleFailed" xml:space="preserve">
+    <value>[托盘] 自启动切换失败：{0}</value>
+  </data>
+  <data name="Common.FailedKeyword" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="PowerPlan.UltimateKeywordZh" xml:space="preserve">
+    <value>卓越性能</value>
+  </data>
 </root>
