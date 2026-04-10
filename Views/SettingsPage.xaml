@@ -11,99 +11,44 @@
         <StackPanel Padding="24" Spacing="16">
             <TextBlock x:Name="PageTitleText" Text="-" FontSize="28" FontWeight="SemiBold" />
 
-            <controls:SettingsCard>
-                <Grid ColumnSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Spacing="4">
-                        <TextBlock x:Name="AutoStartTitleText" Text="-" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock x:Name="AutoStartDescText" Text="-" Opacity="0.72" TextWrapping="Wrap" />
-                    </StackPanel>
-                    <ToggleSwitch
-                        x:Name="AutoStartToggle"
-                        Grid.Column="1"
-                        Toggled="OnAutoStartToggled"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center" />
-                </Grid>
+            <controls:SettingsCard x:Name="AutoStartCard">
+                <ToggleSwitch
+                    x:Name="AutoStartToggle"
+                    Toggled="OnAutoStartToggled"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center" />
             </controls:SettingsCard>
 
-            <controls:SettingsCard>
-                <Grid ColumnSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Spacing="4">
-                        <TextBlock x:Name="TrayTitleText" Text="-" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock x:Name="TrayDescText" Text="-" Opacity="0.72" TextWrapping="Wrap" />
-                    </StackPanel>
-                    <ToggleSwitch
-                        x:Name="TrayToggle"
-                        Grid.Column="1"
-                        Toggled="OnTrayToggled"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center" />
-                </Grid>
+            <controls:SettingsCard x:Name="TrayCard">
+                <ToggleSwitch
+                    x:Name="TrayToggle"
+                    Toggled="OnTrayToggled"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center" />
             </controls:SettingsCard>
 
-            <controls:SettingsCard>
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Spacing="2">
-                        <TextBlock x:Name="PowerOptionsTitleText" Text="-" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock x:Name="PowerOptionsDescText" Text="-" Opacity="0.72" TextWrapping="Wrap" />
-                    </StackPanel>
-                    <Button
-                        x:Name="OpenPowerOptionsButton"
-                        Grid.Column="1"
-                        Click="OnOpenPowerOptionsClicked"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center" />
-                </Grid>
+            <controls:SettingsCard x:Name="PowerOptionsCard">
+                <Button
+                    x:Name="OpenPowerOptionsButton"
+                    Click="OnOpenPowerOptionsClicked"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center" />
             </controls:SettingsCard>
 
-            <controls:SettingsCard>
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Spacing="2">
-                        <TextBlock x:Name="WebsiteTitleText" Text="-" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock x:Name="WebsiteDescText" Text="-" Opacity="0.72" TextWrapping="Wrap" />
-                    </StackPanel>
-                    <Button
-                        x:Name="OpenWebsiteButton"
-                        Grid.Column="1"
-                        Click="OnOpenWebsiteClicked"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center" />
-                </Grid>
+            <controls:SettingsCard x:Name="WebsiteCard">
+                <Button
+                    x:Name="OpenWebsiteButton"
+                    Click="OnOpenWebsiteClicked"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center" />
             </controls:SettingsCard>
 
-            <controls:SettingsCard>
-                <Grid ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Spacing="2">
-                        <TextBlock x:Name="FeedbackTitleText" Text="-" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock x:Name="FeedbackDescText" Text="-" Opacity="0.72" TextWrapping="Wrap" />
-                    </StackPanel>
-                    <Button
-                        x:Name="SendFeedbackButton"
-                        Grid.Column="1"
-                        Click="OnSendFeedbackClicked"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center" />
-                </Grid>
+            <controls:SettingsCard x:Name="FeedbackCard">
+                <Button
+                    x:Name="SendFeedbackButton"
+                    Click="OnSendFeedbackClicked"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center" />
             </controls:SettingsCard>
         </StackPanel>
     </ScrollViewer>
