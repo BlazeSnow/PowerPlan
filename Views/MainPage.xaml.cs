@@ -40,11 +40,10 @@ public sealed partial class MainPage : Page
     private void ApplyLocalization()
     {
         SubtitleText.Text = LocalizationService.Get("Main.Subtitle");
-        UltimateExpander.Header = LocalizationService.Get("PowerPlan.UltimateKeywordZh");
+        UltimateCard.Header = LocalizationService.Get("Main.UltimateMissingTitle");
+        UltimateCard.Description = LocalizationService.Get("Main.UltimateMissingMessage");
         RefreshPlansButton.Content = LocalizationService.Get("Main.RefreshPlansButton");
         PlanPickerTitleText.Text = LocalizationService.Get("Main.PlanPickerTitle");
-        UltimateMissingInfoBar.Title = LocalizationService.Get("Main.UltimateMissingTitle");
-        UltimateMissingInfoBar.Message = LocalizationService.Get("Main.UltimateMissingMessage");
         CreateUltimateButton.Content = LocalizationService.Get("Main.CreateUltimateButton");
         StatusInfoBar.Title = LocalizationService.Get("Main.StatusTitle");
         StatusInfoBar.Message = LocalizationService.Get("Main.StatusWaiting");
@@ -62,8 +61,7 @@ public sealed partial class MainPage : Page
         }
 
         var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
-        UltimateExpander.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
-        UltimateMissingInfoBar.IsOpen = !hasUltimate;
+        UltimateCard.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
         CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
 
         _isUpdatingSelection = true;

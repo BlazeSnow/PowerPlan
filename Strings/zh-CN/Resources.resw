@@ -160,7 +160,7 @@
     <value>未发现卓越性能计划</value>
   </data>
   <data name="Main.UltimateMissingMessage" xml:space="preserve">
-    <value>可点击下方按钮创建卓越性能计划</value>
+    <value>可点击按钮创建卓越性能计划</value>
   </data>
   <data name="Main.CreateUltimateButton" xml:space="preserve">
     <value>创建卓越性能计划</value>

@@ -13,23 +13,15 @@
             <TextBlock FontSize="24" FontWeight="SemiBold" Text="PowerPlan" />
             <TextBlock x:Name="SubtitleText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="-" />
 
-            <controls:SettingsExpander x:Name="UltimateExpander" Header="-">
-                <StackPanel Padding="8,4,8,8" Spacing="10">
-                    <InfoBar
-                        x:Name="UltimateMissingInfoBar"
-                        IsOpen="False"
-                        IsClosable="False"
-                        Severity="Informational"
-                        Title="-"
-                        Message="-" />
-                    <Button
-                        x:Name="CreateUltimateButton"
-                        Click="OnCreateUltimateClicked"
-                        Content="-"
-                        HorizontalAlignment="Left"
-                        Visibility="Collapsed" />
-                </StackPanel>
-            </controls:SettingsExpander>
+            <controls:SettingsCard x:Name="UltimateCard">
+                <Button
+                    x:Name="CreateUltimateButton"
+                    Click="OnCreateUltimateClicked"
+                    Content="-"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Visibility="Collapsed" />
+            </controls:SettingsCard>
 
             <Border BorderThickness="1" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" CornerRadius="12" Padding="0">
                 <StackPanel>
