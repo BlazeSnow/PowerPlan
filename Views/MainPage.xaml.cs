@@ -227,6 +227,11 @@ public sealed partial class MainPage : Page
         SetStatus(message, isError ? InfoBarSeverity.Error : InfoBarSeverity.Informational);
     }
 
+    public void AddExternalStatus(string message, InfoBarSeverity severity)
+    {
+        SetStatus(message, severity);
+    }
+
     public async Task RefreshFromExternalAsync()
     {
         await RefreshPlansAsync();
