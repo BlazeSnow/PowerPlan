@@ -13,7 +13,7 @@
             <TextBlock FontSize="24" FontWeight="SemiBold" Text="PowerPlan" />
             <TextBlock x:Name="SubtitleText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="-" />
 
-            <controls:SettingsCard x:Name="UltimateCard">
+            <controls:SettingsCard x:Name="UltimateCard" Visibility="Collapsed">
                 <Button
                     x:Name="CreateUltimateButton"
                     Click="OnCreateUltimateClicked"
