@@ -160,10 +160,10 @@
     <value>未发现卓越性能计划</value>
   </data>
   <data name="Main.UltimateMissingMessage" xml:space="preserve">
-    <value>可点击按钮创建卓越性能计划</value>
+    <value>可点击按钮尝试创建卓越性能计划，部分设备可能会自动移除该计划</value>
   </data>
   <data name="Main.CreateUltimateButton" xml:space="preserve">
-    <value>创建卓越性能计划</value>
+    <value>尝试创建卓越性能计划</value>
   </data>
   <data name="Main.StatusTitle" xml:space="preserve">
     <value>状态</value>
@@ -196,7 +196,7 @@
     <value>系统中已存在卓越性能计划</value>
   </data>
   <data name="Main.Status.UltimateCreated" xml:space="preserve">
-    <value>已创建卓越性能计划</value>
+    <value>已尝试创建卓越性能计划，请以当前计划列表为准</value>
   </data>
   <data name="Main.Status.UltimateCreateFailed" xml:space="preserve">
     <value>创建卓越性能计划失败：{0}</value>
