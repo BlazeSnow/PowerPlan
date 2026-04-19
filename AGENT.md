@@ -42,8 +42,9 @@
 2. 开机自启动（开关）：默认为关
 3. 启用托盘（开关）：默认为开
 4. 电源计划（按钮）：打开控制面板的电源选项
-5. 开发者官网（按钮）：<https://www.blazesnow.com>
-6. 反馈邮箱（复制按钮）：<powerplan@blazesnow.com>
+5. 恢复电源计划（按钮）：恢复电源计划到默认状态`powercfg -restoredefaultschemes`
+6. 开发者官网（按钮）：<https://www.blazesnow.com>
+7. 反馈邮箱（复制按钮）：<powerplan@blazesnow.com>
 
 ### 持久化设置
 
@@ -53,6 +54,7 @@
    2. 若软件为未打包状态，回退到`%appdata%/PowerPlan/`
 3. 开机自启动的id：`startup`
 4. 启用托盘的id：`tray`
+5. 卓越性能计划的id：`UltimatePerformance`
 
 ## 侧边栏
 
