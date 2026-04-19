@@ -224,6 +224,9 @@ public sealed partial class SettingsPage : Page
             var dataPackage = new DataPackage();
             dataPackage.SetText(FeedbackMail);
             Clipboard.SetContent(dataPackage);
+            _ = ShowOperationDialogAsync(
+                LocalizationService.Get("Settings.FeedbackDialog.Title"),
+                LocalizationService.Get("Settings.Status.FeedbackCopied"));
         }
         catch
         {

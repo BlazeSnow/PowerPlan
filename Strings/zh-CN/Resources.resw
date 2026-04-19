@@ -327,6 +327,9 @@
   <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve">
     <value>取消</value>
   </data>
+  <data name="Settings.FeedbackDialog.Title" xml:space="preserve">
+    <value>复制成功</value>
+  </data>
   <data name="Settings.Status.FeedbackCopied" xml:space="preserve">
     <value>邮箱已复制到剪贴板</value>
   </data>
