@@ -138,6 +138,47 @@ public partial class App : Application
                     page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid), InfoBarSeverity.Success);
                 }
             },
+            getHiddenUltimatePlanGuid: () =>
+            {
+                var guid = SettingsService.Current.UltimatePerformancePlanGuid;
+                return string.IsNullOrWhiteSpace(guid) ? null : guid;
+            },
+            activateHiddenUltimatePlanAsync: async guid =>
+            {
+                try
+                {
+                    await _powerPlanService.SetActivePlanAsync(guid);
+
+                    var page = GetMainPage();
+                    if (page is not null)
+                    {
+                        await page.RefreshFromExternalAsync();
+                    }
+
+                    await RefreshTrayPlansAsync();
+                }
+                catch
+                {
+                    SettingsService.Current.UltimatePerformancePlanGuid = string.Empty;
+                    try
+                    {
+                        await SettingsService.SaveCurrentAsync();
+                    }
+                    catch
+                    {
+                        // Keep tray activation failure focused on the power plan operation.
+                    }
+
+                    var page = GetMainPage();
+                    if (page is not null)
+                    {
+                        await page.RefreshFromExternalAsync();
+                    }
+
+                    await RefreshTrayPlansAsync();
+                    throw;
+                }
+            },
             isStartupEnabled: () => SettingsService.Current.AutoStart,
             setStartupEnabled: UpdateAutoStartFromTrayAsync,
             showMainWindow: ShowMainWindow,

@@ -11,6 +11,7 @@ public sealed partial class SettingsPage : Page
 
     private readonly SettingsService _settingsService;
     private readonly StartupService _startupService = new();
+    private readonly PowerPlanService _powerPlanService = new();
     private bool _updatingUi;
 
     public SettingsPage()
@@ -35,6 +36,10 @@ public sealed partial class SettingsPage : Page
         PowerOptionsCard.Header = LocalizationService.Get("Settings.Tools.PowerOptions");
         PowerOptionsCard.Description = LocalizationService.Get("Settings.Tools.PowerOptionsDesc");
         OpenPowerOptionsButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
+
+        RestorePowerPlansCard.Header = LocalizationService.Get("Settings.Tools.RestorePowerPlans");
+        RestorePowerPlansCard.Description = LocalizationService.Get("Settings.Tools.RestorePowerPlansDesc");
+        RestorePowerPlansButton.Content = LocalizationService.Get("Settings.Tools.RestoreButton");
 
         WebsiteCard.Header = LocalizationService.Get("Settings.Tools.Website");
         WebsiteCard.Description = LocalizationService.Get("Settings.Tools.WebsiteDesc");
@@ -129,7 +134,8 @@ public sealed partial class SettingsPage : Page
             var settings = new AppSettings
             {
                 AutoStart = effectiveAutoStart,
-                TrayEnabled = trayEnabled
+                TrayEnabled = trayEnabled,
+                UltimatePerformancePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid
             };
 
             await _settingsService.SaveAsync(settings);
@@ -158,6 +164,54 @@ public sealed partial class SettingsPage : Page
         OpenExternal("control.exe", "/name Microsoft.PowerOptions");
     }
 
+    private async void OnRestorePowerPlansClicked(object sender, RoutedEventArgs e)
+    {
+        var confirmed = await ShowRestoreConfirmationDialogAsync();
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            await _powerPlanService.RestoreDefaultSchemesAsync();
+            _settingsService.Current.UltimatePerformancePlanGuid = string.Empty;
+            await _settingsService.SaveCurrentAsync();
+
+            if (Application.Current is App app)
+            {
+                await app.RefreshTrayPlansAsync();
+            }
+
+            await ShowOperationDialogAsync(
+                LocalizationService.Get("Settings.RestoreDialog.SuccessTitle"),
+                LocalizationService.Get("Settings.RestoreDialog.SuccessMessage"));
+        }
+        catch (Exception ex)
+        {
+            await ShowOperationDialogAsync(
+                LocalizationService.Get("Settings.RestoreDialog.FailedTitle"),
+                LocalizationService.Format("Settings.RestoreDialog.FailedMessage", ex.Message));
+        }
+    }
+
+    private async Task<bool> ShowRestoreConfirmationDialogAsync()
+    {
+        var dialog = new ContentDialog
+        {
+            Title = LocalizationService.Get("Settings.RestoreConfirmDialog.Title"),
+            Content = LocalizationService.Get("Settings.RestoreConfirmDialog.Message"),
+            PrimaryButtonText = LocalizationService.Get("Settings.RestoreConfirmDialog.Confirm"),
+            CloseButtonText = LocalizationService.Get("Settings.RestoreConfirmDialog.Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            PrimaryButtonStyle = CreateDangerButtonStyle(),
+            XamlRoot = XamlRoot
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
+    }
+
     private void OnOpenWebsiteClicked(object sender, RoutedEventArgs e)
     {
         OpenExternal("https://github.com/BlazeSnow/PowerPlan");
@@ -170,11 +224,42 @@ public sealed partial class SettingsPage : Page
             var dataPackage = new DataPackage();
             dataPackage.SetText(FeedbackMail);
             Clipboard.SetContent(dataPackage);
+            _ = ShowOperationDialogAsync(
+                LocalizationService.Get("Settings.FeedbackDialog.Title"),
+                LocalizationService.Get("Settings.Status.FeedbackCopied"));
         }
         catch
         {
             // Keep page silent when clipboard is unavailable.
         }
+    }
+
+    private async Task ShowOperationDialogAsync(string title, string message)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            CloseButtonText = LocalizationService.Get("Main.CopyDialogCancel"),
+            Content = message,
+            XamlRoot = XamlRoot
+        };
+
+        await dialog.ShowAsync();
+    }
+
+    private static Style CreateDangerButtonStyle()
+    {
+        var style = new Style(typeof(Button));
+        if (Application.Current.Resources.TryGetValue("DefaultButtonStyle", out var baseStyle)
+            && baseStyle is Style defaultButtonStyle)
+        {
+            style.BasedOn = defaultButtonStyle;
+        }
+
+        style.Setters.Add(new Setter(Control.BackgroundProperty, Application.Current.Resources["SystemFillColorCriticalBrush"]));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, Application.Current.Resources["SystemFillColorCriticalBrush"]));
+        style.Setters.Add(new Setter(Control.ForegroundProperty, Application.Current.Resources["TextOnAccentFillColorPrimaryBrush"]));
+        return style;
     }
 
     private static void OpenExternal(string target, string? args = null)

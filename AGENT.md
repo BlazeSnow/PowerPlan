@@ -17,6 +17,19 @@
 1. 读取用户拥有的Windows电源计划
 2. 检查用户是否有卓越性能计划，若无，则提供创建卓越性能计划选项
 
+### 创建卓越性能计划
+
+1. 创建命令为：`powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61`
+2. 创建后读取系统返回的UUID并保存
+
+### 卓越性能计划存在性
+
+1. 部分设备通过`powercfg -l`无法查看到被隐藏的卓越性能计划
+2. 针对这些设备，通过读取创建时的UUID，然后可开启卓越性能计划
+3. 使用`powercfg -setactive 创建时的UUID`可开启被隐藏的卓越性能计划
+4. 但是用户通过其他途径删除该计划后，setactive可能会失败，此时需在log栏提示用户
+5. 在设置中恢复电源计划后，需清空储存的卓越性能计划的UUID
+
 ## 主页面
 
 1. 主页包括：解锁区、表格区、状态
@@ -42,8 +55,9 @@
 2. 开机自启动（开关）：默认为关
 3. 启用托盘（开关）：默认为开
 4. 电源计划（按钮）：打开控制面板的电源选项
-5. 开发者官网（按钮）：<https://www.blazesnow.com>
-6. 反馈邮箱（复制按钮）：<powerplan@blazesnow.com>
+5. 恢复电源计划（按钮）：恢复电源计划到默认状态`powercfg -restoredefaultschemes`
+6. 开发者官网（按钮）：<https://www.blazesnow.com>
+7. 反馈邮箱（复制按钮）：<powerplan@blazesnow.com>
 
 ### 持久化设置
 
@@ -53,6 +67,7 @@
    2. 若软件为未打包状态，回退到`%appdata%/PowerPlan/`
 3. 开机自启动的id：`startup`
 4. 启用托盘的id：`tray`
+5. 卓越性能计划的id：`UltimatePerformance`
 
 ## 侧边栏
 

@@ -160,10 +160,19 @@
     <value>未发现卓越性能计划</value>
   </data>
   <data name="Main.UltimateMissingMessage" xml:space="preserve">
-    <value>可点击按钮创建卓越性能计划</value>
+    <value>可点击按钮尝试创建卓越性能计划，部分设备可能会自动移除该计划</value>
+  </data>
+  <data name="Main.UltimateHiddenTitle" xml:space="preserve">
+    <value>检测到隐藏的卓越性能计划</value>
+  </data>
+  <data name="Main.UltimateHiddenMessage" xml:space="preserve">
+    <value>当前设备可能不会在计划列表中显示该计划，可使用已保存的 UUID 直接启用</value>
   </data>
   <data name="Main.CreateUltimateButton" xml:space="preserve">
-    <value>创建卓越性能计划</value>
+    <value>尝试创建卓越性能计划</value>
+  </data>
+  <data name="Main.ActivateUltimateButton" xml:space="preserve">
+    <value>启用隐藏的卓越性能计划</value>
   </data>
   <data name="Main.StatusTitle" xml:space="preserve">
     <value>状态</value>
@@ -196,10 +205,16 @@
     <value>系统中已存在卓越性能计划</value>
   </data>
   <data name="Main.Status.UltimateCreated" xml:space="preserve">
-    <value>已创建卓越性能计划</value>
+    <value>已尝试创建卓越性能计划，请以当前计划列表为准</value>
+  </data>
+  <data name="Main.Status.UltimateActivated" xml:space="preserve">
+    <value>已通过保存的 UUID 启用卓越性能计划</value>
   </data>
   <data name="Main.Status.UltimateCreateFailed" xml:space="preserve">
     <value>创建卓越性能计划失败：{0}</value>
+  </data>
+  <data name="Main.Status.UltimateActivateFailed" xml:space="preserve">
+    <value>启用隐藏的卓越性能计划失败，已清除保存的 UUID：{0}</value>
   </data>
   <data name="Main.CopyPlanButton" xml:space="preserve">
     <value>复制计划</value>
@@ -261,6 +276,12 @@
   <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve">
     <value>打开 Windows 控制面板中的电源选项页面</value>
   </data>
+  <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve">
+    <value>恢复电源计划</value>
+  </data>
+  <data name="Settings.Tools.RestorePowerPlansDesc" xml:space="preserve">
+    <value>将 Windows 电源计划恢复为默认状态，并清空已保存的卓越性能 UUID</value>
+  </data>
   <data name="Settings.Tools.Website" xml:space="preserve">
     <value>前往本软件代码仓库</value>
   </data>
@@ -276,8 +297,38 @@
   <data name="Settings.Tools.OpenButton" xml:space="preserve">
     <value>打开</value>
   </data>
+  <data name="Settings.Tools.RestoreButton" xml:space="preserve">
+    <value>恢复</value>
+  </data>
   <data name="Settings.Tools.FeedbackCopy" xml:space="preserve">
     <value>复制反馈邮箱</value>
+  </data>
+  <data name="Settings.RestoreDialog.SuccessTitle" xml:space="preserve">
+    <value>恢复完成</value>
+  </data>
+  <data name="Settings.RestoreDialog.SuccessMessage" xml:space="preserve">
+    <value>已恢复默认电源计划，并清空保存的卓越性能 UUID。</value>
+  </data>
+  <data name="Settings.RestoreDialog.FailedTitle" xml:space="preserve">
+    <value>恢复失败</value>
+  </data>
+  <data name="Settings.RestoreDialog.FailedMessage" xml:space="preserve">
+    <value>恢复电源计划失败：{0}</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Title" xml:space="preserve">
+    <value>确认恢复默认电源计划</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Message" xml:space="preserve">
+    <value>此操作会恢复 Windows 默认电源计划，并清空已保存的卓越性能 UUID。确认继续吗？</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Confirm" xml:space="preserve">
+    <value>确认恢复</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Settings.FeedbackDialog.Title" xml:space="preserve">
+    <value>复制成功</value>
   </data>
   <data name="Settings.Status.FeedbackCopied" xml:space="preserve">
     <value>邮箱已复制到剪贴板</value>
@@ -297,6 +348,9 @@
   <data name="Tray.Menu.RefreshPlans" xml:space="preserve">
     <value>刷新计划</value>
   </data>
+  <data name="Tray.Menu.OpenHiddenUltimate" xml:space="preserve">
+    <value>打开隐藏的卓越性能计划</value>
+  </data>
   <data name="Tray.Menu.DisableAutoStart" xml:space="preserve">
     <value>关闭开机自启动</value>
   </data>
@@ -314,6 +368,12 @@
   </data>
   <data name="Tray.SwitchFailed" xml:space="preserve">
     <value>[托盘] 切换失败：{0}</value>
+  </data>
+  <data name="Tray.HiddenUltimateActivated" xml:space="preserve">
+    <value>[托盘] 已启用隐藏的卓越性能计划</value>
+  </data>
+  <data name="Tray.HiddenUltimateActivateFailed" xml:space="preserve">
+    <value>[托盘] 启用隐藏的卓越性能计划失败：{0}</value>
   </data>
   <data name="Tray.AutoStartState" xml:space="preserve">
     <value>[托盘] 开机自启动：{0}</value>

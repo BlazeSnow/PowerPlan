@@ -11,6 +11,7 @@ namespace PowerPlan.Views;
 public sealed partial class MainPage : Page
 {
     private readonly PowerPlanService _powerPlanService = new();
+    private readonly SettingsService _settingsService;
     private bool _isUpdatingSelection;
 
     public ObservableCollection<PowerPlanItemViewModel> Plans { get; } = new();
@@ -18,6 +19,7 @@ public sealed partial class MainPage : Page
     public MainPage()
     {
         InitializeComponent();
+        _settingsService = ((App)Application.Current).SettingsService;
         ApplyLocalization();
 
         PlansListView.ItemsSource = Plans;
@@ -50,7 +52,7 @@ public sealed partial class MainPage : Page
         DeletePlanHintText.Text = LocalizationService.Get("Main.DeletePlanHint");
     }
 
-    private async Task RefreshPlansAsync()
+    private async Task RefreshPlansAsync(bool updateStatus = true)
     {
         var plans = await _powerPlanService.GetPlansAsync();
 
@@ -61,8 +63,19 @@ public sealed partial class MainPage : Page
         }
 
         var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
+        var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
+        var hasHiddenUltimate = !string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
+            && !plans.Any(plan => string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
+
         UltimateCard.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
         CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
+
+        if (!hasUltimate)
+        {
+            UltimateCard.Header = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenTitle" : "Main.UltimateMissingTitle");
+            UltimateCard.Description = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenMessage" : "Main.UltimateMissingMessage");
+            CreateUltimateButton.Content = LocalizationService.Get(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
+        }
 
         _isUpdatingSelection = true;
         PlansListView.SelectedItem = Plans.FirstOrDefault(x => x.IsActive);
@@ -73,7 +86,10 @@ public sealed partial class MainPage : Page
             app.UpdateTrayPlans(plans);
         }
 
-        SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
+        if (updateStatus)
+        {
+            SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
+        }
     }
 
     private void SetStatus(string message, InfoBarSeverity severity)
@@ -136,7 +152,7 @@ public sealed partial class MainPage : Page
             }
 
             await _powerPlanService.CopyPlanAsync(planGuid, newName);
-            await RefreshPlansAsync();
+            await RefreshPlansAsync(false);
             SetStatus(LocalizationService.Format("Main.Status.CopySuccess", newName), InfoBarSeverity.Success);
         }
         catch (Exception ex)
@@ -203,21 +219,46 @@ public sealed partial class MainPage : Page
 
     private async void OnCreateUltimateClicked(object sender, RoutedEventArgs e)
     {
+        var isActivatingSavedUltimate = false;
+
         try
         {
-            if (await _powerPlanService.HasUltimatePerformancePlanAsync())
+            var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
+            if (!string.IsNullOrWhiteSpace(savedUltimatePlanGuid))
             {
-                SetStatus(LocalizationService.Get("Main.Status.UltimateExists"), InfoBarSeverity.Informational);
-                await RefreshPlansAsync();
+                isActivatingSavedUltimate = true;
+                await _powerPlanService.SetActivePlanAsync(savedUltimatePlanGuid);
+                await RefreshPlansAsync(false);
+                SetStatus(LocalizationService.Get("Main.Status.UltimateActivated"), InfoBarSeverity.Success);
                 return;
             }
 
-            await _powerPlanService.CreateUltimatePerformancePlanAsync();
+            var createdGuid = await _powerPlanService.CreateUltimatePerformancePlanAsync();
+            _settingsService.Current.UltimatePerformancePlanGuid = createdGuid;
+            await _settingsService.SaveCurrentAsync();
+
+            await RefreshPlansAsync(false);
             SetStatus(LocalizationService.Get("Main.Status.UltimateCreated"), InfoBarSeverity.Success);
-            await RefreshPlansAsync();
         }
         catch (Exception ex)
         {
+            if (isActivatingSavedUltimate)
+            {
+                _settingsService.Current.UltimatePerformancePlanGuid = string.Empty;
+                try
+                {
+                    await _settingsService.SaveCurrentAsync();
+                }
+                catch
+                {
+                    // Keep failure handling focused on the power plan operation.
+                }
+
+                await RefreshPlansAsync(false);
+                SetStatus(LocalizationService.Format("Main.Status.UltimateActivateFailed", ex.Message), InfoBarSeverity.Error);
+                return;
+            }
+
             SetStatus(LocalizationService.Format("Main.Status.UltimateCreateFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
