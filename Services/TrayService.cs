@@ -14,6 +14,8 @@ public sealed class TrayService : IDisposable
 {
     private readonly Func<Task<IReadOnlyList<PowerPlanInfo>>> _getPlansAsync;
     private readonly Func<string, Task> _setActivePlanAsync;
+    private readonly Func<string?> _getHiddenUltimatePlanGuid;
+    private readonly Func<string, Task> _activateHiddenUltimatePlanAsync;
     private readonly Func<bool> _isStartupEnabled;
     private readonly Func<bool, Task<bool>> _setStartupEnabled;
     private readonly Action _showMainWindow;
@@ -32,6 +34,8 @@ public sealed class TrayService : IDisposable
         DispatcherQueue uiDispatcherQueue,
         Func<Task<IReadOnlyList<PowerPlanInfo>>> getPlansAsync,
         Func<string, Task> setActivePlanAsync,
+        Func<string?> getHiddenUltimatePlanGuid,
+        Func<string, Task> activateHiddenUltimatePlanAsync,
         Func<bool> isStartupEnabled,
         Func<bool, Task<bool>> setStartupEnabled,
         Action showMainWindow,
@@ -41,6 +45,8 @@ public sealed class TrayService : IDisposable
         _uiDispatcherQueue = uiDispatcherQueue ?? throw new ArgumentNullException(nameof(uiDispatcherQueue));
         _getPlansAsync = getPlansAsync;
         _setActivePlanAsync = setActivePlanAsync;
+        _getHiddenUltimatePlanGuid = getHiddenUltimatePlanGuid;
+        _activateHiddenUltimatePlanAsync = activateHiddenUltimatePlanAsync;
         _isStartupEnabled = isStartupEnabled;
         _setStartupEnabled = setStartupEnabled;
         _showMainWindow = showMainWindow;
@@ -185,6 +191,16 @@ public sealed class TrayService : IDisposable
                     () => _ = OnSwitchPlanAsync(planGuid, planName)));
             }
 
+            var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid();
+            var hasHiddenUltimate = !string.IsNullOrWhiteSpace(hiddenUltimatePlanGuid)
+                && !plans.Any(plan => string.Equals(plan.Guid, hiddenUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
+            if (hasHiddenUltimate)
+            {
+                _contextFlyout.Items.Add(CreateActionItem(
+                    "\u26A1 " + LocalizationService.Get("Tray.Menu.OpenHiddenUltimate"),
+                    () => _ = OnActivateHiddenUltimateAsync(hiddenUltimatePlanGuid!)));
+            }
+
             _contextFlyout.Items.Add(new MenuFlyoutSeparator());
             _contextFlyout.Items.Add(CreateActionItem(
                 "\u21BB " + LocalizationService.Get("Tray.Menu.RefreshPlans"),
@@ -227,6 +243,19 @@ public sealed class TrayService : IDisposable
         catch (Exception ex)
         {
             _log(LocalizationService.Format("Tray.SwitchFailed", ex.Message), InfoBarSeverity.Error);
+        }
+    }
+
+    private async Task OnActivateHiddenUltimateAsync(string planGuid)
+    {
+        try
+        {
+            await _activateHiddenUltimatePlanAsync(planGuid);
+            _log(LocalizationService.Get("Tray.HiddenUltimateActivated"), InfoBarSeverity.Success);
+        }
+        catch (Exception ex)
+        {
+            _log(LocalizationService.Format("Tray.HiddenUltimateActivateFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 

@@ -333,6 +333,9 @@
   <data name="Tray.Menu.RefreshPlans" xml:space="preserve">
     <value>刷新计划</value>
   </data>
+  <data name="Tray.Menu.OpenHiddenUltimate" xml:space="preserve">
+    <value>打开隐藏的卓越性能计划</value>
+  </data>
   <data name="Tray.Menu.DisableAutoStart" xml:space="preserve">
     <value>关闭开机自启动</value>
   </data>
@@ -350,6 +353,12 @@
   </data>
   <data name="Tray.SwitchFailed" xml:space="preserve">
     <value>[托盘] 切换失败：{0}</value>
+  </data>
+  <data name="Tray.HiddenUltimateActivated" xml:space="preserve">
+    <value>[托盘] 已启用隐藏的卓越性能计划</value>
+  </data>
+  <data name="Tray.HiddenUltimateActivateFailed" xml:space="preserve">
+    <value>[托盘] 启用隐藏的卓越性能计划失败：{0}</value>
   </data>
   <data name="Tray.AutoStartState" xml:space="preserve">
     <value>[托盘] 开机自启动：{0}</value>
