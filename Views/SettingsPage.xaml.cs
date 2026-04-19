@@ -166,6 +166,12 @@ public sealed partial class SettingsPage : Page
 
     private async void OnRestorePowerPlansClicked(object sender, RoutedEventArgs e)
     {
+        var confirmed = await ShowRestoreConfirmationDialogAsync();
+        if (!confirmed)
+        {
+            return;
+        }
+
         try
         {
             await _powerPlanService.RestoreDefaultSchemesAsync();
@@ -187,6 +193,23 @@ public sealed partial class SettingsPage : Page
                 LocalizationService.Get("Settings.RestoreDialog.FailedTitle"),
                 LocalizationService.Format("Settings.RestoreDialog.FailedMessage", ex.Message));
         }
+    }
+
+    private async Task<bool> ShowRestoreConfirmationDialogAsync()
+    {
+        var dialog = new ContentDialog
+        {
+            Title = LocalizationService.Get("Settings.RestoreConfirmDialog.Title"),
+            Content = LocalizationService.Get("Settings.RestoreConfirmDialog.Message"),
+            PrimaryButtonText = LocalizationService.Get("Settings.RestoreConfirmDialog.Confirm"),
+            CloseButtonText = LocalizationService.Get("Settings.RestoreConfirmDialog.Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            PrimaryButtonStyle = CreateDangerButtonStyle(),
+            XamlRoot = XamlRoot
+        };
+
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
     }
 
     private void OnOpenWebsiteClicked(object sender, RoutedEventArgs e)
@@ -219,6 +242,21 @@ public sealed partial class SettingsPage : Page
         };
 
         await dialog.ShowAsync();
+    }
+
+    private static Style CreateDangerButtonStyle()
+    {
+        var style = new Style(typeof(Button));
+        if (Application.Current.Resources.TryGetValue("DefaultButtonStyle", out var baseStyle)
+            && baseStyle is Style defaultButtonStyle)
+        {
+            style.BasedOn = defaultButtonStyle;
+        }
+
+        style.Setters.Add(new Setter(Control.BackgroundProperty, Application.Current.Resources["SystemFillColorCriticalBrush"]));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, Application.Current.Resources["SystemFillColorCriticalBrush"]));
+        style.Setters.Add(new Setter(Control.ForegroundProperty, Application.Current.Resources["TextOnAccentFillColorPrimaryBrush"]));
+        return style;
     }
 
     private static void OpenExternal(string target, string? args = null)

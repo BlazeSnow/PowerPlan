@@ -315,6 +315,18 @@
   <data name="Settings.RestoreDialog.FailedMessage" xml:space="preserve">
     <value>恢复电源计划失败：{0}</value>
   </data>
+  <data name="Settings.RestoreConfirmDialog.Title" xml:space="preserve">
+    <value>确认恢复默认电源计划</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Message" xml:space="preserve">
+    <value>此操作会恢复 Windows 默认电源计划，并清空已保存的卓越性能 UUID。确认继续吗？</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Confirm" xml:space="preserve">
+    <value>确认恢复</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
   <data name="Settings.Status.FeedbackCopied" xml:space="preserve">
     <value>邮箱已复制到剪贴板</value>
   </data>
