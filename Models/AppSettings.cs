@@ -9,4 +9,7 @@ public sealed class AppSettings
 
     [JsonPropertyName("tray")]
     public bool TrayEnabled { get; set; } = true;
+
+    [JsonPropertyName("UltimatePerformance")]
+    public string UltimatePerformancePlanGuid { get; set; } = string.Empty;
 }

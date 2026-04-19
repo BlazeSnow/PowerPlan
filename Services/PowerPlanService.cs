@@ -66,15 +66,21 @@ public sealed class PowerPlanService
         return newPlanGuid;
     }
 
-    public async Task<bool> HasUltimatePerformancePlanAsync()
+    public async Task<string> CreateUltimatePerformancePlanAsync()
     {
-        var plans = await GetPlansAsync();
-        return plans.Any(IsUltimatePerformancePlan);
+        var duplicateOutput = await RunPowerCfgAsync($"/duplicatescheme {UltimatePerformanceGuid}");
+        var guidMatch = GuidRegex.Match(duplicateOutput);
+        if (!guidMatch.Success)
+        {
+            throw new InvalidOperationException("创建失败：无法获取卓越性能计划 GUID。");
+        }
+
+        return guidMatch.Groups["guid"].Value;
     }
 
-    public async Task CreateUltimatePerformancePlanAsync()
+    public async Task RestoreDefaultSchemesAsync()
     {
-        await RunPowerCfgAsync($"/duplicatescheme {UltimatePerformanceGuid}");
+        await RunPowerCfgAsync("/restoredefaultschemes");
     }
 
     public bool IsUltimatePerformancePlan(PowerPlanInfo plan)

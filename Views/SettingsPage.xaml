@@ -35,6 +35,14 @@
                     VerticalAlignment="Center" />
             </controls:SettingsCard>
 
+            <controls:SettingsCard x:Name="RestorePowerPlansCard">
+                <Button
+                    x:Name="RestorePowerPlansButton"
+                    Click="OnRestorePowerPlansClicked"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center" />
+            </controls:SettingsCard>
+
             <controls:SettingsCard x:Name="WebsiteCard">
                 <Button
                     x:Name="OpenWebsiteButton"
