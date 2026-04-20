@@ -384,6 +384,9 @@
   <data name="Common.FailedKeyword" xml:space="preserve">
     <value>失败</value>
   </data>
+  <data name="Common.Ok" xml:space="preserve">
+    <value>确定</value>
+  </data>
   <data name="PowerPlan.UltimateKeywordZh" xml:space="preserve">
     <value>卓越性能</value>
   </data>

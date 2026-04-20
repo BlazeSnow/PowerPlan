@@ -239,7 +239,7 @@ public sealed partial class SettingsPage : Page
         var dialog = new ContentDialog
         {
             Title = title,
-            CloseButtonText = LocalizationService.Get("Main.CopyDialogCancel"),
+            CloseButtonText = LocalizationService.Get("Common.Ok"),
             Content = message,
             XamlRoot = XamlRoot
         };
