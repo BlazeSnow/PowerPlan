@@ -24,7 +24,9 @@ public sealed class TrayService : IDisposable
     private readonly DispatcherQueue _uiDispatcherQueue;
 
     private readonly object _plansLock = new();
+    private readonly object _refreshTaskLock = new();
     private IReadOnlyList<PowerPlanInfo> _cachedPlans = Array.Empty<PowerPlanInfo>();
+    private Task? _refreshPlansTask;
 
     private TaskbarIcon? _taskbarIcon;
     private MenuFlyout? _contextFlyout;
@@ -98,6 +100,19 @@ public sealed class TrayService : IDisposable
 
     public async Task RefreshPlansAsync()
     {
+        Task refreshTask;
+
+        lock (_refreshTaskLock)
+        {
+            _refreshPlansTask ??= RefreshPlansCoreAsync();
+            refreshTask = _refreshPlansTask;
+        }
+
+        await refreshTask;
+    }
+
+    private async Task RefreshPlansCoreAsync()
+    {
         try
         {
             var plans = await _getPlansAsync();
@@ -106,6 +121,13 @@ public sealed class TrayService : IDisposable
         catch (Exception ex)
         {
             _log(LocalizationService.Format("Tray.RefreshFailed", ex.Message), InfoBarSeverity.Error);
+        }
+        finally
+        {
+            lock (_refreshTaskLock)
+            {
+                _refreshPlansTask = null;
+            }
         }
     }
 

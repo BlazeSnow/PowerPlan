@@ -15,6 +15,8 @@ public partial class App : Application
     private readonly PowerPlanService _powerPlanService = new();
     private readonly StartupService _startupService = new();
     private bool _isExiting;
+    private bool _lastKnownAutoStart;
+    private bool _lastKnownTrayEnabled;
     private nint _windowIconHandle;
 
     public App()
@@ -39,6 +41,9 @@ public partial class App : Application
         {
             // Keep app startup resilient even when settings file cannot be loaded.
         }
+
+        _lastKnownAutoStart = SettingsService.Current.AutoStart;
+        _lastKnownTrayEnabled = SettingsService.Current.TrayEnabled;
 
         _window ??= new Window();
         var launchToTray = startupTaskLaunch && SettingsService.Current.TrayEnabled;
@@ -68,8 +73,21 @@ public partial class App : Application
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
     {
-        await ApplyStartupSettingAsync();
-        await EnsureTrayStateAsync();
+        var autoStartChanged = e.AutoStart != _lastKnownAutoStart;
+        var trayChanged = e.TrayEnabled != _lastKnownTrayEnabled;
+
+        _lastKnownAutoStart = e.AutoStart;
+        _lastKnownTrayEnabled = e.TrayEnabled;
+
+        if (autoStartChanged)
+        {
+            await ApplyStartupSettingAsync();
+        }
+
+        if (trayChanged)
+        {
+            await EnsureTrayStateAsync();
+        }
     }
 
     private async Task ApplyStartupSettingAsync()
@@ -90,6 +108,7 @@ public partial class App : Application
             if (effective != expected)
             {
                 SettingsService.Current.AutoStart = effective;
+                _lastKnownAutoStart = effective;
                 await SettingsService.SaveCurrentAsync();
             }
         }
@@ -204,6 +223,7 @@ public partial class App : Application
         {
             var effective = await _startupService.SetEnabledAsync(enabled);
             SettingsService.Current.AutoStart = effective;
+            _lastKnownAutoStart = effective;
             await SettingsService.SaveCurrentAsync();
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
             GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStart", state), InfoBarSeverity.Success);
