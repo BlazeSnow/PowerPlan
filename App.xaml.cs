@@ -17,6 +17,7 @@ public partial class App : Application
     private bool _isExiting;
     private bool _lastKnownAutoStart;
     private bool _lastKnownTrayEnabled;
+    private bool _pendingMainPageRefresh;
     private nint _windowIconHandle;
 
     public App()
@@ -114,7 +115,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.StartupSettingFailed", ex.Message), true);
+            AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.StartupSettingFailed", ex.Message), true);
         }
     }
 
@@ -137,7 +138,7 @@ public partial class App : Application
         var uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         if (uiDispatcherQueue is null)
         {
-            GetMainPage()?.AddExternalStatus(LocalizationService.Get("Tray.DispatcherUnavailable"), true);
+            AddStatusToVisibleMainPage(LocalizationService.Get("Tray.DispatcherUnavailable"), true);
             return;
         }
 
@@ -147,7 +148,8 @@ public partial class App : Application
             setActivePlanAsync: async guid =>
             {
                 await _powerPlanService.SetActivePlanAsync(guid);
-                var page = GetMainPage();
+
+                var page = GetVisibleMainPage();
                 if (page is not null)
                 {
                     if (!page.TryApplyActivePlanFromExternal(guid))
@@ -156,6 +158,10 @@ public partial class App : Application
                     }
 
                     page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid), InfoBarSeverity.Success);
+                }
+                else
+                {
+                    _pendingMainPageRefresh = true;
                 }
             },
             getHiddenUltimatePlanGuid: () =>
@@ -169,10 +175,14 @@ public partial class App : Application
                 {
                     await _powerPlanService.SetActivePlanAsync(guid);
 
-                    var page = GetMainPage();
+                    var page = GetVisibleMainPage();
                     if (page is not null)
                     {
                         await page.RefreshFromExternalAsync();
+                    }
+                    else
+                    {
+                        _pendingMainPageRefresh = true;
                     }
 
                     await RefreshTrayPlansAsync();
@@ -189,10 +199,14 @@ public partial class App : Application
                         // Keep tray activation failure focused on the power plan operation.
                     }
 
-                    var page = GetMainPage();
+                    var page = GetVisibleMainPage();
                     if (page is not null)
                     {
                         await page.RefreshFromExternalAsync();
+                    }
+                    else
+                    {
+                        _pendingMainPageRefresh = true;
                     }
 
                     await RefreshTrayPlansAsync();
@@ -203,7 +217,7 @@ public partial class App : Application
             setStartupEnabled: UpdateAutoStartFromTrayAsync,
             showMainWindow: ShowMainWindow,
             exitApplication: ExitApplication,
-            log: (message, severity) => GetMainPage()?.AddExternalStatus(message, severity));
+            log: (message, severity) => AddStatusToVisibleMainPage(message, severity));
 
         try
         {
@@ -211,7 +225,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayInitFailed", ex.Message), true);
+            AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.TrayInitFailed", ex.Message), true);
             _trayService?.Dispose();
             _trayService = null;
         }
@@ -226,12 +240,12 @@ public partial class App : Application
             _lastKnownAutoStart = effective;
             await SettingsService.SaveCurrentAsync();
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
-            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStart", state), InfoBarSeverity.Success);
+            AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.TrayAutoStart", state), InfoBarSeverity.Success);
             return effective;
         }
         catch (Exception ex)
         {
-            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStartFailed", ex.Message), true);
+            AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.TrayAutoStartFailed", ex.Message), true);
             return SettingsService.Current.AutoStart;
         }
     }
@@ -288,11 +302,16 @@ public partial class App : Application
             return;
         }
 
-        _ = _shellPage?.EnsureMainPageLoaded();
+        var page = _shellPage?.EnsureMainPageLoaded();
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         _ = ShowWindow(hwnd, 5);
         _window.Activate();
+
+        if (page is not null)
+        {
+            _ = RefreshMainPageAfterShowAsync(page);
+        }
     }
 
     private void HideMainWindow()
@@ -304,6 +323,50 @@ public partial class App : Application
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         _ = ShowWindow(hwnd, 0);
+    }
+
+    private async Task RefreshMainPageAfterShowAsync(MainPage page)
+    {
+        if (_pendingMainPageRefresh)
+        {
+            _pendingMainPageRefresh = false;
+            await page.RefreshFromExternalAsync();
+        }
+    }
+
+    private void AddStatusToVisibleMainPage(string message, bool isError = false)
+    {
+        var page = GetVisibleMainPage();
+        if (page is not null)
+        {
+            page.AddExternalStatus(message, isError);
+        }
+    }
+
+    private void AddStatusToVisibleMainPage(string message, InfoBarSeverity severity)
+    {
+        var page = GetVisibleMainPage();
+        if (page is not null)
+        {
+            page.AddExternalStatus(message, severity);
+        }
+    }
+
+    private MainPage? GetVisibleMainPage()
+    {
+        var page = GetMainPage();
+        return page is not null && IsMainWindowVisible() ? page : null;
+    }
+
+    private bool IsMainWindowVisible()
+    {
+        if (_window is null)
+        {
+            return false;
+        }
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        return IsWindowVisible(hwnd);
     }
 
     private void ConfigureWindowAppearance()
@@ -377,6 +440,10 @@ public partial class App : Application
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindowVisible(nint hWnd);
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern nint LoadImage(nint hinst, string lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);
