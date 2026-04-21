@@ -111,9 +111,11 @@ public sealed class TrayService : IDisposable
 
     public void UpdatePlansSnapshot(IReadOnlyList<PowerPlanInfo> plans)
     {
+        var changed = false;
+
         lock (_plansLock)
         {
-            _cachedPlans = plans
+            var nextPlans = plans
                 .Select(plan => new PowerPlanInfo
                 {
                     Guid = plan.Guid,
@@ -121,6 +123,17 @@ public sealed class TrayService : IDisposable
                     IsActive = plan.IsActive
                 })
                 .ToArray();
+
+            changed = !ArePlansEqual(_cachedPlans, nextPlans);
+            if (changed)
+            {
+                _cachedPlans = nextPlans;
+            }
+        }
+
+        if (!changed)
+        {
+            return;
         }
 
         RebuildMenu();
@@ -261,9 +274,11 @@ public sealed class TrayService : IDisposable
 
     private void SetActivePlanInCache(string activePlanGuid)
     {
+        var changed = false;
+
         lock (_plansLock)
         {
-            _cachedPlans = _cachedPlans
+            var nextPlans = _cachedPlans
                 .Select(plan => new PowerPlanInfo
                 {
                     Guid = plan.Guid,
@@ -271,9 +286,47 @@ public sealed class TrayService : IDisposable
                     IsActive = string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase)
                 })
                 .ToArray();
+
+            changed = !ArePlansEqual(_cachedPlans, nextPlans);
+            if (changed)
+            {
+                _cachedPlans = nextPlans;
+            }
+        }
+
+        if (!changed)
+        {
+            return;
         }
 
         RebuildMenu();
+    }
+
+    private static bool ArePlansEqual(IReadOnlyList<PowerPlanInfo> current, IReadOnlyList<PowerPlanInfo> next)
+    {
+        if (ReferenceEquals(current, next))
+        {
+            return true;
+        }
+
+        if (current.Count != next.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < current.Count; i++)
+        {
+            var left = current[i];
+            var right = next[i];
+            if (!string.Equals(left.Guid, right.Guid, StringComparison.OrdinalIgnoreCase)
+                || !string.Equals(left.Name, right.Name, StringComparison.Ordinal)
+                || left.IsActive != right.IsActive)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private async Task ToggleStartupAsync()

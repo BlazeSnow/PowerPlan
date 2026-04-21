@@ -41,12 +41,13 @@ public partial class App : Application
         }
 
         _window ??= new Window();
-        _shellPage ??= new ShellPage();
+        var launchToTray = startupTaskLaunch && SettingsService.Current.TrayEnabled;
+        _shellPage ??= new ShellPage(navigateToHomeOnStartup: !launchToTray);
         _window.Content = _shellPage;
         ConfigureWindowAppearance();
 
         _window.Activate();
-        if (startupTaskLaunch && SettingsService.Current.TrayEnabled)
+        if (launchToTray)
         {
             HideMainWindow();
         }
@@ -266,6 +267,8 @@ public partial class App : Application
         {
             return;
         }
+
+        _ = _shellPage?.EnsureMainPageLoaded();
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         _ = ShowWindow(hwnd, 5);

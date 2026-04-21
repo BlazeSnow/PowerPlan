@@ -4,13 +4,16 @@ namespace PowerPlan.Views;
 
 public sealed partial class ShellPage : Page
 {
-    public ShellPage()
+    public ShellPage(bool navigateToHomeOnStartup = true)
     {
         InitializeComponent();
         ApplyLocalization();
 
         AppNavigationView.SelectedItem = HomeItem;
-        _ = ContentFrame.Navigate(typeof(MainPage));
+        if (navigateToHomeOnStartup)
+        {
+            _ = ContentFrame.Navigate(typeof(MainPage));
+        }
     }
 
     private void ApplyLocalization()
@@ -31,6 +34,17 @@ public sealed partial class ShellPage : Page
         {
             _ = ContentFrame.Navigate(target);
         }
+    }
+
+    public MainPage EnsureMainPageLoaded()
+    {
+        if (ContentFrame.CurrentSourcePageType != typeof(MainPage))
+        {
+            AppNavigationView.SelectedItem = HomeItem;
+            _ = ContentFrame.Navigate(typeof(MainPage));
+        }
+
+        return (MainPage)ContentFrame.Content;
     }
 
     public MainPage? GetMainPage() => ContentFrame.Content as MainPage;
