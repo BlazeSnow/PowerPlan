@@ -10,10 +10,14 @@ namespace PowerPlan.Views;
 
 public sealed partial class MainPage : Page
 {
+    private static readonly TimeSpan DuplicateStatusSuppressionWindow = TimeSpan.FromMilliseconds(400);
     private readonly PowerPlanService _powerPlanService;
     private readonly SettingsService _settingsService;
     private readonly SemaphoreSlim _refreshSemaphore = new(1, 1);
     private bool _isUpdatingSelection;
+    private DateTimeOffset _lastStatusAt;
+    private string _lastStatusMessage = string.Empty;
+    private InfoBarSeverity _lastStatusSeverity;
 
     public ObservableCollection<PowerPlanItemViewModel> Plans { get; } = new();
 
@@ -106,6 +110,17 @@ public sealed partial class MainPage : Page
 
     private void SetStatus(string message, InfoBarSeverity severity)
     {
+        var now = DateTimeOffset.UtcNow;
+        if (severity == _lastStatusSeverity
+            && string.Equals(message, _lastStatusMessage, StringComparison.Ordinal)
+            && now - _lastStatusAt <= DuplicateStatusSuppressionWindow)
+        {
+            return;
+        }
+
+        _lastStatusAt = now;
+        _lastStatusMessage = message;
+        _lastStatusSeverity = severity;
         StatusInfoBar.IsOpen = true;
         StatusInfoBar.Severity = severity;
         StatusInfoBar.Title = LocalizationService.Format("Main.Status.TitleWithTime", DateTime.Now.ToString("HH:mm:ss"));
@@ -355,6 +370,7 @@ public sealed partial class MainPage : Page
 
 public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
 {
+    private static readonly string CopyPlanButtonTextValue = LocalizationService.Get("Main.CopyPlanButton");
     private string _name;
     private bool _isActive;
 
@@ -381,7 +397,7 @@ public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
         }
     }
 
-    public string CopyButtonText => LocalizationService.Get("Main.CopyPlanButton");
+    public string CopyButtonText => CopyPlanButtonTextValue;
 
     public bool IsActive
     {
