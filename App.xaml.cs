@@ -3,6 +3,7 @@ using PowerPlan.Services;
 using PowerPlan.Views;
 using Microsoft.Windows.AppLifecycle;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml.Media;
 using System.Runtime.InteropServices;
 
 namespace PowerPlan;
@@ -377,6 +378,7 @@ public partial class App : Application
         }
 
         _window.Title = LocalizationService.Get("App.WindowTitle", "PowerPlan");
+        ApplySystemBackdrop();
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "powerplan.ico");
@@ -393,6 +395,23 @@ public partial class App : Application
 
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconSmall, _windowIconHandle);
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconBig, _windowIconHandle);
+    }
+
+    private void ApplySystemBackdrop()
+    {
+        if (_window is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _window.SystemBackdrop = new MicaBackdrop();
+        }
+        catch
+        {
+            // Keep window creation resilient if the current system does not support Mica.
+        }
     }
 
     private void OnRootActualThemeChanged(FrameworkElement sender, object args)
