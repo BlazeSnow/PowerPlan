@@ -56,11 +56,7 @@ public sealed partial class MainPage : Page
     {
         var plans = await _powerPlanService.GetPlansAsync();
 
-        Plans.Clear();
-        foreach (var plan in plans)
-        {
-            Plans.Add(new PowerPlanItemViewModel(plan));
-        }
+        SynchronizePlans(plans);
 
         var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
         var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
@@ -263,6 +259,49 @@ public sealed partial class MainPage : Page
         }
     }
 
+    private void SynchronizePlans(IReadOnlyList<PowerPlanInfo> plans)
+    {
+        var incomingGuids = new HashSet<string>(plans.Select(plan => plan.Guid), StringComparer.OrdinalIgnoreCase);
+        for (var i = Plans.Count - 1; i >= 0; i--)
+        {
+            if (!incomingGuids.Contains(Plans[i].Guid))
+            {
+                Plans.RemoveAt(i);
+            }
+        }
+
+        for (var i = 0; i < plans.Count; i++)
+        {
+            var plan = plans[i];
+            var existingIndex = FindPlanIndex(plan.Guid);
+            if (existingIndex < 0)
+            {
+                Plans.Insert(i, new PowerPlanItemViewModel(plan));
+                continue;
+            }
+
+            var existing = Plans[existingIndex];
+            existing.UpdateFrom(plan);
+            if (existingIndex != i)
+            {
+                Plans.Move(existingIndex, i);
+            }
+        }
+    }
+
+    private int FindPlanIndex(string planGuid)
+    {
+        for (var i = 0; i < Plans.Count; i++)
+        {
+            if (string.Equals(Plans[i].Guid, planGuid, StringComparison.OrdinalIgnoreCase))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     public void AddExternalStatus(string message, bool isError = false)
     {
         SetStatus(message, isError ? InfoBarSeverity.Error : InfoBarSeverity.Informational);
@@ -313,17 +352,32 @@ public sealed partial class MainPage : Page
 
 public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
 {
+    private string _name;
     private bool _isActive;
 
     public PowerPlanItemViewModel(PowerPlanInfo model)
     {
         Guid = model.Guid;
-        Name = model.Name;
+        _name = model.Name;
         _isActive = model.IsActive;
     }
 
     public string Guid { get; }
-    public string Name { get; }
+    public string Name
+    {
+        get => _name;
+        private set
+        {
+            if (string.Equals(_name, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _name = value;
+            OnPropertyChanged();
+        }
+    }
+
     public string CopyButtonText => LocalizationService.Get("Main.CopyPlanButton");
 
     public bool IsActive
@@ -339,6 +393,12 @@ public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
             _isActive = value;
             OnPropertyChanged();
         }
+    }
+
+    public void UpdateFrom(PowerPlanInfo model)
+    {
+        Name = model.Name;
+        IsActive = model.IsActive;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
