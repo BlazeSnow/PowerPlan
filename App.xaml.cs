@@ -30,6 +30,8 @@ public partial class App : Application
     }
 
     public SettingsService SettingsService { get; }
+    public PowerPlanService PowerPlanService => _powerPlanService;
+    public StartupService StartupService => _startupService;
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
@@ -216,6 +218,7 @@ public partial class App : Application
             },
             isStartupEnabled: () => SettingsService.Current.AutoStart,
             setStartupEnabled: UpdateAutoStartFromTrayAsync,
+            onPlansRefreshed: SyncMainPageAfterPlansRefreshAsync,
             showMainWindow: ShowMainWindow,
             exitApplication: ExitApplication,
             log: (message, severity) => AddStatusToVisibleMainPage(message, severity));
@@ -265,6 +268,20 @@ public partial class App : Application
         }
 
         await _trayService.RefreshPlansAsync();
+    }
+
+    private async Task SyncMainPageAfterPlansRefreshAsync()
+    {
+        var page = GetVisibleMainPage();
+        if (page is not null)
+        {
+            await page.RefreshFromExternalAsync();
+        }
+        else if (GetMainPage() is not null)
+        {
+            _pendingMainPageRefresh = true;
+        }
+
     }
 
     private MainPage? GetMainPage() => _shellPage?.GetMainPage();

@@ -10,7 +10,7 @@ namespace PowerPlan.Views;
 
 public sealed partial class MainPage : Page
 {
-    private readonly PowerPlanService _powerPlanService = new();
+    private readonly PowerPlanService _powerPlanService;
     private readonly SettingsService _settingsService;
     private bool _isUpdatingSelection;
 
@@ -19,7 +19,9 @@ public sealed partial class MainPage : Page
     public MainPage()
     {
         InitializeComponent();
-        _settingsService = ((App)Application.Current).SettingsService;
+        var app = (App)Application.Current;
+        _powerPlanService = app.PowerPlanService;
+        _settingsService = app.SettingsService;
         ApplyLocalization();
 
         PlansListView.ItemsSource = Plans;

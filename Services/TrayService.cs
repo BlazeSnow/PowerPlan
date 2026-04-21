@@ -18,6 +18,7 @@ public sealed class TrayService : IDisposable
     private readonly Func<string, Task> _activateHiddenUltimatePlanAsync;
     private readonly Func<bool> _isStartupEnabled;
     private readonly Func<bool, Task<bool>> _setStartupEnabled;
+    private readonly Func<Task> _onPlansRefreshed;
     private readonly Action _showMainWindow;
     private readonly Action _exitApplication;
     private readonly Action<string, InfoBarSeverity> _log;
@@ -40,6 +41,7 @@ public sealed class TrayService : IDisposable
         Func<string, Task> activateHiddenUltimatePlanAsync,
         Func<bool> isStartupEnabled,
         Func<bool, Task<bool>> setStartupEnabled,
+        Func<Task> onPlansRefreshed,
         Action showMainWindow,
         Action exitApplication,
         Action<string, InfoBarSeverity> log)
@@ -51,6 +53,7 @@ public sealed class TrayService : IDisposable
         _activateHiddenUltimatePlanAsync = activateHiddenUltimatePlanAsync;
         _isStartupEnabled = isStartupEnabled;
         _setStartupEnabled = setStartupEnabled;
+        _onPlansRefreshed = onPlansRefreshed;
         _showMainWindow = showMainWindow;
         _exitApplication = exitApplication;
         _log = log;
@@ -117,6 +120,7 @@ public sealed class TrayService : IDisposable
         {
             var plans = await _getPlansAsync();
             UpdatePlansSnapshot(plans);
+            await _onPlansRefreshed();
         }
         catch (Exception ex)
         {
