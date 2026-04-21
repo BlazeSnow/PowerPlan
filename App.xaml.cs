@@ -178,16 +178,6 @@ public partial class App : Application
                 {
                     await _powerPlanService.SetActivePlanAsync(guid);
 
-                    var page = GetVisibleMainPage();
-                    if (page is not null)
-                    {
-                        await page.RefreshFromExternalAsync(forceRefresh: true);
-                    }
-                    else
-                    {
-                        _pendingMainPageRefresh = true;
-                    }
-
                     await RefreshTrayPlansAsync();
                 }
                 catch
@@ -200,16 +190,6 @@ public partial class App : Application
                     catch
                     {
                         // Keep tray activation failure focused on the power plan operation.
-                    }
-
-                    var page = GetVisibleMainPage();
-                    if (page is not null)
-                    {
-                        await page.RefreshFromExternalAsync(forceRefresh: true);
-                    }
-                    else
-                    {
-                        _pendingMainPageRefresh = true;
                     }
 
                     await RefreshTrayPlansAsync();
