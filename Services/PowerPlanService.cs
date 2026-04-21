@@ -7,6 +7,7 @@ namespace PowerPlan.Services;
 public sealed class PowerPlanService
 {
     public const string UltimatePerformanceGuid = "e9a42b02-d5df-448d-aa00-03f14749eb61";
+    private static readonly TimeSpan PlansCacheDuration = TimeSpan.FromMilliseconds(750);
 
     private static readonly Regex GuidRegex = new(
         @"(?<guid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})",
@@ -18,37 +19,34 @@ public sealed class PowerPlanService
         LocalizationService.Get("PowerPlan.UltimateKeywordZh")
     };
 
+    private static readonly object PlansCacheLock = new();
+    private static Task<IReadOnlyList<PowerPlanInfo>>? _plansFetchTask;
+    private static IReadOnlyList<PowerPlanInfo>? _cachedPlans;
+    private static DateTimeOffset _cachedPlansAt;
+
     public async Task<IReadOnlyList<PowerPlanInfo>> GetPlansAsync()
     {
-        var output = await RunPowerCfgAsync("/list");
-        var plans = new List<PowerPlanInfo>();
+        Task<IReadOnlyList<PowerPlanInfo>> fetchTask;
 
-        foreach (var line in output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries))
+        lock (PlansCacheLock)
         {
-            var trimmed = line.Trim();
-            var match = GuidRegex.Match(trimmed);
-            if (!match.Success)
+            if (_cachedPlans is not null && DateTimeOffset.UtcNow - _cachedPlansAt <= PlansCacheDuration)
             {
-                continue;
+                return ClonePlans(_cachedPlans);
             }
 
-            var guid = match.Groups["guid"].Value;
-            var name = ExtractPlanName(trimmed);
-
-            plans.Add(new PowerPlanInfo
-            {
-                Guid = guid,
-                Name = string.IsNullOrWhiteSpace(name) ? guid : name,
-                IsActive = IsActivePlanLine(trimmed)
-            });
+            _plansFetchTask ??= FetchPlansCoreAsync();
+            fetchTask = _plansFetchTask;
         }
 
-        return plans;
+        var plans = await fetchTask;
+        return ClonePlans(plans);
     }
 
     public async Task SetActivePlanAsync(string planGuid)
     {
         await RunPowerCfgAsync($"/setactive {planGuid}");
+        InvalidatePlansCache();
     }
 
     public async Task<string> CopyPlanAsync(string sourcePlanGuid, string newName)
@@ -63,6 +61,7 @@ public sealed class PowerPlanService
         var newPlanGuid = guidMatch.Groups["guid"].Value;
         var safeName = newName.Trim().Replace("\"", "'");
         await RunPowerCfgAsync($"/changename {newPlanGuid} \"{safeName}\"");
+        InvalidatePlansCache();
         return newPlanGuid;
     }
 
@@ -75,12 +74,14 @@ public sealed class PowerPlanService
             throw new InvalidOperationException("创建失败：无法获取卓越性能计划 GUID。");
         }
 
+        InvalidatePlansCache();
         return guidMatch.Groups["guid"].Value;
     }
 
     public async Task RestoreDefaultSchemesAsync()
     {
         await RunPowerCfgAsync("/restoredefaultschemes");
+        InvalidatePlansCache();
     }
 
     public bool IsUltimatePerformancePlan(PowerPlanInfo plan)
@@ -124,6 +125,79 @@ public sealed class PowerPlanService
     {
         return line.Contains('*');
     }
+
+    private static async Task<IReadOnlyList<PowerPlanInfo>> FetchPlansCoreAsync()
+    {
+        try
+        {
+            var output = await RunPowerCfgAsync("/list");
+            var plans = ParsePlans(output);
+
+            lock (PlansCacheLock)
+            {
+                _cachedPlans = plans;
+                _cachedPlansAt = DateTimeOffset.UtcNow;
+            }
+
+            return plans;
+        }
+        finally
+        {
+            lock (PlansCacheLock)
+            {
+                _plansFetchTask = null;
+            }
+        }
+    }
+
+    private static IReadOnlyList<PowerPlanInfo> ParsePlans(string output)
+    {
+        var plans = new List<PowerPlanInfo>();
+
+        foreach (var line in output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries))
+        {
+            var trimmed = line.Trim();
+            var match = GuidRegex.Match(trimmed);
+            if (!match.Success)
+            {
+                continue;
+            }
+
+            var guid = match.Groups["guid"].Value;
+            var name = ExtractPlanName(trimmed);
+
+            plans.Add(new PowerPlanInfo
+            {
+                Guid = guid,
+                Name = string.IsNullOrWhiteSpace(name) ? guid : name,
+                IsActive = IsActivePlanLine(trimmed)
+            });
+        }
+
+        return plans;
+    }
+
+    private static IReadOnlyList<PowerPlanInfo> ClonePlans(IReadOnlyList<PowerPlanInfo> source)
+    {
+        return source
+            .Select(plan => new PowerPlanInfo
+            {
+                Guid = plan.Guid,
+                Name = plan.Name,
+                IsActive = plan.IsActive
+            })
+            .ToArray();
+    }
+
+    private static void InvalidatePlansCache()
+    {
+        lock (PlansCacheLock)
+        {
+            _cachedPlans = null;
+            _cachedPlansAt = default;
+        }
+    }
+
     private static async Task<string> RunPowerCfgAsync(string args)
     {
         var startInfo = new ProcessStartInfo
