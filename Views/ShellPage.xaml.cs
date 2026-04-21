@@ -41,10 +41,18 @@ public sealed partial class ShellPage : Page
         if (ContentFrame.CurrentSourcePageType != typeof(MainPage))
         {
             AppNavigationView.SelectedItem = HomeItem;
-            _ = ContentFrame.Navigate(typeof(MainPage));
+            if (!ContentFrame.Navigate(typeof(MainPage)))
+            {
+                throw new InvalidOperationException("Failed to navigate to MainPage.");
+            }
         }
 
-        return (MainPage)ContentFrame.Content;
+        if (ContentFrame.Content is not MainPage mainPage)
+        {
+            throw new InvalidOperationException("MainPage is not loaded in the content frame.");
+        }
+
+        return mainPage;
     }
 
     public MainPage? GetMainPage() => ContentFrame.Content as MainPage;

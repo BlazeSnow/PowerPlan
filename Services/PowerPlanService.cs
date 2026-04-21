@@ -21,12 +21,15 @@ public sealed class PowerPlanService
 
     private static readonly object PlansCacheLock = new();
     private static Task<IReadOnlyList<PowerPlanInfo>>? _plansFetchTask;
+    private static long _plansFetchTaskVersion = -1;
     private static IReadOnlyList<PowerPlanInfo>? _cachedPlans;
     private static DateTimeOffset _cachedPlansAt;
+    private static long _plansCacheVersion;
 
     public async Task<IReadOnlyList<PowerPlanInfo>> GetPlansAsync(bool forceRefresh = false)
     {
         Task<IReadOnlyList<PowerPlanInfo>> fetchTask;
+        long fetchVersion;
 
         lock (PlansCacheLock)
         {
@@ -34,13 +37,20 @@ public sealed class PowerPlanService
             {
                 _cachedPlans = null;
                 _cachedPlansAt = default;
+                _plansFetchTask = null;
+                _plansCacheVersion++;
             }
             else if (_cachedPlans is not null && DateTimeOffset.UtcNow - _cachedPlansAt <= PlansCacheDuration)
             {
                 return ClonePlans(_cachedPlans);
             }
 
-            _plansFetchTask ??= FetchPlansCoreAsync();
+            fetchVersion = _plansCacheVersion;
+            if (_plansFetchTask is null)
+            {
+                _plansFetchTask = FetchPlansCoreAsync(fetchVersion);
+                _plansFetchTaskVersion = fetchVersion;
+            }
             fetchTask = _plansFetchTask;
         }
 
@@ -131,7 +141,7 @@ public sealed class PowerPlanService
         return line.Contains('*');
     }
 
-    private static async Task<IReadOnlyList<PowerPlanInfo>> FetchPlansCoreAsync()
+    private static async Task<IReadOnlyList<PowerPlanInfo>> FetchPlansCoreAsync(long fetchVersion)
     {
         try
         {
@@ -140,8 +150,11 @@ public sealed class PowerPlanService
 
             lock (PlansCacheLock)
             {
-                _cachedPlans = plans;
-                _cachedPlansAt = DateTimeOffset.UtcNow;
+                if (fetchVersion == _plansCacheVersion)
+                {
+                    _cachedPlans = plans;
+                    _cachedPlansAt = DateTimeOffset.UtcNow;
+                }
             }
 
             return plans;
@@ -150,7 +163,11 @@ public sealed class PowerPlanService
         {
             lock (PlansCacheLock)
             {
-                _plansFetchTask = null;
+                if (_plansFetchTaskVersion == fetchVersion)
+                {
+                    _plansFetchTask = null;
+                    _plansFetchTaskVersion = -1;
+                }
             }
         }
     }
@@ -200,6 +217,9 @@ public sealed class PowerPlanService
         {
             _cachedPlans = null;
             _cachedPlansAt = default;
+            _plansFetchTask = null;
+            _plansFetchTaskVersion = -1;
+            _plansCacheVersion++;
         }
     }
 

@@ -300,16 +300,17 @@ public partial class App : Application
             return;
         }
 
-        var page = _shellPage?.EnsureMainPageLoaded();
+        if (_shellPage is null)
+        {
+            return;
+        }
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         _ = ShowWindow(hwnd, 5);
         _window.Activate();
 
-        if (page is not null)
-        {
-            _ = RefreshMainPageAfterShowAsync(page);
-        }
+        var page = _shellPage.EnsureMainPageLoaded();
+        _ = RefreshMainPageAfterShowAsync(page);
     }
 
     private void HideMainWindow()
