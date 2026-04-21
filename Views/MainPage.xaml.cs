@@ -12,6 +12,7 @@ public sealed partial class MainPage : Page
 {
     private readonly PowerPlanService _powerPlanService;
     private readonly SettingsService _settingsService;
+    private readonly SemaphoreSlim _refreshSemaphore = new(1, 1);
     private bool _isUpdatingSelection;
 
     public ObservableCollection<PowerPlanItemViewModel> Plans { get; } = new();
@@ -54,39 +55,52 @@ public sealed partial class MainPage : Page
         DeletePlanHintText.Text = LocalizationService.Get("Main.DeletePlanHint");
     }
 
-    private async Task RefreshPlansAsync(bool updateStatus = true)
+    private Task RefreshPlansAsync(bool updateStatus = true, bool forceRefresh = false)
     {
-        var plans = await _powerPlanService.GetPlansAsync();
+        return RefreshPlansCoreAsync(updateStatus, forceRefresh);
+    }
 
-        SynchronizePlans(plans);
-
-        var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
-        var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
-        var hasHiddenUltimate = !string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
-            && !plans.Any(plan => string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
-
-        UltimateCard.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
-        CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
-
-        if (!hasUltimate)
+    private async Task RefreshPlansCoreAsync(bool updateStatus, bool forceRefresh)
+    {
+        await _refreshSemaphore.WaitAsync();
+        try
         {
-            UltimateCard.Header = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenTitle" : "Main.UltimateMissingTitle");
-            UltimateCard.Description = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenMessage" : "Main.UltimateMissingMessage");
-            CreateUltimateButton.Content = LocalizationService.Get(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
+            var plans = await _powerPlanService.GetPlansAsync(forceRefresh);
+
+            SynchronizePlans(plans);
+
+            var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
+            var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
+            var hasHiddenUltimate = !string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
+                && !plans.Any(plan => string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
+
+            UltimateCard.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
+            CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
+
+            if (!hasUltimate)
+            {
+                UltimateCard.Header = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenTitle" : "Main.UltimateMissingTitle");
+                UltimateCard.Description = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenMessage" : "Main.UltimateMissingMessage");
+                CreateUltimateButton.Content = LocalizationService.Get(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
+            }
+
+            _isUpdatingSelection = true;
+            PlansListView.SelectedItem = Plans.FirstOrDefault(x => x.IsActive);
+            _isUpdatingSelection = false;
+
+            if (Application.Current is App app)
+            {
+                app.UpdateTrayPlans(plans);
+            }
+
+            if (updateStatus)
+            {
+                SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
+            }
         }
-
-        _isUpdatingSelection = true;
-        PlansListView.SelectedItem = Plans.FirstOrDefault(x => x.IsActive);
-        _isUpdatingSelection = false;
-
-        if (Application.Current is App app)
+        finally
         {
-            app.UpdateTrayPlans(plans);
-        }
-
-        if (updateStatus)
-        {
-            SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
+            _refreshSemaphore.Release();
         }
     }
 
@@ -102,7 +116,7 @@ public sealed partial class MainPage : Page
     {
         try
         {
-            await RefreshPlansAsync();
+            await RefreshPlansAsync(forceRefresh: true);
         }
         catch (Exception ex)
         {
@@ -263,6 +277,7 @@ public sealed partial class MainPage : Page
 
     private void SynchronizePlans(IReadOnlyList<PowerPlanInfo> plans)
     {
+        var existingPlans = Plans.ToDictionary(plan => plan.Guid, StringComparer.OrdinalIgnoreCase);
         var incomingGuids = new HashSet<string>(plans.Select(plan => plan.Guid), StringComparer.OrdinalIgnoreCase);
         for (var i = Plans.Count - 1; i >= 0; i--)
         {
@@ -275,33 +290,19 @@ public sealed partial class MainPage : Page
         for (var i = 0; i < plans.Count; i++)
         {
             var plan = plans[i];
-            var existingIndex = FindPlanIndex(plan.Guid);
-            if (existingIndex < 0)
+            if (!existingPlans.TryGetValue(plan.Guid, out var existing))
             {
                 Plans.Insert(i, new PowerPlanItemViewModel(plan));
                 continue;
             }
 
-            var existing = Plans[existingIndex];
+            var existingIndex = Plans.IndexOf(existing);
             existing.UpdateFrom(plan);
             if (existingIndex != i)
             {
                 Plans.Move(existingIndex, i);
             }
         }
-    }
-
-    private int FindPlanIndex(string planGuid)
-    {
-        for (var i = 0; i < Plans.Count; i++)
-        {
-            if (string.Equals(Plans[i].Guid, planGuid, StringComparison.OrdinalIgnoreCase))
-            {
-                return i;
-            }
-        }
-
-        return -1;
     }
 
     public void AddExternalStatus(string message, bool isError = false)
@@ -314,9 +315,9 @@ public sealed partial class MainPage : Page
         SetStatus(message, severity);
     }
 
-    public async Task RefreshFromExternalAsync()
+    public async Task RefreshFromExternalAsync(bool forceRefresh = false)
     {
-        await RefreshPlansAsync();
+        await RefreshPlansAsync(forceRefresh: forceRefresh);
     }
 
     public bool TryApplyActivePlanFromExternal(string activePlanGuid)

@@ -147,7 +147,7 @@ public partial class App : Application
 
         _trayService = new TrayService(
             uiDispatcherQueue: uiDispatcherQueue,
-            getPlansAsync: _powerPlanService.GetPlansAsync,
+            getPlansAsync: () => _powerPlanService.GetPlansAsync(forceRefresh: true),
             setActivePlanAsync: async guid =>
             {
                 await _powerPlanService.SetActivePlanAsync(guid);
@@ -157,7 +157,7 @@ public partial class App : Application
                 {
                     if (!page.TryApplyActivePlanFromExternal(guid))
                     {
-                        await page.RefreshFromExternalAsync();
+                        await page.RefreshFromExternalAsync(forceRefresh: true);
                     }
 
                     page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid), InfoBarSeverity.Success);
@@ -181,7 +181,7 @@ public partial class App : Application
                     var page = GetVisibleMainPage();
                     if (page is not null)
                     {
-                        await page.RefreshFromExternalAsync();
+                        await page.RefreshFromExternalAsync(forceRefresh: true);
                     }
                     else
                     {
@@ -205,7 +205,7 @@ public partial class App : Application
                     var page = GetVisibleMainPage();
                     if (page is not null)
                     {
-                        await page.RefreshFromExternalAsync();
+                        await page.RefreshFromExternalAsync(forceRefresh: true);
                     }
                     else
                     {
@@ -275,7 +275,7 @@ public partial class App : Application
         var page = GetVisibleMainPage();
         if (page is not null)
         {
-            await page.RefreshFromExternalAsync();
+            await page.RefreshFromExternalAsync(forceRefresh: true);
         }
         else if (GetMainPage() is not null)
         {
@@ -348,7 +348,7 @@ public partial class App : Application
         if (_pendingMainPageRefresh)
         {
             _pendingMainPageRefresh = false;
-            await page.RefreshFromExternalAsync();
+            await page.RefreshFromExternalAsync(forceRefresh: true);
         }
     }
 

@@ -24,13 +24,18 @@ public sealed class PowerPlanService
     private static IReadOnlyList<PowerPlanInfo>? _cachedPlans;
     private static DateTimeOffset _cachedPlansAt;
 
-    public async Task<IReadOnlyList<PowerPlanInfo>> GetPlansAsync()
+    public async Task<IReadOnlyList<PowerPlanInfo>> GetPlansAsync(bool forceRefresh = false)
     {
         Task<IReadOnlyList<PowerPlanInfo>> fetchTask;
 
         lock (PlansCacheLock)
         {
-            if (_cachedPlans is not null && DateTimeOffset.UtcNow - _cachedPlansAt <= PlansCacheDuration)
+            if (forceRefresh)
+            {
+                _cachedPlans = null;
+                _cachedPlansAt = default;
+            }
+            else if (_cachedPlans is not null && DateTimeOffset.UtcNow - _cachedPlansAt <= PlansCacheDuration)
             {
                 return ClonePlans(_cachedPlans);
             }
