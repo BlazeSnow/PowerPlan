@@ -6,8 +6,9 @@
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    Background="Transparent"
     mc:Ignorable="d">
-    <ScrollViewer>
+    <ScrollViewer Background="Transparent">
         <StackPanel Padding="24" Spacing="16">
             <TextBlock x:Name="PageTitleText" Text="-" FontSize="28" FontWeight="SemiBold" />
 

@@ -10,14 +10,17 @@ public sealed partial class SettingsPage : Page
     private const string FeedbackMail = "powerplan@blazesnow.com";
 
     private readonly SettingsService _settingsService;
-    private readonly StartupService _startupService = new();
-    private readonly PowerPlanService _powerPlanService = new();
+    private readonly StartupService _startupService;
+    private readonly PowerPlanService _powerPlanService;
     private bool _updatingUi;
 
     public SettingsPage()
     {
         InitializeComponent();
-        _settingsService = ((App)Application.Current).SettingsService;
+        var app = (App)Application.Current;
+        _settingsService = app.SettingsService;
+        _startupService = app.StartupService;
+        _powerPlanService = app.PowerPlanService;
         ApplyLocalization();
 
         Loaded += SettingsPage_Loaded;

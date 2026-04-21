@@ -12,23 +12,37 @@ namespace PowerPlan.Services;
 
 public sealed class TrayService : IDisposable
 {
+    private static readonly string AppTitleText = LocalizationService.Get("App.WindowTitle", "PowerPlan");
+    private static readonly string OpenMainWindowText = "\u2302 " + LocalizationService.Get("Tray.Menu.OpenMainWindow");
+    private static readonly string OpenHiddenUltimateText = "\u26A1 " + LocalizationService.Get("Tray.Menu.OpenHiddenUltimate");
+    private static readonly string RefreshPlansText = "\u21BB " + LocalizationService.Get("Tray.Menu.RefreshPlans");
+    private static readonly string EnableAutoStartText = "\u23FB " + LocalizationService.Get("Tray.Menu.EnableAutoStart");
+    private static readonly string DisableAutoStartText = "\u23FB " + LocalizationService.Get("Tray.Menu.DisableAutoStart");
+    private static readonly string ExitText = "\u2715 " + LocalizationService.Get("Tray.Menu.Exit");
     private readonly Func<Task<IReadOnlyList<PowerPlanInfo>>> _getPlansAsync;
     private readonly Func<string, Task> _setActivePlanAsync;
     private readonly Func<string?> _getHiddenUltimatePlanGuid;
     private readonly Func<string, Task> _activateHiddenUltimatePlanAsync;
     private readonly Func<bool> _isStartupEnabled;
     private readonly Func<bool, Task<bool>> _setStartupEnabled;
+    private readonly Func<Task> _onPlansRefreshed;
     private readonly Action _showMainWindow;
     private readonly Action _exitApplication;
     private readonly Action<string, InfoBarSeverity> _log;
     private readonly DispatcherQueue _uiDispatcherQueue;
 
     private readonly object _plansLock = new();
+    private readonly object _refreshTaskLock = new();
     private IReadOnlyList<PowerPlanInfo> _cachedPlans = Array.Empty<PowerPlanInfo>();
+    private Task? _refreshPlansTask;
 
     private TaskbarIcon? _taskbarIcon;
     private MenuFlyout? _contextFlyout;
     private bool _disposed;
+    private readonly ICommand _showMainWindowCommand;
+    private readonly ICommand _refreshPlansCommand;
+    private readonly ICommand _toggleStartupCommand;
+    private readonly ICommand _exitApplicationCommand;
 
     public TrayService(
         DispatcherQueue uiDispatcherQueue,
@@ -38,6 +52,7 @@ public sealed class TrayService : IDisposable
         Func<string, Task> activateHiddenUltimatePlanAsync,
         Func<bool> isStartupEnabled,
         Func<bool, Task<bool>> setStartupEnabled,
+        Func<Task> onPlansRefreshed,
         Action showMainWindow,
         Action exitApplication,
         Action<string, InfoBarSeverity> log)
@@ -49,9 +64,14 @@ public sealed class TrayService : IDisposable
         _activateHiddenUltimatePlanAsync = activateHiddenUltimatePlanAsync;
         _isStartupEnabled = isStartupEnabled;
         _setStartupEnabled = setStartupEnabled;
+        _onPlansRefreshed = onPlansRefreshed;
         _showMainWindow = showMainWindow;
         _exitApplication = exitApplication;
         _log = log;
+        _showMainWindowCommand = new ActionCommand(_showMainWindow);
+        _refreshPlansCommand = new ActionCommand(OnRefreshPlansRequested);
+        _toggleStartupCommand = new ActionCommand(() => _ = ToggleStartupAsync());
+        _exitApplicationCommand = new ActionCommand(_exitApplication);
     }
 
     public async Task InitializeAsync()
@@ -98,22 +118,45 @@ public sealed class TrayService : IDisposable
 
     public async Task RefreshPlansAsync()
     {
+        Task refreshTask;
+
+        lock (_refreshTaskLock)
+        {
+            _refreshPlansTask ??= RefreshPlansCoreAsync();
+            refreshTask = _refreshPlansTask;
+        }
+
+        await refreshTask;
+    }
+
+    private async Task RefreshPlansCoreAsync()
+    {
         try
         {
             var plans = await _getPlansAsync();
             UpdatePlansSnapshot(plans);
+            await _onPlansRefreshed();
         }
         catch (Exception ex)
         {
             _log(LocalizationService.Format("Tray.RefreshFailed", ex.Message), InfoBarSeverity.Error);
         }
+        finally
+        {
+            lock (_refreshTaskLock)
+            {
+                _refreshPlansTask = null;
+            }
+        }
     }
 
     public void UpdatePlansSnapshot(IReadOnlyList<PowerPlanInfo> plans)
     {
+        var changed = false;
+
         lock (_plansLock)
         {
-            _cachedPlans = plans
+            var nextPlans = plans
                 .Select(plan => new PowerPlanInfo
                 {
                     Guid = plan.Guid,
@@ -121,6 +164,17 @@ public sealed class TrayService : IDisposable
                     IsActive = plan.IsActive
                 })
                 .ToArray();
+
+            changed = !ArePlansEqual(_cachedPlans, nextPlans);
+            if (changed)
+            {
+                _cachedPlans = nextPlans;
+            }
+        }
+
+        if (!changed)
+        {
+            return;
         }
 
         RebuildMenu();
@@ -171,13 +225,11 @@ public sealed class TrayService : IDisposable
 
             _contextFlyout.Items.Add(new MenuFlyoutItem
             {
-                Text = LocalizationService.Get("App.WindowTitle", "PowerPlan"),
+                Text = AppTitleText,
                 IsEnabled = false
             });
 
-            _contextFlyout.Items.Add(CreateActionItem(
-                "\u2302 " + LocalizationService.Get("Tray.Menu.OpenMainWindow"),
-                _showMainWindow));
+            _contextFlyout.Items.Add(CreateActionItem(OpenMainWindowText, _showMainWindowCommand));
             _contextFlyout.Items.Add(new MenuFlyoutSeparator());
 
             for (var i = 0; i < plans.Count; i++)
@@ -188,7 +240,7 @@ public sealed class TrayService : IDisposable
                 var prefix = plan.IsActive ? "\u2713 " : string.Empty;
                 _contextFlyout.Items.Add(CreateActionItem(
                     prefix + "\u26A1 " + planName,
-                    () => _ = OnSwitchPlanAsync(planGuid, planName)));
+                    new ActionCommand(() => _ = OnSwitchPlanAsync(planGuid, planName))));
             }
 
             var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid();
@@ -197,39 +249,30 @@ public sealed class TrayService : IDisposable
             if (hasHiddenUltimate)
             {
                 _contextFlyout.Items.Add(CreateActionItem(
-                    "\u26A1 " + LocalizationService.Get("Tray.Menu.OpenHiddenUltimate"),
-                    () => _ = OnActivateHiddenUltimateAsync(hiddenUltimatePlanGuid!)));
+                    OpenHiddenUltimateText,
+                    new ActionCommand(() => _ = OnActivateHiddenUltimateAsync(hiddenUltimatePlanGuid!))));
             }
 
             _contextFlyout.Items.Add(new MenuFlyoutSeparator());
-            _contextFlyout.Items.Add(CreateActionItem(
-                "\u21BB " + LocalizationService.Get("Tray.Menu.RefreshPlans"),
-                () =>
-                {
-                    _ = RefreshPlansAsync();
-                    _log(LocalizationService.Get("Tray.RefreshStarted"), InfoBarSeverity.Informational);
-                }));
+            _contextFlyout.Items.Add(CreateActionItem(RefreshPlansText, _refreshPlansCommand));
 
             var startupText = _isStartupEnabled()
-                ? LocalizationService.Get("Tray.Menu.DisableAutoStart")
-                : LocalizationService.Get("Tray.Menu.EnableAutoStart");
-            _contextFlyout.Items.Add(CreateActionItem(
-                "\u23FB " + startupText,
-                () => _ = ToggleStartupAsync()));
+                ? DisableAutoStartText
+                : EnableAutoStartText;
+            _contextFlyout.Items.Add(CreateActionItem(startupText, _toggleStartupCommand));
 
             _contextFlyout.Items.Add(new MenuFlyoutSeparator());
-            _contextFlyout.Items.Add(CreateActionItem(
-                "\u2715 " + LocalizationService.Get("Tray.Menu.Exit"),
-                _exitApplication));
+            _contextFlyout.Items.Add(CreateActionItem(ExitText, _exitApplicationCommand));
         });
     }
 
-    private MenuFlyoutItem CreateActionItem(string text, Action action)
+    private MenuFlyoutItem CreateActionItem(string text, ICommand command)
     {
-        var item = new MenuFlyoutItem { Text = text };
-        var command = new ActionCommand(action);
-        item.Command = command;
-        return item;
+        return new MenuFlyoutItem
+        {
+            Text = text,
+            Command = command
+        };
     }
 
     private async Task OnSwitchPlanAsync(string planGuid, string planName)
@@ -261,9 +304,11 @@ public sealed class TrayService : IDisposable
 
     private void SetActivePlanInCache(string activePlanGuid)
     {
+        var changed = false;
+
         lock (_plansLock)
         {
-            _cachedPlans = _cachedPlans
+            var nextPlans = _cachedPlans
                 .Select(plan => new PowerPlanInfo
                 {
                     Guid = plan.Guid,
@@ -271,9 +316,47 @@ public sealed class TrayService : IDisposable
                     IsActive = string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase)
                 })
                 .ToArray();
+
+            changed = !ArePlansEqual(_cachedPlans, nextPlans);
+            if (changed)
+            {
+                _cachedPlans = nextPlans;
+            }
+        }
+
+        if (!changed)
+        {
+            return;
         }
 
         RebuildMenu();
+    }
+
+    private static bool ArePlansEqual(IReadOnlyList<PowerPlanInfo> current, IReadOnlyList<PowerPlanInfo> next)
+    {
+        if (ReferenceEquals(current, next))
+        {
+            return true;
+        }
+
+        if (current.Count != next.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < current.Count; i++)
+        {
+            var left = current[i];
+            var right = next[i];
+            if (!string.Equals(left.Guid, right.Guid, StringComparison.OrdinalIgnoreCase)
+                || !string.Equals(left.Name, right.Name, StringComparison.Ordinal)
+                || left.IsActive != right.IsActive)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private async Task ToggleStartupAsync()
@@ -290,6 +373,12 @@ public sealed class TrayService : IDisposable
         {
             _log(LocalizationService.Format("Tray.AutoStartToggleFailed", ex.Message), InfoBarSeverity.Error);
         }
+    }
+
+    private void OnRefreshPlansRequested()
+    {
+        _ = RefreshPlansAsync();
+        _log(LocalizationService.Get("Tray.RefreshStarted"), InfoBarSeverity.Informational);
     }
 
     private void RunOnUiThread(Action action)

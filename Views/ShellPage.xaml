@@ -5,9 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    Background="Transparent"
     mc:Ignorable="d">
     <NavigationView
         x:Name="AppNavigationView"
+        Background="Transparent"
         IsBackEnabled="False"
         IsBackButtonVisible="Collapsed"
         IsSettingsVisible="False"
@@ -19,6 +21,6 @@
             <NavigationViewItem x:Name="HomeItem" Tag="home" Icon="Home" Content="-" />
             <NavigationViewItem x:Name="SettingsItem" Tag="settings" Icon="Setting" Content="-" />
         </NavigationView.MenuItems>
-        <Frame x:Name="ContentFrame" />
+        <Frame x:Name="ContentFrame" Background="Transparent" />
     </NavigationView>
 </Page>

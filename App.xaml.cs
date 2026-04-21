@@ -3,6 +3,7 @@ using PowerPlan.Services;
 using PowerPlan.Views;
 using Microsoft.Windows.AppLifecycle;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml.Media;
 using System.Runtime.InteropServices;
 
 namespace PowerPlan;
@@ -15,6 +16,9 @@ public partial class App : Application
     private readonly PowerPlanService _powerPlanService = new();
     private readonly StartupService _startupService = new();
     private bool _isExiting;
+    private bool _lastKnownAutoStart;
+    private bool _lastKnownTrayEnabled;
+    private bool _pendingMainPageRefresh;
     private nint _windowIconHandle;
 
     public App()
@@ -26,6 +30,8 @@ public partial class App : Application
     }
 
     public SettingsService SettingsService { get; }
+    public PowerPlanService PowerPlanService => _powerPlanService;
+    public StartupService StartupService => _startupService;
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
@@ -40,13 +46,17 @@ public partial class App : Application
             // Keep app startup resilient even when settings file cannot be loaded.
         }
 
+        _lastKnownAutoStart = SettingsService.Current.AutoStart;
+        _lastKnownTrayEnabled = SettingsService.Current.TrayEnabled;
+
         _window ??= new Window();
-        _shellPage ??= new ShellPage();
+        var launchToTray = startupTaskLaunch && SettingsService.Current.TrayEnabled;
+        _shellPage ??= new ShellPage(navigateToHomeOnStartup: !launchToTray);
         _window.Content = _shellPage;
         ConfigureWindowAppearance();
 
         _window.Activate();
-        if (startupTaskLaunch && SettingsService.Current.TrayEnabled)
+        if (launchToTray)
         {
             HideMainWindow();
         }
@@ -67,8 +77,21 @@ public partial class App : Application
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
     {
-        await ApplyStartupSettingAsync();
-        await EnsureTrayStateAsync();
+        var autoStartChanged = e.AutoStart != _lastKnownAutoStart;
+        var trayChanged = e.TrayEnabled != _lastKnownTrayEnabled;
+
+        _lastKnownAutoStart = e.AutoStart;
+        _lastKnownTrayEnabled = e.TrayEnabled;
+
+        if (autoStartChanged)
+        {
+            await ApplyStartupSettingAsync();
+        }
+
+        if (trayChanged)
+        {
+            await EnsureTrayStateAsync();
+        }
     }
 
     private async Task ApplyStartupSettingAsync()
@@ -89,12 +112,13 @@ public partial class App : Application
             if (effective != expected)
             {
                 SettingsService.Current.AutoStart = effective;
+                _lastKnownAutoStart = effective;
                 await SettingsService.SaveCurrentAsync();
             }
         }
         catch (Exception ex)
         {
-            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.StartupSettingFailed", ex.Message), true);
+            AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.StartupSettingFailed", ex.Message), true);
         }
     }
 
@@ -117,25 +141,30 @@ public partial class App : Application
         var uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         if (uiDispatcherQueue is null)
         {
-            GetMainPage()?.AddExternalStatus(LocalizationService.Get("Tray.DispatcherUnavailable"), true);
+            AddStatusToVisibleMainPage(LocalizationService.Get("Tray.DispatcherUnavailable"), true);
             return;
         }
 
         _trayService = new TrayService(
             uiDispatcherQueue: uiDispatcherQueue,
-            getPlansAsync: _powerPlanService.GetPlansAsync,
+            getPlansAsync: () => _powerPlanService.GetPlansAsync(forceRefresh: true),
             setActivePlanAsync: async guid =>
             {
                 await _powerPlanService.SetActivePlanAsync(guid);
-                var page = GetMainPage();
+
+                var page = GetVisibleMainPage();
                 if (page is not null)
                 {
                     if (!page.TryApplyActivePlanFromExternal(guid))
                     {
-                        await page.RefreshFromExternalAsync();
+                        await page.RefreshFromExternalAsync(forceRefresh: true);
                     }
 
                     page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid), InfoBarSeverity.Success);
+                }
+                else
+                {
+                    _pendingMainPageRefresh = true;
                 }
             },
             getHiddenUltimatePlanGuid: () =>
@@ -148,12 +177,6 @@ public partial class App : Application
                 try
                 {
                     await _powerPlanService.SetActivePlanAsync(guid);
-
-                    var page = GetMainPage();
-                    if (page is not null)
-                    {
-                        await page.RefreshFromExternalAsync();
-                    }
 
                     await RefreshTrayPlansAsync();
                 }
@@ -169,21 +192,16 @@ public partial class App : Application
                         // Keep tray activation failure focused on the power plan operation.
                     }
 
-                    var page = GetMainPage();
-                    if (page is not null)
-                    {
-                        await page.RefreshFromExternalAsync();
-                    }
-
                     await RefreshTrayPlansAsync();
                     throw;
                 }
             },
             isStartupEnabled: () => SettingsService.Current.AutoStart,
             setStartupEnabled: UpdateAutoStartFromTrayAsync,
+            onPlansRefreshed: SyncMainPageAfterPlansRefreshAsync,
             showMainWindow: ShowMainWindow,
             exitApplication: ExitApplication,
-            log: (message, severity) => GetMainPage()?.AddExternalStatus(message, severity));
+            log: (message, severity) => AddStatusToVisibleMainPage(message, severity));
 
         try
         {
@@ -191,7 +209,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayInitFailed", ex.Message), true);
+            AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.TrayInitFailed", ex.Message), true);
             _trayService?.Dispose();
             _trayService = null;
         }
@@ -203,14 +221,15 @@ public partial class App : Application
         {
             var effective = await _startupService.SetEnabledAsync(enabled);
             SettingsService.Current.AutoStart = effective;
+            _lastKnownAutoStart = effective;
             await SettingsService.SaveCurrentAsync();
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
-            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStart", state), InfoBarSeverity.Success);
+            AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.TrayAutoStart", state), InfoBarSeverity.Success);
             return effective;
         }
         catch (Exception ex)
         {
-            GetMainPage()?.AddExternalStatus(LocalizationService.Format("App.Status.TrayAutoStartFailed", ex.Message), true);
+            AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.TrayAutoStartFailed", ex.Message), true);
             return SettingsService.Current.AutoStart;
         }
     }
@@ -229,6 +248,20 @@ public partial class App : Application
         }
 
         await _trayService.RefreshPlansAsync();
+    }
+
+    private async Task SyncMainPageAfterPlansRefreshAsync()
+    {
+        var page = GetVisibleMainPage();
+        if (page is not null)
+        {
+            await page.RefreshFromExternalAsync(forceRefresh: true);
+        }
+        else if (GetMainPage() is not null)
+        {
+            _pendingMainPageRefresh = true;
+        }
+
     }
 
     private MainPage? GetMainPage() => _shellPage?.GetMainPage();
@@ -267,9 +300,17 @@ public partial class App : Application
             return;
         }
 
+        if (_shellPage is null)
+        {
+            return;
+        }
+
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         _ = ShowWindow(hwnd, 5);
         _window.Activate();
+
+        var page = _shellPage.EnsureMainPageLoaded();
+        _ = RefreshMainPageAfterShowAsync(page);
     }
 
     private void HideMainWindow()
@@ -283,6 +324,50 @@ public partial class App : Application
         _ = ShowWindow(hwnd, 0);
     }
 
+    private async Task RefreshMainPageAfterShowAsync(MainPage page)
+    {
+        if (_pendingMainPageRefresh)
+        {
+            _pendingMainPageRefresh = false;
+            await page.RefreshFromExternalAsync(forceRefresh: true);
+        }
+    }
+
+    private void AddStatusToVisibleMainPage(string message, bool isError = false)
+    {
+        var page = GetVisibleMainPage();
+        if (page is not null)
+        {
+            page.AddExternalStatus(message, isError);
+        }
+    }
+
+    private void AddStatusToVisibleMainPage(string message, InfoBarSeverity severity)
+    {
+        var page = GetVisibleMainPage();
+        if (page is not null)
+        {
+            page.AddExternalStatus(message, severity);
+        }
+    }
+
+    private MainPage? GetVisibleMainPage()
+    {
+        var page = GetMainPage();
+        return page is not null && IsMainWindowVisible() ? page : null;
+    }
+
+    private bool IsMainWindowVisible()
+    {
+        if (_window is null)
+        {
+            return false;
+        }
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        return IsWindowVisible(hwnd);
+    }
+
     private void ConfigureWindowAppearance()
     {
         if (_window is null)
@@ -291,6 +376,7 @@ public partial class App : Application
         }
 
         _window.Title = LocalizationService.Get("App.WindowTitle", "PowerPlan");
+        ApplySystemBackdrop();
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "powerplan.ico");
@@ -307,6 +393,23 @@ public partial class App : Application
 
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconSmall, _windowIconHandle);
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconBig, _windowIconHandle);
+    }
+
+    private void ApplySystemBackdrop()
+    {
+        if (_window is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _window.SystemBackdrop = new MicaBackdrop();
+        }
+        catch
+        {
+            // Keep window creation resilient if the current system does not support Mica.
+        }
     }
 
     private void OnRootActualThemeChanged(FrameworkElement sender, object args)
@@ -354,6 +457,10 @@ public partial class App : Application
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindowVisible(nint hWnd);
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern nint LoadImage(nint hinst, string lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);

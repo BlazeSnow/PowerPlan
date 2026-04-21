@@ -10,16 +10,23 @@ namespace PowerPlan.Views;
 
 public sealed partial class MainPage : Page
 {
-    private readonly PowerPlanService _powerPlanService = new();
+    private static readonly TimeSpan DuplicateStatusSuppressionWindow = TimeSpan.FromMilliseconds(400);
+    private readonly PowerPlanService _powerPlanService;
     private readonly SettingsService _settingsService;
+    private readonly SemaphoreSlim _refreshSemaphore = new(1, 1);
     private bool _isUpdatingSelection;
+    private DateTimeOffset _lastStatusAt;
+    private string _lastStatusMessage = string.Empty;
+    private InfoBarSeverity _lastStatusSeverity;
 
     public ObservableCollection<PowerPlanItemViewModel> Plans { get; } = new();
 
     public MainPage()
     {
         InitializeComponent();
-        _settingsService = ((App)Application.Current).SettingsService;
+        var app = (App)Application.Current;
+        _powerPlanService = app.PowerPlanService;
+        _settingsService = app.SettingsService;
         ApplyLocalization();
 
         PlansListView.ItemsSource = Plans;
@@ -52,48 +59,68 @@ public sealed partial class MainPage : Page
         DeletePlanHintText.Text = LocalizationService.Get("Main.DeletePlanHint");
     }
 
-    private async Task RefreshPlansAsync(bool updateStatus = true)
+    private Task RefreshPlansAsync(bool updateStatus = true, bool forceRefresh = false)
     {
-        var plans = await _powerPlanService.GetPlansAsync();
+        return RefreshPlansCoreAsync(updateStatus, forceRefresh);
+    }
 
-        Plans.Clear();
-        foreach (var plan in plans)
+    private async Task RefreshPlansCoreAsync(bool updateStatus, bool forceRefresh)
+    {
+        await _refreshSemaphore.WaitAsync();
+        try
         {
-            Plans.Add(new PowerPlanItemViewModel(plan));
+            var plans = await _powerPlanService.GetPlansAsync(forceRefresh);
+
+            SynchronizePlans(plans);
+
+            var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
+            var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
+            var hasHiddenUltimate = !string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
+                && !plans.Any(plan => string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
+
+            UltimateCard.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
+            CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
+
+            if (!hasUltimate)
+            {
+                UltimateCard.Header = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenTitle" : "Main.UltimateMissingTitle");
+                UltimateCard.Description = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenMessage" : "Main.UltimateMissingMessage");
+                CreateUltimateButton.Content = LocalizationService.Get(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
+            }
+
+            _isUpdatingSelection = true;
+            PlansListView.SelectedItem = Plans.FirstOrDefault(x => x.IsActive);
+            _isUpdatingSelection = false;
+
+            if (Application.Current is App app)
+            {
+                app.UpdateTrayPlans(plans);
+            }
+
+            if (updateStatus)
+            {
+                SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
+            }
         }
-
-        var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
-        var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
-        var hasHiddenUltimate = !string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
-            && !plans.Any(plan => string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
-
-        UltimateCard.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
-        CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
-
-        if (!hasUltimate)
+        finally
         {
-            UltimateCard.Header = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenTitle" : "Main.UltimateMissingTitle");
-            UltimateCard.Description = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenMessage" : "Main.UltimateMissingMessage");
-            CreateUltimateButton.Content = LocalizationService.Get(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
-        }
-
-        _isUpdatingSelection = true;
-        PlansListView.SelectedItem = Plans.FirstOrDefault(x => x.IsActive);
-        _isUpdatingSelection = false;
-
-        if (Application.Current is App app)
-        {
-            app.UpdateTrayPlans(plans);
-        }
-
-        if (updateStatus)
-        {
-            SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
+            _refreshSemaphore.Release();
         }
     }
 
     private void SetStatus(string message, InfoBarSeverity severity)
     {
+        var now = DateTimeOffset.UtcNow;
+        if (severity == _lastStatusSeverity
+            && string.Equals(message, _lastStatusMessage, StringComparison.Ordinal)
+            && now - _lastStatusAt <= DuplicateStatusSuppressionWindow)
+        {
+            return;
+        }
+
+        _lastStatusAt = now;
+        _lastStatusMessage = message;
+        _lastStatusSeverity = severity;
         StatusInfoBar.IsOpen = true;
         StatusInfoBar.Severity = severity;
         StatusInfoBar.Title = LocalizationService.Format("Main.Status.TitleWithTime", DateTime.Now.ToString("HH:mm:ss"));
@@ -104,7 +131,7 @@ public sealed partial class MainPage : Page
     {
         try
         {
-            await RefreshPlansAsync();
+            await RefreshPlansAsync(forceRefresh: true);
         }
         catch (Exception ex)
         {
@@ -263,6 +290,36 @@ public sealed partial class MainPage : Page
         }
     }
 
+    private void SynchronizePlans(IReadOnlyList<PowerPlanInfo> plans)
+    {
+        var existingPlans = Plans.ToDictionary(plan => plan.Guid, StringComparer.OrdinalIgnoreCase);
+        var incomingGuids = new HashSet<string>(plans.Select(plan => plan.Guid), StringComparer.OrdinalIgnoreCase);
+        for (var i = Plans.Count - 1; i >= 0; i--)
+        {
+            if (!incomingGuids.Contains(Plans[i].Guid))
+            {
+                Plans.RemoveAt(i);
+            }
+        }
+
+        for (var i = 0; i < plans.Count; i++)
+        {
+            var plan = plans[i];
+            if (!existingPlans.TryGetValue(plan.Guid, out var existing))
+            {
+                Plans.Insert(i, new PowerPlanItemViewModel(plan));
+                continue;
+            }
+
+            var existingIndex = Plans.IndexOf(existing);
+            existing.UpdateFrom(plan);
+            if (existingIndex != i)
+            {
+                Plans.Move(existingIndex, i);
+            }
+        }
+    }
+
     public void AddExternalStatus(string message, bool isError = false)
     {
         SetStatus(message, isError ? InfoBarSeverity.Error : InfoBarSeverity.Informational);
@@ -273,9 +330,9 @@ public sealed partial class MainPage : Page
         SetStatus(message, severity);
     }
 
-    public async Task RefreshFromExternalAsync()
+    public async Task RefreshFromExternalAsync(bool forceRefresh = false)
     {
-        await RefreshPlansAsync();
+        await RefreshPlansAsync(forceRefresh: forceRefresh);
     }
 
     public bool TryApplyActivePlanFromExternal(string activePlanGuid)
@@ -313,18 +370,34 @@ public sealed partial class MainPage : Page
 
 public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
 {
+    private static readonly string CopyPlanButtonTextValue = LocalizationService.Get("Main.CopyPlanButton");
+    private string _name;
     private bool _isActive;
 
     public PowerPlanItemViewModel(PowerPlanInfo model)
     {
         Guid = model.Guid;
-        Name = model.Name;
+        _name = model.Name;
         _isActive = model.IsActive;
     }
 
     public string Guid { get; }
-    public string Name { get; }
-    public string CopyButtonText => LocalizationService.Get("Main.CopyPlanButton");
+    public string Name
+    {
+        get => _name;
+        private set
+        {
+            if (string.Equals(_name, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _name = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string CopyButtonText => CopyPlanButtonTextValue;
 
     public bool IsActive
     {
@@ -339,6 +412,12 @@ public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
             _isActive = value;
             OnPropertyChanged();
         }
+    }
+
+    public void UpdateFrom(PowerPlanInfo model)
+    {
+        Name = model.Name;
+        IsActive = model.IsActive;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
