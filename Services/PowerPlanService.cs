@@ -1,5 +1,6 @@
-using System.Diagnostics;
-using System.Text.RegularExpressions;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Text;
 using PowerPlan.Models;
 
 namespace PowerPlan.Services;
@@ -8,10 +9,6 @@ public sealed class PowerPlanService
 {
     public const string UltimatePerformanceGuid = "e9a42b02-d5df-448d-aa00-03f14749eb61";
     private static readonly TimeSpan PlansCacheDuration = TimeSpan.FromMilliseconds(750);
-
-    private static readonly Regex GuidRegex = new(
-        @"(?<guid>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})",
-        RegexOptions.Compiled);
 
     private static readonly string[] UltimatePlanNameKeywords =
     {
@@ -58,45 +55,36 @@ public sealed class PowerPlanService
         return ClonePlans(plans);
     }
 
-    public async Task SetActivePlanAsync(string planGuid)
+    public Task SetActivePlanAsync(string planGuid)
     {
-        await RunPowerCfgAsync($"/setactive {planGuid}");
+        var guid = ParsePowerSchemeGuid(planGuid, "PowerPlan.Error.InvalidPlanGuid");
+        ThrowIfFailed(PowerSetActiveScheme(IntPtr.Zero, ref guid), "PowerPlan.Error.SetActiveFailed");
         InvalidatePlansCache();
+        return Task.CompletedTask;
     }
 
-    public async Task<string> CopyPlanAsync(string sourcePlanGuid, string newName)
+    public Task<string> CopyPlanAsync(string sourcePlanGuid, string newName)
     {
-        var duplicateOutput = await RunPowerCfgAsync($"/duplicatescheme {sourcePlanGuid}");
-        var guidMatch = GuidRegex.Match(duplicateOutput);
-        if (!guidMatch.Success)
-        {
-            throw new InvalidOperationException("复制失败：无法获取新计划 GUID。");
-        }
-
-        var newPlanGuid = guidMatch.Groups["guid"].Value;
-        var safeName = newName.Trim().Replace("\"", "'");
-        await RunPowerCfgAsync($"/changename {newPlanGuid} \"{safeName}\"");
+        var sourceGuid = ParsePowerSchemeGuid(sourcePlanGuid, "PowerPlan.Error.InvalidSourcePlanGuid");
+        var newPlanGuid = DuplicatePowerScheme(sourceGuid);
+        WritePowerSchemeName(newPlanGuid, newName.Trim());
         InvalidatePlansCache();
-        return newPlanGuid;
+        return Task.FromResult(newPlanGuid.ToString("D"));
     }
 
-    public async Task<string> CreateUltimatePerformancePlanAsync()
+    public Task<string> CreateUltimatePerformancePlanAsync()
     {
-        var duplicateOutput = await RunPowerCfgAsync($"/duplicatescheme {UltimatePerformanceGuid}");
-        var guidMatch = GuidRegex.Match(duplicateOutput);
-        if (!guidMatch.Success)
-        {
-            throw new InvalidOperationException("创建失败：无法获取卓越性能计划 GUID。");
-        }
-
+        var ultimatePerformanceGuid = Guid.Parse(UltimatePerformanceGuid);
+        var createdGuid = DuplicatePowerScheme(ultimatePerformanceGuid);
         InvalidatePlansCache();
-        return guidMatch.Groups["guid"].Value;
+        return Task.FromResult(createdGuid.ToString("D"));
     }
 
-    public async Task RestoreDefaultSchemesAsync()
+    public Task RestoreDefaultSchemesAsync()
     {
-        await RunPowerCfgAsync("/restoredefaultschemes");
+        ThrowIfFailed(PowerRestoreDefaultPowerSchemes(), "PowerPlan.Error.RestoreDefaultsFailed");
         InvalidatePlansCache();
+        return Task.CompletedTask;
     }
 
     public bool IsUltimatePerformancePlan(PowerPlanInfo plan)
@@ -117,36 +105,11 @@ public sealed class PowerPlanService
         return false;
     }
 
-
-    private static string ExtractPlanName(string line)
-    {
-        var start = line.IndexOf('(');
-        if (start < 0)
-        {
-            return string.Empty;
-        }
-
-        var end = line.IndexOf(')', start + 1);
-        if (end <= start)
-        {
-            return string.Empty;
-        }
-
-        return line[(start + 1)..end].Trim();
-    }
-
-
-    private static bool IsActivePlanLine(string line)
-    {
-        return line.Contains('*');
-    }
-
     private static async Task<IReadOnlyList<PowerPlanInfo>> FetchPlansCoreAsync(long fetchVersion)
     {
         try
         {
-            var output = await RunPowerCfgAsync("/list");
-            var plans = ParsePlans(output);
+            var plans = await Task.Run(ReadPowerSchemes);
 
             lock (PlansCacheLock)
             {
@@ -172,31 +135,110 @@ public sealed class PowerPlanService
         }
     }
 
-    private static IReadOnlyList<PowerPlanInfo> ParsePlans(string output)
+    private static IReadOnlyList<PowerPlanInfo> ReadPowerSchemes()
     {
+        var activeGuid = GetActivePowerSchemeGuid();
         var plans = new List<PowerPlanInfo>();
 
-        foreach (var line in output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries))
+        for (uint index = 0; ; index++)
         {
-            var trimmed = line.Trim();
-            var match = GuidRegex.Match(trimmed);
-            if (!match.Success)
+            var bufferSize = GuidSize;
+            var buffer = new byte[GuidSize];
+            var result = PowerEnumerate(IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, AccessScheme, index, buffer, ref bufferSize);
+            if (result == ErrorNoMoreItems)
             {
-                continue;
+                break;
             }
 
-            var guid = match.Groups["guid"].Value;
-            var name = ExtractPlanName(trimmed);
+            ThrowIfFailed(result, "PowerPlan.Error.EnumerateFailed");
 
+            var guid = new Guid(buffer);
+            var guidText = guid.ToString("D");
+            var name = ReadPowerSchemeName(guid);
             plans.Add(new PowerPlanInfo
             {
-                Guid = guid,
-                Name = string.IsNullOrWhiteSpace(name) ? guid : name,
-                IsActive = IsActivePlanLine(trimmed)
+                Guid = guidText,
+                Name = string.IsNullOrWhiteSpace(name) ? guidText : name,
+                IsActive = guid.Equals(activeGuid)
             });
         }
 
         return plans;
+    }
+
+    private static Guid GetActivePowerSchemeGuid()
+    {
+        var result = PowerGetActiveScheme(IntPtr.Zero, out var activeGuidPointer);
+        ThrowIfFailed(result, "PowerPlan.Error.ReadActiveFailed");
+
+        try
+        {
+            return Marshal.PtrToStructure<Guid>(activeGuidPointer);
+        }
+        finally
+        {
+            if (activeGuidPointer != IntPtr.Zero)
+            {
+                _ = LocalFree(activeGuidPointer);
+            }
+        }
+    }
+
+    private static Guid DuplicatePowerScheme(Guid sourceGuid)
+    {
+        var result = PowerDuplicateScheme(IntPtr.Zero, ref sourceGuid, out var destinationGuidPointer);
+        ThrowIfFailed(result, "PowerPlan.Error.DuplicateFailed");
+
+        try
+        {
+            if (destinationGuidPointer == IntPtr.Zero)
+            {
+                throw new InvalidOperationException(LocalizationService.Get("PowerPlan.Error.DuplicateMissingGuid"));
+            }
+
+            return Marshal.PtrToStructure<Guid>(destinationGuidPointer);
+        }
+        finally
+        {
+            if (destinationGuidPointer != IntPtr.Zero)
+            {
+                _ = LocalFree(destinationGuidPointer);
+            }
+        }
+    }
+
+    private static string ReadPowerSchemeName(Guid schemeGuid)
+    {
+        uint bufferSize = 0;
+        var result = PowerReadFriendlyName(IntPtr.Zero, ref schemeGuid, IntPtr.Zero, IntPtr.Zero, null, ref bufferSize);
+        if (result is not ErrorSuccess and not ErrorMoreData)
+        {
+            ThrowIfFailed(result, "PowerPlan.Error.ReadNameFailed");
+        }
+
+        if (bufferSize == 0)
+        {
+            return string.Empty;
+        }
+
+        var buffer = new byte[bufferSize];
+        result = PowerReadFriendlyName(IntPtr.Zero, ref schemeGuid, IntPtr.Zero, IntPtr.Zero, buffer, ref bufferSize);
+        ThrowIfFailed(result, "PowerPlan.Error.ReadNameFailed");
+
+        return Encoding.Unicode.GetString(buffer).TrimEnd('\0');
+    }
+
+    private static void WritePowerSchemeName(Guid schemeGuid, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new InvalidOperationException(LocalizationService.Get("PowerPlan.Error.EmptyName"));
+        }
+
+        var buffer = Encoding.Unicode.GetBytes(name + '\0');
+        ThrowIfFailed(
+            PowerWriteFriendlyName(IntPtr.Zero, ref schemeGuid, IntPtr.Zero, IntPtr.Zero, buffer, (uint)buffer.Length),
+            "PowerPlan.Error.WriteNameFailed");
     }
 
     private static IReadOnlyList<PowerPlanInfo> ClonePlans(IReadOnlyList<PowerPlanInfo> source)
@@ -223,31 +265,74 @@ public sealed class PowerPlanService
         }
     }
 
-    private static async Task<string> RunPowerCfgAsync(string args)
+    private static Guid ParsePowerSchemeGuid(string value, string errorKey)
     {
-        var startInfo = new ProcessStartInfo
+        if (Guid.TryParse(value, out var guid))
         {
-            FileName = "powercfg",
-            Arguments = args,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = new Process { StartInfo = startInfo };
-        _ = process.Start();
-
-        var stdout = await process.StandardOutput.ReadToEndAsync();
-        var stderr = await process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync();
-
-        if (process.ExitCode != 0)
-        {
-            var error = string.IsNullOrWhiteSpace(stderr) ? stdout : stderr;
-            throw new InvalidOperationException($"powercfg failed ({process.ExitCode}): {error.Trim()}");
+            return guid;
         }
 
-        return stdout;
+        throw new InvalidOperationException(LocalizationService.Get(errorKey));
     }
+
+    private static void ThrowIfFailed(uint result, string errorKey)
+    {
+        if (result == ErrorSuccess)
+        {
+            return;
+        }
+
+        throw new Win32Exception(
+            (int)result,
+            LocalizationService.Format("PowerPlan.Error.Win32", LocalizationService.Get(errorKey), new Win32Exception((int)result).Message));
+    }
+
+    private const uint ErrorSuccess = 0;
+    private const uint ErrorMoreData = 234;
+    private const uint ErrorNoMoreItems = 259;
+    private const uint AccessScheme = 16;
+    private const uint GuidSize = 16;
+
+    [DllImport("powrprof.dll")]
+    private static extern uint PowerEnumerate(
+        IntPtr rootPowerKey,
+        IntPtr schemeGuid,
+        IntPtr subGroupOfPowerSettingsGuid,
+        uint accessFlags,
+        uint index,
+        [Out] byte[] buffer,
+        ref uint bufferSize);
+
+    [DllImport("powrprof.dll")]
+    private static extern uint PowerGetActiveScheme(IntPtr rootPowerKey, out IntPtr activePolicyGuid);
+
+    [DllImport("powrprof.dll")]
+    private static extern uint PowerSetActiveScheme(IntPtr rootPowerKey, ref Guid schemeGuid);
+
+    [DllImport("powrprof.dll")]
+    private static extern uint PowerDuplicateScheme(IntPtr rootPowerKey, ref Guid sourceSchemeGuid, out IntPtr destinationSchemeGuid);
+
+    [DllImport("powrprof.dll")]
+    private static extern uint PowerReadFriendlyName(
+        IntPtr rootPowerKey,
+        ref Guid schemeGuid,
+        IntPtr subGroupOfPowerSettingsGuid,
+        IntPtr powerSettingGuid,
+        [Out] byte[]? buffer,
+        ref uint bufferSize);
+
+    [DllImport("powrprof.dll")]
+    private static extern uint PowerWriteFriendlyName(
+        IntPtr rootPowerKey,
+        ref Guid schemeGuid,
+        IntPtr subGroupOfPowerSettingsGuid,
+        IntPtr powerSettingGuid,
+        byte[] buffer,
+        uint bufferSize);
+
+    [DllImport("powrprof.dll")]
+    private static extern uint PowerRestoreDefaultPowerSchemes();
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr LocalFree(IntPtr hMem);
 }

@@ -390,4 +390,40 @@
   <data name="PowerPlan.UltimateKeywordZh" xml:space="preserve">
     <value>卓越性能</value>
   </data>
+  <data name="PowerPlan.Error.InvalidPlanGuid" xml:space="preserve">
+    <value>电源计划 GUID 无效。</value>
+  </data>
+  <data name="PowerPlan.Error.InvalidSourcePlanGuid" xml:space="preserve">
+    <value>源电源计划 GUID 无效。</value>
+  </data>
+  <data name="PowerPlan.Error.SetActiveFailed" xml:space="preserve">
+    <value>切换电源计划失败</value>
+  </data>
+  <data name="PowerPlan.Error.RestoreDefaultsFailed" xml:space="preserve">
+    <value>还原默认电源计划失败</value>
+  </data>
+  <data name="PowerPlan.Error.EnumerateFailed" xml:space="preserve">
+    <value>枚举电源计划失败</value>
+  </data>
+  <data name="PowerPlan.Error.ReadActiveFailed" xml:space="preserve">
+    <value>读取当前电源计划失败</value>
+  </data>
+  <data name="PowerPlan.Error.DuplicateFailed" xml:space="preserve">
+    <value>复制电源计划失败</value>
+  </data>
+  <data name="PowerPlan.Error.DuplicateMissingGuid" xml:space="preserve">
+    <value>复制电源计划失败：系统未返回新计划 GUID。</value>
+  </data>
+  <data name="PowerPlan.Error.ReadNameFailed" xml:space="preserve">
+    <value>读取电源计划名称失败</value>
+  </data>
+  <data name="PowerPlan.Error.EmptyName" xml:space="preserve">
+    <value>电源计划名称不能为空。</value>
+  </data>
+  <data name="PowerPlan.Error.WriteNameFailed" xml:space="preserve">
+    <value>写入电源计划名称失败</value>
+  </data>
+  <data name="PowerPlan.Error.Win32" xml:space="preserve">
+    <value>{0}：{1}</value>
+  </data>
 </root>
