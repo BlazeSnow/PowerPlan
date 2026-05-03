@@ -8,11 +8,20 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     Background="Transparent"
     mc:Ignorable="d">
+    <Page.Resources>
+        <Style x:Key="SettingsCardHeaderIconStyle" TargetType="FontIcon">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Style>
+    </Page.Resources>
     <ScrollViewer Background="Transparent">
         <StackPanel Padding="24" Spacing="16">
             <TextBlock x:Name="PageTitleText" Text="-" FontSize="28" FontWeight="SemiBold" />
 
             <controls:SettingsCard x:Name="AutoStartCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE7E8;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
                 <ToggleSwitch
                     x:Name="AutoStartToggle"
                     Toggled="OnAutoStartToggled"
@@ -21,6 +30,9 @@
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="TrayCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE8F2;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
                 <ToggleSwitch
                     x:Name="TrayToggle"
                     Toggled="OnTrayToggled"
@@ -29,6 +41,9 @@
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="PowerOptionsCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE713;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
                 <Button
                     x:Name="OpenPowerOptionsButton"
                     Click="OnOpenPowerOptionsClicked"
@@ -37,6 +52,9 @@
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="RestorePowerPlansCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE777;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
                 <Button
                     x:Name="RestorePowerPlansButton"
                     Click="OnRestorePowerPlansClicked"
@@ -45,6 +63,9 @@
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="WebsiteCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE774;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
                 <Button
                     x:Name="OpenWebsiteButton"
                     Click="OnOpenWebsiteClicked"
@@ -53,6 +74,9 @@
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="FeedbackCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE715;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
                 <Button
                     x:Name="SendFeedbackButton"
                     Click="OnSendFeedbackClicked"
