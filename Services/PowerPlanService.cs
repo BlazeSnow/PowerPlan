@@ -57,15 +57,15 @@ public sealed class PowerPlanService
 
     public Task SetActivePlanAsync(string planGuid)
     {
-        var guid = ParsePowerSchemeGuid(planGuid, "电源计划 GUID 无效。");
-        ThrowIfFailed(PowerSetActiveScheme(IntPtr.Zero, ref guid), "切换电源计划失败");
+        var guid = ParsePowerSchemeGuid(planGuid, "PowerPlan.Error.InvalidPlanGuid");
+        ThrowIfFailed(PowerSetActiveScheme(IntPtr.Zero, ref guid), "PowerPlan.Error.SetActiveFailed");
         InvalidatePlansCache();
         return Task.CompletedTask;
     }
 
     public Task<string> CopyPlanAsync(string sourcePlanGuid, string newName)
     {
-        var sourceGuid = ParsePowerSchemeGuid(sourcePlanGuid, "源电源计划 GUID 无效。");
+        var sourceGuid = ParsePowerSchemeGuid(sourcePlanGuid, "PowerPlan.Error.InvalidSourcePlanGuid");
         var newPlanGuid = DuplicatePowerScheme(sourceGuid);
         WritePowerSchemeName(newPlanGuid, newName.Trim());
         InvalidatePlansCache();
@@ -82,7 +82,7 @@ public sealed class PowerPlanService
 
     public Task RestoreDefaultSchemesAsync()
     {
-        ThrowIfFailed(PowerRestoreDefaultPowerSchemes(), "还原默认电源计划失败");
+        ThrowIfFailed(PowerRestoreDefaultPowerSchemes(), "PowerPlan.Error.RestoreDefaultsFailed");
         InvalidatePlansCache();
         return Task.CompletedTask;
     }
@@ -150,7 +150,7 @@ public sealed class PowerPlanService
                 break;
             }
 
-            ThrowIfFailed(result, "枚举电源计划失败");
+            ThrowIfFailed(result, "PowerPlan.Error.EnumerateFailed");
 
             var guid = new Guid(buffer);
             var guidText = guid.ToString("D");
@@ -169,7 +169,7 @@ public sealed class PowerPlanService
     private static Guid GetActivePowerSchemeGuid()
     {
         var result = PowerGetActiveScheme(IntPtr.Zero, out var activeGuidPointer);
-        ThrowIfFailed(result, "读取当前电源计划失败");
+        ThrowIfFailed(result, "PowerPlan.Error.ReadActiveFailed");
 
         try
         {
@@ -187,13 +187,13 @@ public sealed class PowerPlanService
     private static Guid DuplicatePowerScheme(Guid sourceGuid)
     {
         var result = PowerDuplicateScheme(IntPtr.Zero, ref sourceGuid, out var destinationGuidPointer);
-        ThrowIfFailed(result, "复制电源计划失败");
+        ThrowIfFailed(result, "PowerPlan.Error.DuplicateFailed");
 
         try
         {
             if (destinationGuidPointer == IntPtr.Zero)
             {
-                throw new InvalidOperationException("复制电源计划失败：系统未返回新计划 GUID。");
+                throw new InvalidOperationException(LocalizationService.Get("PowerPlan.Error.DuplicateMissingGuid"));
             }
 
             return Marshal.PtrToStructure<Guid>(destinationGuidPointer);
@@ -213,7 +213,7 @@ public sealed class PowerPlanService
         var result = PowerReadFriendlyName(IntPtr.Zero, ref schemeGuid, IntPtr.Zero, IntPtr.Zero, null, ref bufferSize);
         if (result is not ErrorSuccess and not ErrorMoreData)
         {
-            ThrowIfFailed(result, "读取电源计划名称失败");
+            ThrowIfFailed(result, "PowerPlan.Error.ReadNameFailed");
         }
 
         if (bufferSize == 0)
@@ -223,7 +223,7 @@ public sealed class PowerPlanService
 
         var buffer = new byte[bufferSize];
         result = PowerReadFriendlyName(IntPtr.Zero, ref schemeGuid, IntPtr.Zero, IntPtr.Zero, buffer, ref bufferSize);
-        ThrowIfFailed(result, "读取电源计划名称失败");
+        ThrowIfFailed(result, "PowerPlan.Error.ReadNameFailed");
 
         return Encoding.Unicode.GetString(buffer).TrimEnd('\0');
     }
@@ -232,13 +232,13 @@ public sealed class PowerPlanService
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new InvalidOperationException("电源计划名称不能为空。");
+            throw new InvalidOperationException(LocalizationService.Get("PowerPlan.Error.EmptyName"));
         }
 
         var buffer = Encoding.Unicode.GetBytes(name + '\0');
         ThrowIfFailed(
             PowerWriteFriendlyName(IntPtr.Zero, ref schemeGuid, IntPtr.Zero, IntPtr.Zero, buffer, (uint)buffer.Length),
-            "写入电源计划名称失败");
+            "PowerPlan.Error.WriteNameFailed");
     }
 
     private static IReadOnlyList<PowerPlanInfo> ClonePlans(IReadOnlyList<PowerPlanInfo> source)
@@ -265,24 +265,26 @@ public sealed class PowerPlanService
         }
     }
 
-    private static Guid ParsePowerSchemeGuid(string value, string errorMessage)
+    private static Guid ParsePowerSchemeGuid(string value, string errorKey)
     {
         if (Guid.TryParse(value, out var guid))
         {
             return guid;
         }
 
-        throw new InvalidOperationException(errorMessage);
+        throw new InvalidOperationException(LocalizationService.Get(errorKey));
     }
 
-    private static void ThrowIfFailed(uint result, string message)
+    private static void ThrowIfFailed(uint result, string errorKey)
     {
         if (result == ErrorSuccess)
         {
             return;
         }
 
-        throw new Win32Exception((int)result, $"{message}：{new Win32Exception((int)result).Message}");
+        throw new Win32Exception(
+            (int)result,
+            LocalizationService.Format("PowerPlan.Error.Win32", LocalizationService.Get(errorKey), new Win32Exception((int)result).Message));
     }
 
     private const uint ErrorSuccess = 0;
