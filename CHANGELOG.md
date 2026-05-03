@@ -1,5 +1,11 @@
 # 更新日志
 
+## v2026.5.3.0
+
+1. 升级WindowsAppSDK版本到v2.0.1
+2. 使用powrprof.dll替代powercfg命令调用
+3. 为设置界面卡片添加icon
+
 ## v2026.4.21.0
 
 1. 启用mica材质
