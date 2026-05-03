@@ -1,9 +1,8 @@
-using PowerPlan.Models;
-using PowerPlan.Services;
-using PowerPlan.Views;
-using Microsoft.Windows.AppLifecycle;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.Windows.AppLifecycle;
+using PowerPlan.Models;
+using PowerPlan.Services;
 using System.Runtime.InteropServices;
 
 namespace PowerPlan;
