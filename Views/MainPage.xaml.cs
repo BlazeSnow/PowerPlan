@@ -29,7 +29,6 @@ public sealed partial class MainPage : Page
         _settingsService = app.SettingsService;
         ApplyLocalization();
 
-        PlansListView.ItemsSource = Plans;
         Loaded += MainPage_Loaded;
     }
 
@@ -88,9 +87,7 @@ public sealed partial class MainPage : Page
                 CreateUltimateButton.Content = LocalizationService.Get(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
             }
 
-            _isUpdatingSelection = true;
-            PlansListView.SelectedItem = Plans.FirstOrDefault(x => x.IsActive);
-            _isUpdatingSelection = false;
+            SelectPlan(Plans.FirstOrDefault(x => x.IsActive));
 
             if (Application.Current is App app)
             {
@@ -221,9 +218,7 @@ public sealed partial class MainPage : Page
             var activePlan = Plans.FirstOrDefault(x => x.IsActive);
             if (activePlan is not null)
             {
-                _isUpdatingSelection = true;
-                PlansListView.SelectedItem = activePlan;
-                _isUpdatingSelection = false;
+                SelectPlan(activePlan);
             }
         }
     }
@@ -238,8 +233,19 @@ public sealed partial class MainPage : Page
         var selected = Plans.FirstOrDefault(x => x.IsActive);
         if (selected is not null)
         {
+            SelectPlan(selected);
+        }
+    }
+
+    private void SelectPlan(PowerPlanItemViewModel? plan)
+    {
+        try
+        {
             _isUpdatingSelection = true;
-            PlansListView.SelectedItem = selected;
+            PlansListView.SelectedItem = plan;
+        }
+        finally
+        {
             _isUpdatingSelection = false;
         }
     }

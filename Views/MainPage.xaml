@@ -44,6 +44,7 @@
 
                     <ListView
                         x:Name="PlansListView"
+                        ItemsSource="{x:Bind Plans}"
                         SelectionMode="Single"
                         SelectionChanged="OnPlansSelectionChanged"
                         BorderThickness="0">
