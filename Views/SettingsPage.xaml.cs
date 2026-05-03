@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
-using PowerPlan.Models;
+﻿using PowerPlan.Models;
 using PowerPlan.Services;
+using System.Diagnostics;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace PowerPlan.Views;

@@ -1,10 +1,8 @@
-﻿using System.Collections.ObjectModel;
+﻿using PowerPlan.Models;
+using PowerPlan.Services;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using PowerPlan.Models;
-using PowerPlan.Services;
 
 namespace PowerPlan.Views;
 

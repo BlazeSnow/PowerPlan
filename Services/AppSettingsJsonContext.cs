@@ -1,5 +1,5 @@
-using System.Text.Json.Serialization;
 using PowerPlan.Models;
+using System.Text.Json.Serialization;
 
 namespace PowerPlan.Services;
 

@@ -1,5 +1,5 @@
-using System.Text.Json;
 using PowerPlan.Models;
+using System.Text.Json;
 using Windows.ApplicationModel;
 
 namespace PowerPlan.Services;
