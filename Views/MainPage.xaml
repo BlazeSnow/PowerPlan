@@ -9,12 +9,21 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="Transparent"
     mc:Ignorable="d">
+    <Page.Resources>
+        <Style x:Key="SettingsCardHeaderIconStyle" TargetType="FontIcon">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        </Style>
+    </Page.Resources>
     <ScrollViewer Background="Transparent">
         <StackPanel Padding="24" Spacing="16">
             <TextBlock FontSize="24" FontWeight="SemiBold" Text="PowerPlan" />
             <TextBlock x:Name="SubtitleText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="-" />
 
             <controls:SettingsCard x:Name="UltimateCard" Visibility="Collapsed">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon x:Name="UltimateCardIcon" Glyph="&#xE945;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
                 <Button
                     x:Name="CreateUltimateButton"
                     Click="OnCreateUltimateClicked"
