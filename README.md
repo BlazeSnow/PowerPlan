@@ -12,9 +12,17 @@
 
 ## 三、软件截图
 
-![mainpage](./images/mainpage.png)
+![1W](./images/1W.png)
+![1D](./images/1D.png)
 
-![performance](./images/performance.png)
+![2W](./images/2W.png)
+![2D](./images/2D.png)
+
+![3W](./images/3W.png)
+![3D](./images/3D.png)
+
+![4W](./images/4W.png)
+![4D](./images/4D.png)
 
 ## 四、开发者信息
 
