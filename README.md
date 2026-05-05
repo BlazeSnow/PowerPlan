@@ -12,17 +12,13 @@
 
 ## 三、软件截图
 
-![1W](./images/1W.png)
-![1D](./images/1D.png)
+![1](./images/1.png)
 
-![2W](./images/2W.png)
-![2D](./images/2D.png)
+![2](./images/2.png)
 
-![3W](./images/3W.png)
-![3D](./images/3D.png)
+![3](./images/3.png)
 
-![4W](./images/4W.png)
-![4D](./images/4D.png)
+![4](./images/4.png)
 
 ## 四、开发者信息
 
