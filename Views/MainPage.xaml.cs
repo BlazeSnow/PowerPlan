@@ -9,6 +9,8 @@ namespace PowerPlan.Views;
 public sealed partial class MainPage : Page
 {
     private static readonly TimeSpan DuplicateStatusSuppressionWindow = TimeSpan.FromMilliseconds(400);
+    private const string HiddenUltimateIconGlyph = "\uE890";
+    private const string MissingUltimateIconGlyph = "\uE945";
     private readonly PowerPlanService _powerPlanService;
     private readonly SettingsService _settingsService;
     private readonly SemaphoreSlim _refreshSemaphore = new(1, 1);
@@ -80,6 +82,7 @@ public sealed partial class MainPage : Page
 
             if (!hasUltimate)
             {
+                UltimateCardIcon.Glyph = hasHiddenUltimate ? HiddenUltimateIconGlyph : MissingUltimateIconGlyph;
                 UltimateCard.Header = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenTitle" : "Main.UltimateMissingTitle");
                 UltimateCard.Description = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenMessage" : "Main.UltimateMissingMessage");
                 CreateUltimateButton.Content = LocalizationService.Get(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
