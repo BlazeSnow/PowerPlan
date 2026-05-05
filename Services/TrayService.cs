@@ -213,13 +213,13 @@ public sealed class TrayService : IDisposable
                 return;
             }
 
-            _contextFlyout.Items.Clear();
-
             IReadOnlyList<PowerPlanInfo> plans;
             lock (_plansLock)
             {
                 plans = _cachedPlans.ToArray();
             }
+
+            _contextFlyout.Items.Clear();
 
             _contextFlyout.Items.Add(new MenuFlyoutItem
             {

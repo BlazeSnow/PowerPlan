@@ -4,6 +4,7 @@ using Microsoft.Windows.AppLifecycle;
 using PowerPlan.Models;
 using PowerPlan.Services;
 using System.Runtime.InteropServices;
+using Windows.UI.ViewManagement;
 
 namespace PowerPlan;
 
@@ -19,6 +20,7 @@ public partial class App : Application
     private bool _lastKnownTrayEnabled;
     private bool _pendingMainPageRefresh;
     private nint _windowIconHandle;
+    private readonly UISettings _uiSettings = new();
 
     public App()
     {
@@ -26,6 +28,7 @@ public partial class App : Application
 
         SettingsService = new SettingsService();
         SettingsService.SettingsChanged += OnSettingsChanged;
+        _uiSettings.ColorValuesChanged += OnColorValuesChanged;
     }
 
     public SettingsService SettingsService { get; }
@@ -65,6 +68,7 @@ public partial class App : Application
             rootElement.ActualThemeChanged += OnRootActualThemeChanged;
         }
         ApplySystemTitleBarTheme();
+        ApplyTrayTheme();
         _window.Closed -= OnMainWindowClosed;
         _window.Closed += OnMainWindowClosed;
 
@@ -282,6 +286,7 @@ public partial class App : Application
     private void ExitApplication()
     {
         _isExiting = true;
+        _uiSettings.ColorValuesChanged -= OnColorValuesChanged;
         _trayService?.Dispose();
         _trayService = null;
         if (_windowIconHandle != IntPtr.Zero)
@@ -414,6 +419,73 @@ public partial class App : Application
     private void OnRootActualThemeChanged(FrameworkElement sender, object args)
     {
         ApplySystemTitleBarTheme();
+        ApplyTrayTheme();
+    }
+
+    private void OnColorValuesChanged(UISettings sender, object args)
+    {
+        if (_window is null)
+        {
+            return;
+        }
+
+        var dispatcherQueue = _window.DispatcherQueue;
+        if (dispatcherQueue.HasThreadAccess)
+        {
+            ApplyTrayTheme();
+            ApplySystemTitleBarTheme();
+            return;
+        }
+
+        _ = dispatcherQueue.TryEnqueue(() =>
+        {
+            ApplyTrayTheme();
+            ApplySystemTitleBarTheme();
+        });
+    }
+
+    private void ApplyTrayTheme()
+    {
+        var theme = GetEffectiveTheme();
+        ApplyNativeMenuTheme(theme);
+    }
+
+    private ElementTheme GetEffectiveTheme()
+    {
+        if (_window?.Content is FrameworkElement root && root.ActualTheme != ElementTheme.Default)
+        {
+            return root.ActualTheme;
+        }
+
+        return IsSystemUsingDarkTheme() ? ElementTheme.Dark : ElementTheme.Light;
+    }
+
+    private bool IsSystemUsingDarkTheme()
+    {
+        try
+        {
+            var background = _uiSettings.GetColorValue(UIColorType.Background);
+            return background.R < 128 && background.G < 128 && background.B < 128;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void ApplyNativeMenuTheme(ElementTheme theme)
+    {
+        try
+        {
+            // H.NotifyIcon's default tray menu uses Win32 popup menus. These undocumented
+            // uxtheme entries enable dark menu rendering on supported Windows builds.
+            _ = SetPreferredAppMode(theme == ElementTheme.Dark ? PreferredAppMode.ForceDark : PreferredAppMode.ForceLight);
+            FlushMenuThemes();
+        }
+        catch
+        {
+            // Native menu dark mode APIs are undocumented and may be unavailable on some systems.
+        }
     }
 
     private void ApplySystemTitleBarTheme()
@@ -424,7 +496,7 @@ public partial class App : Application
         }
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
-        var useDarkMode = _window.Content is FrameworkElement root && root.ActualTheme == ElementTheme.Dark ? 1 : 0;
+        var useDarkMode = GetEffectiveTheme() == ElementTheme.Dark ? 1 : 0;
         var size = Marshal.SizeOf<int>();
 
         var result = DwmSetWindowAttribute(hwnd, DwmaUseImmersiveDarkMode, ref useDarkMode, size);
@@ -454,6 +526,15 @@ public partial class App : Application
     private const uint DwmaUseImmersiveDarkMode = 20;
     private const uint DwmaUseImmersiveDarkModeBefore20H1 = 19;
 
+    private enum PreferredAppMode
+    {
+        Default,
+        AllowDark,
+        ForceDark,
+        ForceLight,
+        Max
+    }
+
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
 
@@ -473,4 +554,10 @@ public partial class App : Application
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(nint hwnd, uint dwAttribute, ref int pvAttribute, int cbAttribute);
+
+    [DllImport("uxtheme.dll", EntryPoint = "#135", ExactSpelling = true)]
+    private static extern PreferredAppMode SetPreferredAppMode(PreferredAppMode appMode);
+
+    [DllImport("uxtheme.dll", EntryPoint = "#136", ExactSpelling = true)]
+    private static extern void FlushMenuThemes();
 }
