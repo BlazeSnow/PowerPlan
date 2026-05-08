@@ -33,6 +33,8 @@ public sealed class TrayService : IDisposable
     private readonly object _refreshTaskLock = new();
     private IReadOnlyList<PowerPlanInfo> _cachedPlans = Array.Empty<PowerPlanInfo>();
     private Task? _refreshPlansTask;
+    private bool _refreshPlansTaskForceRefresh;
+    private bool _pendingForceRefresh;
 
     private TaskbarIcon? _taskbarIcon;
     private MenuFlyout? _contextFlyout;
@@ -119,15 +121,44 @@ public sealed class TrayService : IDisposable
 
     public async Task RefreshPlansAsync(bool forceRefresh = false)
     {
-        Task refreshTask;
-
-        lock (_refreshTaskLock)
+        var nextForceRefresh = forceRefresh;
+        while (true)
         {
-            _refreshPlansTask ??= RefreshPlansCoreAsync(forceRefresh);
-            refreshTask = _refreshPlansTask;
-        }
+            Task refreshTask;
 
-        await refreshTask;
+            lock (_refreshTaskLock)
+            {
+                if (_refreshPlansTask is null)
+                {
+                    if (nextForceRefresh)
+                    {
+                        _pendingForceRefresh = false;
+                    }
+
+                    _refreshPlansTask = RefreshPlansCoreAsync(nextForceRefresh);
+                    _refreshPlansTaskForceRefresh = nextForceRefresh;
+                }
+                else if (nextForceRefresh && !_refreshPlansTaskForceRefresh)
+                {
+                    _pendingForceRefresh = true;
+                }
+
+                refreshTask = _refreshPlansTask
+                    ?? throw new InvalidOperationException("Refresh task was not created.");
+            }
+
+            await refreshTask;
+
+            lock (_refreshTaskLock)
+            {
+                if (!forceRefresh || !_pendingForceRefresh)
+                {
+                    return;
+                }
+
+                nextForceRefresh = true;
+            }
+        }
     }
 
     private async Task RefreshPlansCoreAsync(bool forceRefresh)
@@ -147,6 +178,7 @@ public sealed class TrayService : IDisposable
             lock (_refreshTaskLock)
             {
                 _refreshPlansTask = null;
+                _refreshPlansTaskForceRefresh = false;
             }
         }
     }
@@ -223,8 +255,10 @@ public sealed class TrayService : IDisposable
             return;
         }
 
-        _lastMenuSignature = signature;
-        RebuildMenu();
+        if (RebuildMenu())
+        {
+            _lastMenuSignature = signature;
+        }
     }
 
     private string BuildMenuSignature()
@@ -255,9 +289,9 @@ public sealed class TrayService : IDisposable
         return builder.ToString();
     }
 
-    private void RebuildMenu()
+    private bool RebuildMenu()
     {
-        RunOnUiThread(() =>
+        return RunOnUiThread(() =>
         {
             if (_contextFlyout is null)
             {
@@ -430,18 +464,21 @@ public sealed class TrayService : IDisposable
         _log(LocalizationService.Get("Tray.RefreshStarted"), InfoBarSeverity.Informational);
     }
 
-    private void RunOnUiThread(Action action)
+    private bool RunOnUiThread(Action action)
     {
         if (_uiDispatcherQueue.HasThreadAccess)
         {
             action();
-            return;
+            return true;
         }
 
         if (!_uiDispatcherQueue.TryEnqueue(() => action()))
         {
             _log(LocalizationService.Get("Tray.DispatcherUnavailable"), InfoBarSeverity.Error);
+            return false;
         }
+
+        return true;
     }
 
     private Task RunOnUiThreadAsync(Action action)
