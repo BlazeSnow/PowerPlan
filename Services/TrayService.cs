@@ -17,7 +17,7 @@ public sealed class TrayService : IDisposable
     private static readonly string EnableAutoStartText = "\u23FB " + LocalizationService.Get("Tray.Menu.EnableAutoStart");
     private static readonly string DisableAutoStartText = "\u23FB " + LocalizationService.Get("Tray.Menu.DisableAutoStart");
     private static readonly string ExitText = "\u2715 " + LocalizationService.Get("Tray.Menu.Exit");
-    private readonly Func<Task<IReadOnlyList<PowerPlanInfo>>> _getPlansAsync;
+    private readonly Func<bool, Task<IReadOnlyList<PowerPlanInfo>>> _getPlansAsync;
     private readonly Func<string, Task> _setActivePlanAsync;
     private readonly Func<string?> _getHiddenUltimatePlanGuid;
     private readonly Func<string, Task> _activateHiddenUltimatePlanAsync;
@@ -36,6 +36,8 @@ public sealed class TrayService : IDisposable
 
     private TaskbarIcon? _taskbarIcon;
     private MenuFlyout? _contextFlyout;
+    private Icon? _trayIcon;
+    private string _lastMenuSignature = string.Empty;
     private bool _disposed;
     private readonly ICommand _showMainWindowCommand;
     private readonly ICommand _refreshPlansCommand;
@@ -44,7 +46,7 @@ public sealed class TrayService : IDisposable
 
     public TrayService(
         DispatcherQueue uiDispatcherQueue,
-        Func<Task<IReadOnlyList<PowerPlanInfo>>> getPlansAsync,
+        Func<bool, Task<IReadOnlyList<PowerPlanInfo>>> getPlansAsync,
         Func<string, Task> setActivePlanAsync,
         Func<string?> getHiddenUltimatePlanGuid,
         Func<string, Task> activateHiddenUltimatePlanAsync,
@@ -95,7 +97,8 @@ public sealed class TrayService : IDisposable
                 var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "powerplan.ico");
                 if (File.Exists(iconPath))
                 {
-                    _taskbarIcon.Icon = new Icon(iconPath);
+                    _trayIcon = new Icon(iconPath);
+                    _taskbarIcon.Icon = _trayIcon;
                 }
                 else
                 {
@@ -114,25 +117,25 @@ public sealed class TrayService : IDisposable
         _log(LocalizationService.Get("Tray.Init"), InfoBarSeverity.Success);
     }
 
-    public async Task RefreshPlansAsync()
+    public async Task RefreshPlansAsync(bool forceRefresh = false)
     {
         Task refreshTask;
 
         lock (_refreshTaskLock)
         {
-            _refreshPlansTask ??= RefreshPlansCoreAsync();
+            _refreshPlansTask ??= RefreshPlansCoreAsync(forceRefresh);
             refreshTask = _refreshPlansTask;
         }
 
         await refreshTask;
     }
 
-    private async Task RefreshPlansCoreAsync()
+    private async Task RefreshPlansCoreAsync(bool forceRefresh)
     {
         try
         {
-            var plans = await _getPlansAsync();
-            UpdatePlansSnapshot(plans);
+            var plans = await _getPlansAsync(forceRefresh);
+            UpdatePlansSnapshot(plans, forceMenuRebuild: forceRefresh);
             await _onPlansRefreshed();
         }
         catch (Exception ex)
@@ -149,6 +152,11 @@ public sealed class TrayService : IDisposable
     }
 
     public void UpdatePlansSnapshot(IReadOnlyList<PowerPlanInfo> plans)
+    {
+        UpdatePlansSnapshot(plans, forceMenuRebuild: false);
+    }
+
+    private void UpdatePlansSnapshot(IReadOnlyList<PowerPlanInfo> plans, bool forceMenuRebuild)
     {
         var changed = false;
 
@@ -170,12 +178,12 @@ public sealed class TrayService : IDisposable
             }
         }
 
-        if (!changed)
+        if (!changed && !forceMenuRebuild)
         {
             return;
         }
 
-        RebuildMenu();
+        RebuildMenuIfNeeded(forceMenuRebuild);
     }
 
     public void ShowBalloon(string message)
@@ -200,8 +208,51 @@ public sealed class TrayService : IDisposable
                 _taskbarIcon = null;
             }
 
+            _trayIcon?.Dispose();
+            _trayIcon = null;
             _contextFlyout = null;
+            _lastMenuSignature = string.Empty;
         });
+    }
+
+    private void RebuildMenuIfNeeded(bool forceRebuild = false)
+    {
+        var signature = BuildMenuSignature();
+        if (!forceRebuild && string.Equals(signature, _lastMenuSignature, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _lastMenuSignature = signature;
+        RebuildMenu();
+    }
+
+    private string BuildMenuSignature()
+    {
+        IReadOnlyList<PowerPlanInfo> plans;
+        lock (_plansLock)
+        {
+            plans = _cachedPlans.ToArray();
+        }
+
+        var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid() ?? string.Empty;
+        var builder = new System.Text.StringBuilder();
+        builder.Append(_isStartupEnabled() ? '1' : '0');
+        builder.Append('|');
+        builder.Append(hiddenUltimatePlanGuid);
+
+        for (var i = 0; i < plans.Count; i++)
+        {
+            var plan = plans[i];
+            builder.Append('|');
+            builder.Append(plan.Guid);
+            builder.Append(',');
+            builder.Append(plan.Name);
+            builder.Append(',');
+            builder.Append(plan.IsActive ? '1' : '0');
+        }
+
+        return builder.ToString();
     }
 
     private void RebuildMenu()
@@ -327,7 +378,7 @@ public sealed class TrayService : IDisposable
             return;
         }
 
-        RebuildMenu();
+        RebuildMenuIfNeeded();
     }
 
     private static bool ArePlansEqual(IReadOnlyList<PowerPlanInfo> current, IReadOnlyList<PowerPlanInfo> next)
@@ -365,7 +416,7 @@ public sealed class TrayService : IDisposable
             var effective = await _setStartupEnabled(next);
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
             _log(LocalizationService.Format("Tray.AutoStartState", state), InfoBarSeverity.Success);
-            RebuildMenu();
+            RebuildMenuIfNeeded();
         }
         catch (Exception ex)
         {
@@ -375,7 +426,7 @@ public sealed class TrayService : IDisposable
 
     private void OnRefreshPlansRequested()
     {
-        _ = RefreshPlansAsync();
+        _ = RefreshPlansAsync(forceRefresh: true);
         _log(LocalizationService.Get("Tray.RefreshStarted"), InfoBarSeverity.Informational);
     }
 

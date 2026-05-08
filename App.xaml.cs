@@ -67,7 +67,11 @@ public partial class App : Application
             rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
             rootElement.ActualThemeChanged += OnRootActualThemeChanged;
         }
-        ApplySystemTitleBarTheme();
+        if (IsMainWindowVisible())
+        {
+            ApplySystemTitleBarTheme();
+        }
+
         ApplyTrayTheme();
         _window.Closed -= OnMainWindowClosed;
         _window.Closed += OnMainWindowClosed;
@@ -150,7 +154,7 @@ public partial class App : Application
 
         _trayService = new TrayService(
             uiDispatcherQueue: uiDispatcherQueue,
-            getPlansAsync: () => _powerPlanService.GetPlansAsync(forceRefresh: true),
+            getPlansAsync: forceRefresh => _powerPlanService.GetPlansAsync(forceRefresh),
             setActivePlanAsync: async guid =>
             {
                 await _powerPlanService.SetActivePlanAsync(guid);
@@ -195,7 +199,7 @@ public partial class App : Application
                         // Keep tray activation failure focused on the power plan operation.
                     }
 
-                    await RefreshTrayPlansAsync();
+                    await RefreshTrayPlansAsync(forceRefresh: true);
                     throw;
                 }
             },
@@ -245,12 +249,17 @@ public partial class App : Application
 
     public async Task RefreshTrayPlansAsync()
     {
+        await RefreshTrayPlansAsync(forceRefresh: false);
+    }
+
+    public async Task RefreshTrayPlansAsync(bool forceRefresh)
+    {
         if (_trayService is null)
         {
             return;
         }
 
-        await _trayService.RefreshPlansAsync();
+        await _trayService.RefreshPlansAsync(forceRefresh);
     }
 
     private async Task SyncMainPageAfterPlansRefreshAsync()
@@ -312,6 +321,7 @@ public partial class App : Application
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         _ = ShowWindow(hwnd, 5);
         _window.Activate();
+        ApplySystemTitleBarTheme();
 
         var page = _shellPage.EnsureMainPageLoaded();
         _ = RefreshMainPageAfterShowAsync(page);
@@ -418,7 +428,11 @@ public partial class App : Application
 
     private void OnRootActualThemeChanged(FrameworkElement sender, object args)
     {
-        ApplySystemTitleBarTheme();
+        if (IsMainWindowVisible())
+        {
+            ApplySystemTitleBarTheme();
+        }
+
         ApplyTrayTheme();
     }
 
@@ -433,14 +447,21 @@ public partial class App : Application
         if (dispatcherQueue.HasThreadAccess)
         {
             ApplyTrayTheme();
-            ApplySystemTitleBarTheme();
+            if (IsMainWindowVisible())
+            {
+                ApplySystemTitleBarTheme();
+            }
+
             return;
         }
 
         _ = dispatcherQueue.TryEnqueue(() =>
         {
             ApplyTrayTheme();
-            ApplySystemTitleBarTheme();
+            if (IsMainWindowVisible())
+            {
+                ApplySystemTitleBarTheme();
+            }
         });
     }
 

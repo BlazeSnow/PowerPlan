@@ -183,7 +183,7 @@ public sealed partial class SettingsPage : Page
 
             if (Application.Current is App app)
             {
-                await app.RefreshTrayPlansAsync();
+                await app.RefreshTrayPlansAsync(forceRefresh: true);
             }
 
             await ShowOperationDialogAsync(
