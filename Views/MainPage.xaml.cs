@@ -72,8 +72,8 @@ public sealed partial class MainPage : Page
 
             SynchronizePlans(plans);
 
-            var hasUltimate = plans.Any(_powerPlanService.IsUltimatePerformancePlan);
             var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
+            var hasUltimate = plans.Any(plan => IsVisibleUltimatePerformancePlan(plan, savedUltimatePlanGuid));
             var hasHiddenUltimate = !string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
                 && !plans.Any(plan => string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
 
@@ -325,6 +325,13 @@ public sealed partial class MainPage : Page
                 Plans.Move(existingIndex, i);
             }
         }
+    }
+
+    private bool IsVisibleUltimatePerformancePlan(PowerPlanInfo plan, string? savedUltimatePlanGuid)
+    {
+        return _powerPlanService.IsUltimatePerformancePlan(plan)
+            || (!string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
+                && string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
     }
 
     public void AddExternalStatus(string message, bool isError = false)

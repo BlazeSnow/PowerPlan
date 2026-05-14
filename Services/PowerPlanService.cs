@@ -10,12 +10,6 @@ public sealed class PowerPlanService
     public const string UltimatePerformanceGuid = "e9a42b02-d5df-448d-aa00-03f14749eb61";
     private static readonly TimeSpan PlansCacheDuration = TimeSpan.FromMilliseconds(750);
 
-    private static readonly string[] UltimatePlanNameKeywords =
-    {
-        "Ultimate Performance",
-        LocalizationService.Get("PowerPlan.UltimateKeywordZh")
-    };
-
     private static readonly object PlansCacheLock = new();
     private static Task<IReadOnlyList<PowerPlanInfo>>? _plansFetchTask;
     private static long _plansFetchTaskVersion = -1;
@@ -89,20 +83,7 @@ public sealed class PowerPlanService
 
     public bool IsUltimatePerformancePlan(PowerPlanInfo plan)
     {
-        if (plan.Guid.Equals(UltimatePerformanceGuid, StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
-        foreach (var keyword in UltimatePlanNameKeywords)
-        {
-            if (!string.IsNullOrWhiteSpace(keyword) && plan.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return plan.Guid.Equals(UltimatePerformanceGuid, StringComparison.OrdinalIgnoreCase);
     }
 
     private static async Task<IReadOnlyList<PowerPlanInfo>> FetchPlansCoreAsync(long fetchVersion)
