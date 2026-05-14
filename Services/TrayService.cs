@@ -270,18 +270,7 @@ public sealed class TrayService : IDisposable
             return;
         }
 
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "powerplan.ico");
-        if (File.Exists(iconPath))
-        {
-            _trayIconHandle = LoadImage(IntPtr.Zero, iconPath, ImageIcon, 0, 0, LrLoadFromFile);
-            _ownsTrayIcon = _trayIconHandle != IntPtr.Zero;
-        }
-
-        if (_trayIconHandle == IntPtr.Zero)
-        {
-            _trayIconHandle = LoadIcon(IntPtr.Zero, IdiApplication);
-            _ownsTrayIcon = false;
-        }
+        EnsureTrayIconHandle();
 
         var iconData = CreateNotifyIconData();
         iconData.uFlags = NifMessage | NifIcon | NifTip | NifShowTip;
@@ -297,6 +286,27 @@ public sealed class TrayService : IDisposable
 
         iconData.uVersion = NotifyIconVersion4;
         _ = ShellNotifyIcon(NimSetVersion, ref iconData);
+    }
+
+    private void EnsureTrayIconHandle()
+    {
+        if (_trayIconHandle != IntPtr.Zero)
+        {
+            return;
+        }
+
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "powerplan.ico");
+        if (File.Exists(iconPath))
+        {
+            _trayIconHandle = LoadImage(IntPtr.Zero, iconPath, ImageIcon, 0, 0, LrLoadFromFile);
+            _ownsTrayIcon = _trayIconHandle != IntPtr.Zero;
+        }
+
+        if (_trayIconHandle == IntPtr.Zero)
+        {
+            _trayIconHandle = LoadIcon(IntPtr.Zero, IdiApplication);
+            _ownsTrayIcon = false;
+        }
     }
 
     private void RemoveTrayIcon()
