@@ -468,7 +468,7 @@ public sealed class TrayService : IDisposable
                 _ = ToggleStartupAsync();
                 return;
             case CommandExit:
-                _exitApplication();
+                _ = _uiDispatcherQueue.TryEnqueue(() => _exitApplication());
                 return;
             case CommandHiddenUltimate:
                 var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid();
@@ -547,9 +547,7 @@ public sealed class TrayService : IDisposable
         try
         {
             var next = !_isStartupEnabled();
-            var effective = await _setStartupEnabled(next);
-            var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
-            _log(LocalizationService.Format("Tray.AutoStartState", state), InfoBarSeverity.Success);
+            _ = await _setStartupEnabled(next);
         }
         catch (Exception ex)
         {

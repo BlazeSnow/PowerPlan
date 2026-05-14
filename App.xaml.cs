@@ -16,6 +16,7 @@ public partial class App : Application
     private readonly PowerPlanService _powerPlanService = new();
     private readonly StartupService _startupService = new();
     private bool _isExiting;
+    private bool _isDestroyingMainWindow;
     private bool _lastKnownAutoStart;
     private bool _lastKnownTrayEnabled;
     private bool _pendingMainPageRefresh;
@@ -89,9 +90,14 @@ public partial class App : Application
 
             if (expected)
             {
-                // Keep desired=true stable here. Reading StartupTask state immediately after
-                // user-initiated enable can be transiently false and would wrongly revert settings.
-                _ = await _startupService.GetEffectiveEnabledAsync();
+                var effective = await _startupService.GetEffectiveEnabledAsync();
+                if (!effective)
+                {
+                    SettingsService.Current.AutoStart = false;
+                    _lastKnownAutoStart = false;
+                    await SettingsService.SaveCurrentAsync();
+                }
+
                 return;
             }
 
@@ -138,7 +144,6 @@ public partial class App : Application
             setActivePlanAsync: async guid =>
             {
                 await _powerPlanService.SetActivePlanAsync(guid);
-                _pendingMainPageRefresh = true;
 
                 var page = GetVisibleMainPage();
                 if (page is not null)
@@ -149,7 +154,10 @@ public partial class App : Application
                     }
 
                     page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid), InfoBarSeverity.Success);
+                    return;
                 }
+
+                _pendingMainPageRefresh = true;
             },
             getHiddenUltimatePlanGuid: () =>
             {
@@ -246,9 +254,10 @@ public partial class App : Application
         if (page is not null)
         {
             await page.RefreshFromExternalAsync(forceRefresh: true);
+            return;
         }
-        _pendingMainPageRefresh = true;
 
+        _pendingMainPageRefresh = true;
     }
 
     private MainPage? GetMainPage() => _shellPage?.GetMainPage();
@@ -263,8 +272,12 @@ public partial class App : Application
         if (SettingsService.Current.TrayEnabled && _trayService is not null)
         {
             args.Handled = true;
-            HideMainWindow();
+            _ = _window.DispatcherQueue.TryEnqueue(DestroyMainWindow);
+            return;
         }
+
+        args.Handled = true;
+        _ = _window.DispatcherQueue.TryEnqueue(ExitApplication);
     }
 
     private void ExitApplication()
@@ -274,24 +287,8 @@ public partial class App : Application
         _trayService?.Dispose();
         _trayService = null;
 
-        if (_window is not null)
-        {
-            if (_window.Content is FrameworkElement rootElement)
-            {
-                rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
-            }
-
-            _window.Closed -= OnMainWindowClosed;
-            _window.Close();
-            _window = null;
-            _shellPage = null;
-        }
-
-        if (_windowIconHandle != IntPtr.Zero)
-        {
-            _ = DestroyIcon(_windowIconHandle);
-            _windowIconHandle = IntPtr.Zero;
-        }
+        DestroyMainWindow();
+        DestroyWindowIcon();
         Exit();
     }
 
@@ -334,15 +331,32 @@ public partial class App : Application
         _window.Closed += OnMainWindowClosed;
     }
 
-    private void HideMainWindow()
+    private void DestroyMainWindow()
     {
-        if (_window is null)
+        if (_window is null || _isDestroyingMainWindow)
         {
             return;
         }
 
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
-        _ = ShowWindow(hwnd, 0);
+        _isDestroyingMainWindow = true;
+        try
+        {
+            if (_window.Content is FrameworkElement rootElement)
+            {
+                rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
+            }
+
+            _window.Closed -= OnMainWindowClosed;
+            _window.Close();
+            _window = null;
+            _shellPage = null;
+            _pendingMainPageRefresh = true;
+            DestroyWindowIcon();
+        }
+        finally
+        {
+            _isDestroyingMainWindow = false;
+        }
     }
 
     private async Task RefreshMainPageAfterShowAsync(MainPage page)
@@ -406,6 +420,7 @@ public partial class App : Application
             return;
         }
 
+        DestroyWindowIcon();
         _windowIconHandle = LoadImage(IntPtr.Zero, iconPath, ImageIcon, 0, 0, LrLoadFromFile);
         if (_windowIconHandle == IntPtr.Zero)
         {
@@ -414,6 +429,17 @@ public partial class App : Application
 
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconSmall, _windowIconHandle);
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconBig, _windowIconHandle);
+    }
+
+    private void DestroyWindowIcon()
+    {
+        if (_windowIconHandle == IntPtr.Zero)
+        {
+            return;
+        }
+
+        _ = DestroyIcon(_windowIconHandle);
+        _windowIconHandle = IntPtr.Zero;
     }
 
     private void ApplySystemBackdrop()

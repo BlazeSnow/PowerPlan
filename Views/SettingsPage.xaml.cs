@@ -143,9 +143,26 @@ public sealed partial class SettingsPage : Page
 
             await _settingsService.SaveAsync(settings);
         }
-        catch
+        catch (Exception ex)
         {
-            // Keep page silent when persistence/startup update fails.
+            RestoreSettingsToggles();
+            await ShowOperationDialogAsync(
+                LocalizationService.Get("Settings.PageTitle"),
+                LocalizationService.Format("App.Status.StartupSettingFailed", ex.Message));
+        }
+    }
+
+    private void RestoreSettingsToggles()
+    {
+        _updatingUi = true;
+        try
+        {
+            AutoStartToggle.IsOn = _startupService.IsSupported && _settingsService.Current.AutoStart;
+            TrayToggle.IsOn = _settingsService.Current.TrayEnabled;
+        }
+        finally
+        {
+            _updatingUi = false;
         }
     }
 
