@@ -325,6 +325,11 @@ public sealed class TrayService : IDisposable
 
     private nint WindowProc(nint hWnd, uint message, nint wParam, nint lParam)
     {
+        if (_disposed)
+        {
+            return DefWindowProc(hWnd, message, wParam, lParam);
+        }
+
         if (_taskbarCreatedMessage != 0 && message == _taskbarCreatedMessage)
         {
             _trayIconAdded = false;
@@ -359,29 +364,34 @@ public sealed class TrayService : IDisposable
             return;
         }
 
-        if (!GetCursorPos(out var point))
+        try
         {
-            point = default;
+            if (!GetCursorPos(out var point))
+            {
+                point = default;
+            }
+
+            ApplyNativeMenuTheme(_isDarkTheme());
+            _ = SetForegroundWindow(_messageWindowHandle);
+            var command = TrackPopupMenu(
+                menu,
+                TpmReturnCmd | TpmRightButton,
+                point.X,
+                point.Y,
+                0,
+                _messageWindowHandle,
+                IntPtr.Zero);
+            _ = PostMessage(_messageWindowHandle, WmNull, IntPtr.Zero, IntPtr.Zero);
+
+            if (command != 0)
+            {
+                HandleMenuCommand(command);
+            }
         }
-
-        ApplyNativeMenuTheme(_isDarkTheme());
-        _ = SetForegroundWindow(_messageWindowHandle);
-        var command = TrackPopupMenu(
-            menu,
-            TpmReturnCmd | TpmRightButton,
-            point.X,
-            point.Y,
-            0,
-            _messageWindowHandle,
-            IntPtr.Zero);
-        _ = PostMessage(_messageWindowHandle, WmNull, IntPtr.Zero, IntPtr.Zero);
-
-        if (command != 0)
+        finally
         {
-            HandleMenuCommand(command);
+            _ = DestroyMenu(menu);
         }
-
-        _ = DestroyMenu(menu);
     }
 
     private static void ApplyNativeMenuTheme(bool useDarkTheme)

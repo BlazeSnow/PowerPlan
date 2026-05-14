@@ -128,6 +128,8 @@ public sealed partial class SettingsPage : Page
 
     private async Task SaveSettingsAsync()
     {
+        var previousAutoStart = _settingsService.Current.AutoStart;
+
         try
         {
             var desiredAutoStart = AutoStartToggle.IsOn;
@@ -145,6 +147,15 @@ public sealed partial class SettingsPage : Page
         }
         catch (Exception ex)
         {
+            try
+            {
+                _ = await _startupService.SetEnabledAsync(previousAutoStart);
+            }
+            catch
+            {
+                // Prefer showing the original settings failure instead of masking it.
+            }
+
             RestoreSettingsToggles();
             await ShowOperationDialogAsync(
                 LocalizationService.Get("Settings.PageTitle"),
