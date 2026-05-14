@@ -48,6 +48,7 @@ jobs:
       shell: pwsh
       run: |
         dotnet build ${{ env.PROJECTCSPROJ }} `
+          --no-restore `
           -c Release `
           /p:WindowsPackageType=MSIX `
           /p:GenerateAppxPackageOnBuild=true `
