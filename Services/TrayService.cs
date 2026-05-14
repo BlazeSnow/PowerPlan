@@ -1,10 +1,7 @@
-using H.NotifyIcon;
-using H.NotifyIcon.Core;
 using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml.Media.Imaging;
 using PowerPlan.Models;
-using System.Drawing;
-using System.Windows.Input;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 
 namespace PowerPlan.Services;
 
@@ -17,6 +14,14 @@ public sealed class TrayService : IDisposable
     private static readonly string EnableAutoStartText = "\u23FB " + LocalizationService.Get("Tray.Menu.EnableAutoStart");
     private static readonly string DisableAutoStartText = "\u23FB " + LocalizationService.Get("Tray.Menu.DisableAutoStart");
     private static readonly string ExitText = "\u2715 " + LocalizationService.Get("Tray.Menu.Exit");
+
+    private const int CommandOpenMainWindow = 1001;
+    private const int CommandRefreshPlans = 1002;
+    private const int CommandToggleStartup = 1003;
+    private const int CommandExit = 1004;
+    private const int CommandHiddenUltimate = 1005;
+    private const int CommandPlanBase = 2000;
+
     private readonly Func<bool, Task<IReadOnlyList<PowerPlanInfo>>> _getPlansAsync;
     private readonly Func<string, Task> _setActivePlanAsync;
     private readonly Func<string?> _getHiddenUltimatePlanGuid;
@@ -36,15 +41,16 @@ public sealed class TrayService : IDisposable
     private bool _refreshPlansTaskForceRefresh;
     private bool _pendingForceRefresh;
 
-    private TaskbarIcon? _taskbarIcon;
-    private MenuFlyout? _contextFlyout;
-    private Icon? _trayIcon;
-    private string _lastMenuSignature = string.Empty;
+    private nint _messageWindowHandle;
+    private nint _moduleHandle;
+    private nint _trayIconHandle;
+    private nint _currentMenuHandle;
+    private uint _taskbarCreatedMessage;
+    private string _windowClassName = string.Empty;
+    private readonly WndProc _windowProc;
+    private bool _trayIconAdded;
+    private bool _ownsTrayIcon;
     private bool _disposed;
-    private readonly ICommand _showMainWindowCommand;
-    private readonly ICommand _refreshPlansCommand;
-    private readonly ICommand _toggleStartupCommand;
-    private readonly ICommand _exitApplicationCommand;
 
     public TrayService(
         DispatcherQueue uiDispatcherQueue,
@@ -70,10 +76,7 @@ public sealed class TrayService : IDisposable
         _showMainWindow = showMainWindow;
         _exitApplication = exitApplication;
         _log = log;
-        _showMainWindowCommand = new ActionCommand(_showMainWindow);
-        _refreshPlansCommand = new ActionCommand(OnRefreshPlansRequested);
-        _toggleStartupCommand = new ActionCommand(() => _ = ToggleStartupAsync());
-        _exitApplicationCommand = new ActionCommand(_exitApplication);
+        _windowProc = WindowProc;
     }
 
     public async Task InitializeAsync()
@@ -85,34 +88,8 @@ public sealed class TrayService : IDisposable
 
         await RunOnUiThreadAsync(() =>
         {
-            _contextFlyout = new MenuFlyout();
-            _taskbarIcon = new TaskbarIcon
-            {
-                ToolTipText = "PowerPlan",
-                ContextFlyout = _contextFlyout,
-                MenuActivation = PopupActivationMode.LeftOrRightClick
-            };
-            _taskbarIcon.NoLeftClickDelay = true;
-
-            try
-            {
-                var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "powerplan.ico");
-                if (File.Exists(iconPath))
-                {
-                    _trayIcon = new Icon(iconPath);
-                    _taskbarIcon.Icon = _trayIcon;
-                }
-                else
-                {
-                    _taskbarIcon.IconSource = new BitmapImage(new Uri("ms-appx:///Assets/powerplan.png"));
-                }
-            }
-            catch
-            {
-                // Keep tray available even if icon source fails to resolve.
-            }
-
-            _taskbarIcon.ForceCreate();
+            EnsureMessageWindow();
+            AddTrayIcon();
         });
 
         await RefreshPlansAsync();
@@ -166,7 +143,7 @@ public sealed class TrayService : IDisposable
         try
         {
             var plans = await _getPlansAsync(forceRefresh);
-            UpdatePlansSnapshot(plans, forceMenuRebuild: forceRefresh);
+            UpdatePlansSnapshot(plans);
             await _onPlansRefreshed();
         }
         catch (Exception ex)
@@ -185,16 +162,9 @@ public sealed class TrayService : IDisposable
 
     public void UpdatePlansSnapshot(IReadOnlyList<PowerPlanInfo> plans)
     {
-        UpdatePlansSnapshot(plans, forceMenuRebuild: false);
-    }
-
-    private void UpdatePlansSnapshot(IReadOnlyList<PowerPlanInfo> plans, bool forceMenuRebuild)
-    {
-        var changed = false;
-
         lock (_plansLock)
         {
-            var nextPlans = plans
+            _cachedPlans = plans
                 .Select(plan => new PowerPlanInfo
                 {
                     Guid = plan.Guid,
@@ -202,20 +172,7 @@ public sealed class TrayService : IDisposable
                     IsActive = plan.IsActive
                 })
                 .ToArray();
-
-            changed = !ArePlansEqual(_cachedPlans, nextPlans);
-            if (changed)
-            {
-                _cachedPlans = nextPlans;
-            }
         }
-
-        if (!changed && !forceMenuRebuild)
-        {
-            return;
-        }
-
-        RebuildMenuIfNeeded(forceMenuRebuild);
     }
 
     public void ShowBalloon(string message)
@@ -234,128 +191,298 @@ public sealed class TrayService : IDisposable
 
         RunOnUiThread(() =>
         {
-            if (_taskbarIcon is not null)
+            RemoveTrayIcon();
+            DestroyCurrentMenu();
+
+            if (_messageWindowHandle != IntPtr.Zero)
             {
-                _taskbarIcon.Dispose();
-                _taskbarIcon = null;
+                _ = DestroyWindow(_messageWindowHandle);
+                _messageWindowHandle = IntPtr.Zero;
             }
 
-            _trayIcon?.Dispose();
-            _trayIcon = null;
-            _contextFlyout = null;
-            _lastMenuSignature = string.Empty;
+            if (_moduleHandle != IntPtr.Zero && !string.IsNullOrWhiteSpace(_windowClassName))
+            {
+                _ = UnregisterClass(_windowClassName, _moduleHandle);
+                _moduleHandle = IntPtr.Zero;
+                _windowClassName = string.Empty;
+            }
+
+            if (_ownsTrayIcon && _trayIconHandle != IntPtr.Zero)
+            {
+                _ = DestroyIcon(_trayIconHandle);
+            }
+
+            _trayIconHandle = IntPtr.Zero;
+            _ownsTrayIcon = false;
         });
     }
 
-    private void RebuildMenuIfNeeded(bool forceRebuild = false)
+    private void EnsureMessageWindow()
     {
-        var signature = BuildMenuSignature();
-        if (!forceRebuild && string.Equals(signature, _lastMenuSignature, StringComparison.Ordinal))
+        if (_messageWindowHandle != IntPtr.Zero)
         {
             return;
         }
 
-        if (RebuildMenu())
+        _windowClassName = "PowerPlan.TrayWindow." + Guid.NewGuid().ToString("N");
+        _moduleHandle = GetModuleHandle(null);
+        _taskbarCreatedMessage = RegisterWindowMessage("TaskbarCreated");
+
+        var windowClass = new WndClassEx
         {
-            _lastMenuSignature = signature;
+            cbSize = (uint)Marshal.SizeOf<WndClassEx>(),
+            lpfnWndProc = _windowProc,
+            hInstance = _moduleHandle,
+            lpszClassName = _windowClassName
+        };
+
+        if (RegisterClassEx(ref windowClass) == 0)
+        {
+            throw CreateWin32Exception("RegisterClassEx");
+        }
+
+        _messageWindowHandle = CreateWindowEx(
+            0,
+            _windowClassName,
+            AppTitleText,
+            0,
+            0,
+            0,
+            0,
+            0,
+            IntPtr.Zero,
+            IntPtr.Zero,
+            _moduleHandle,
+            IntPtr.Zero);
+
+        if (_messageWindowHandle == IntPtr.Zero)
+        {
+            throw CreateWin32Exception("CreateWindowEx");
         }
     }
 
-    private string BuildMenuSignature()
+    private void AddTrayIcon()
     {
+        if (_trayIconAdded)
+        {
+            return;
+        }
+
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "powerplan.ico");
+        if (File.Exists(iconPath))
+        {
+            _trayIconHandle = LoadImage(IntPtr.Zero, iconPath, ImageIcon, 0, 0, LrLoadFromFile);
+            _ownsTrayIcon = _trayIconHandle != IntPtr.Zero;
+        }
+
+        if (_trayIconHandle == IntPtr.Zero)
+        {
+            _trayIconHandle = LoadIcon(IntPtr.Zero, IdiApplication);
+            _ownsTrayIcon = false;
+        }
+
+        var iconData = CreateNotifyIconData();
+        iconData.uFlags = NifMessage | NifIcon | NifTip;
+        iconData.hIcon = _trayIconHandle;
+        iconData.szTip = AppTitleText;
+
+        if (!ShellNotifyIcon(NimAdd, ref iconData))
+        {
+            throw CreateWin32Exception("Shell_NotifyIcon");
+        }
+
+        _trayIconAdded = true;
+
+        iconData.uVersion = NotifyIconVersion4;
+        _ = ShellNotifyIcon(NimSetVersion, ref iconData);
+    }
+
+    private void RemoveTrayIcon()
+    {
+        if (!_trayIconAdded || _messageWindowHandle == IntPtr.Zero)
+        {
+            return;
+        }
+
+        var iconData = CreateNotifyIconData();
+        _ = ShellNotifyIcon(NimDelete, ref iconData);
+        _trayIconAdded = false;
+    }
+
+    private NotifyIconData CreateNotifyIconData()
+    {
+        return new NotifyIconData
+        {
+            cbSize = (uint)Marshal.SizeOf<NotifyIconData>(),
+            hWnd = _messageWindowHandle,
+            uID = 1,
+            uCallbackMessage = TrayCallbackMessage,
+            szTip = string.Empty,
+            szInfo = string.Empty,
+            szInfoTitle = string.Empty
+        };
+    }
+
+    private nint WindowProc(nint hWnd, uint message, nint wParam, nint lParam)
+    {
+        if (_taskbarCreatedMessage != 0 && message == _taskbarCreatedMessage)
+        {
+            _trayIconAdded = false;
+            AddTrayIcon();
+            return IntPtr.Zero;
+        }
+
+        if (message == TrayCallbackMessage)
+        {
+            var mouseMessage = unchecked((uint)lParam.ToInt64()) & 0xFFFF;
+            if (mouseMessage is WmLButtonUp or WmRButtonUp or WmContextMenu or NinSelect or NinKeySelect)
+            {
+                ShowContextMenu();
+            }
+
+            return IntPtr.Zero;
+        }
+
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+
+    private void ShowContextMenu()
+    {
+        if (_disposed || _messageWindowHandle == IntPtr.Zero)
+        {
+            return;
+        }
+
+        DestroyCurrentMenu();
+        _currentMenuHandle = BuildMenu();
+        if (_currentMenuHandle == IntPtr.Zero)
+        {
+            return;
+        }
+
+        if (!GetCursorPos(out var point))
+        {
+            point = default;
+        }
+
+        _ = SetForegroundWindow(_messageWindowHandle);
+        var command = TrackPopupMenuEx(
+            _currentMenuHandle,
+            TpmReturnCmd | TpmRightButton | TpmNonotify,
+            point.X,
+            point.Y,
+            _messageWindowHandle,
+            IntPtr.Zero);
+        _ = PostMessage(_messageWindowHandle, WmNull, IntPtr.Zero, IntPtr.Zero);
+        DestroyCurrentMenu();
+
+        if (command != 0)
+        {
+            HandleMenuCommand(command);
+        }
+    }
+
+    private nint BuildMenu()
+    {
+        var menu = CreatePopupMenu();
+        if (menu == IntPtr.Zero)
+        {
+            return IntPtr.Zero;
+        }
+
         IReadOnlyList<PowerPlanInfo> plans;
         lock (_plansLock)
         {
             plans = _cachedPlans.ToArray();
         }
 
-        var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid() ?? string.Empty;
-        var builder = new System.Text.StringBuilder();
-        builder.Append(_isStartupEnabled() ? '1' : '0');
-        builder.Append('|');
-        builder.Append(hiddenUltimatePlanGuid);
+        AppendMenuText(menu, MfDisabled | MfGrayed, 0, AppTitleText);
+        AppendMenuText(menu, MfString, CommandOpenMainWindow, OpenMainWindowText);
+        AppendMenuSeparator(menu);
 
         for (var i = 0; i < plans.Count; i++)
         {
             var plan = plans[i];
-            builder.Append('|');
-            builder.Append(plan.Guid);
-            builder.Append(',');
-            builder.Append(plan.Name);
-            builder.Append(',');
-            builder.Append(plan.IsActive ? '1' : '0');
+            var flags = MfString | (plan.IsActive ? MfChecked : 0);
+            AppendMenuText(menu, flags, CommandPlanBase + i, "\u26A1 " + plan.Name);
         }
 
-        return builder.ToString();
+        var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid();
+        var hasHiddenUltimate = !string.IsNullOrWhiteSpace(hiddenUltimatePlanGuid)
+            && !plans.Any(plan => string.Equals(plan.Guid, hiddenUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
+        if (hasHiddenUltimate)
+        {
+            AppendMenuText(menu, MfString, CommandHiddenUltimate, OpenHiddenUltimateText);
+        }
+
+        AppendMenuSeparator(menu);
+        AppendMenuText(menu, MfString, CommandRefreshPlans, RefreshPlansText);
+
+        var startupText = _isStartupEnabled()
+            ? DisableAutoStartText
+            : EnableAutoStartText;
+        AppendMenuText(menu, MfString, CommandToggleStartup, startupText);
+
+        AppendMenuSeparator(menu);
+        AppendMenuText(menu, MfString, CommandExit, ExitText);
+
+        return menu;
     }
 
-    private bool RebuildMenu()
+    private static void AppendMenuText(nint menu, uint flags, int commandId, string text)
     {
-        return RunOnUiThread(() =>
+        _ = AppendMenu(menu, flags, (UIntPtr)commandId, text);
+    }
+
+    private static void AppendMenuSeparator(nint menu)
+    {
+        _ = AppendMenu(menu, MfSeparator, UIntPtr.Zero, null);
+    }
+
+    private void HandleMenuCommand(int command)
+    {
+        switch (command)
         {
-            if (_contextFlyout is null)
-            {
+            case CommandOpenMainWindow:
+                _showMainWindow();
                 return;
-            }
+            case CommandRefreshPlans:
+                OnRefreshPlansRequested();
+                return;
+            case CommandToggleStartup:
+                _ = ToggleStartupAsync();
+                return;
+            case CommandExit:
+                _exitApplication();
+                return;
+            case CommandHiddenUltimate:
+                var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid();
+                if (!string.IsNullOrWhiteSpace(hiddenUltimatePlanGuid))
+                {
+                    _ = OnActivateHiddenUltimateAsync(hiddenUltimatePlanGuid);
+                }
 
-            IReadOnlyList<PowerPlanInfo> plans;
-            lock (_plansLock)
-            {
-                plans = _cachedPlans.ToArray();
-            }
+                return;
+        }
 
-            _contextFlyout.Items.Clear();
-
-            _contextFlyout.Items.Add(new MenuFlyoutItem
-            {
-                Text = AppTitleText,
-                IsEnabled = false
-            });
-
-            _contextFlyout.Items.Add(CreateActionItem(OpenMainWindowText, _showMainWindowCommand));
-            _contextFlyout.Items.Add(new MenuFlyoutSeparator());
-
-            for (var i = 0; i < plans.Count; i++)
-            {
-                var plan = plans[i];
-                var planGuid = plan.Guid;
-                var planName = plan.Name;
-                var prefix = plan.IsActive ? "\u2713 " : string.Empty;
-                _contextFlyout.Items.Add(CreateActionItem(
-                    prefix + "\u26A1 " + planName,
-                    new ActionCommand(() => _ = OnSwitchPlanAsync(planGuid, planName))));
-            }
-
-            var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid();
-            var hasHiddenUltimate = !string.IsNullOrWhiteSpace(hiddenUltimatePlanGuid)
-                && !plans.Any(plan => string.Equals(plan.Guid, hiddenUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
-            if (hasHiddenUltimate)
-            {
-                _contextFlyout.Items.Add(CreateActionItem(
-                    OpenHiddenUltimateText,
-                    new ActionCommand(() => _ = OnActivateHiddenUltimateAsync(hiddenUltimatePlanGuid!))));
-            }
-
-            _contextFlyout.Items.Add(new MenuFlyoutSeparator());
-            _contextFlyout.Items.Add(CreateActionItem(RefreshPlansText, _refreshPlansCommand));
-
-            var startupText = _isStartupEnabled()
-                ? DisableAutoStartText
-                : EnableAutoStartText;
-            _contextFlyout.Items.Add(CreateActionItem(startupText, _toggleStartupCommand));
-
-            _contextFlyout.Items.Add(new MenuFlyoutSeparator());
-            _contextFlyout.Items.Add(CreateActionItem(ExitText, _exitApplicationCommand));
-        });
-    }
-
-    private MenuFlyoutItem CreateActionItem(string text, ICommand command)
-    {
-        return new MenuFlyoutItem
+        if (command < CommandPlanBase)
         {
-            Text = text,
-            Command = command
-        };
+            return;
+        }
+
+        PowerPlanInfo? selectedPlan;
+        lock (_plansLock)
+        {
+            var index = command - CommandPlanBase;
+            selectedPlan = index >= 0 && index < _cachedPlans.Count
+                ? _cachedPlans[index]
+                : null;
+        }
+
+        if (selectedPlan is not null)
+        {
+            _ = OnSwitchPlanAsync(selectedPlan.Guid, selectedPlan.Name);
+        }
     }
 
     private async Task OnSwitchPlanAsync(string planGuid, string planName)
@@ -387,11 +514,9 @@ public sealed class TrayService : IDisposable
 
     private void SetActivePlanInCache(string activePlanGuid)
     {
-        var changed = false;
-
         lock (_plansLock)
         {
-            var nextPlans = _cachedPlans
+            _cachedPlans = _cachedPlans
                 .Select(plan => new PowerPlanInfo
                 {
                     Guid = plan.Guid,
@@ -399,47 +524,7 @@ public sealed class TrayService : IDisposable
                     IsActive = string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase)
                 })
                 .ToArray();
-
-            changed = !ArePlansEqual(_cachedPlans, nextPlans);
-            if (changed)
-            {
-                _cachedPlans = nextPlans;
-            }
         }
-
-        if (!changed)
-        {
-            return;
-        }
-
-        RebuildMenuIfNeeded();
-    }
-
-    private static bool ArePlansEqual(IReadOnlyList<PowerPlanInfo> current, IReadOnlyList<PowerPlanInfo> next)
-    {
-        if (ReferenceEquals(current, next))
-        {
-            return true;
-        }
-
-        if (current.Count != next.Count)
-        {
-            return false;
-        }
-
-        for (var i = 0; i < current.Count; i++)
-        {
-            var left = current[i];
-            var right = next[i];
-            if (!string.Equals(left.Guid, right.Guid, StringComparison.OrdinalIgnoreCase)
-                || !string.Equals(left.Name, right.Name, StringComparison.Ordinal)
-                || left.IsActive != right.IsActive)
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private async Task ToggleStartupAsync()
@@ -450,7 +535,6 @@ public sealed class TrayService : IDisposable
             var effective = await _setStartupEnabled(next);
             var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
             _log(LocalizationService.Format("Tray.AutoStartState", state), InfoBarSeverity.Success);
-            RebuildMenuIfNeeded();
         }
         catch (Exception ex)
         {
@@ -462,6 +546,26 @@ public sealed class TrayService : IDisposable
     {
         _ = RefreshPlansAsync(forceRefresh: true);
         _log(LocalizationService.Get("Tray.RefreshStarted"), InfoBarSeverity.Informational);
+    }
+
+    private void DestroyCurrentMenu()
+    {
+        if (_currentMenuHandle == IntPtr.Zero)
+        {
+            return;
+        }
+
+        _ = DestroyMenu(_currentMenuHandle);
+        _currentMenuHandle = IntPtr.Zero;
+    }
+
+    private static InvalidOperationException CreateWin32Exception(string operation)
+    {
+        var error = Marshal.GetLastWin32Error();
+        var message = error == 0
+            ? operation
+            : $"{operation}: {new Win32Exception(error).Message}";
+        return new InvalidOperationException(message);
     }
 
     private bool RunOnUiThread(Action action)
@@ -512,26 +616,160 @@ public sealed class TrayService : IDisposable
         return completion.Task;
     }
 
-    private sealed class ActionCommand : ICommand
+    private const uint TrayCallbackMessage = WmApp + 1;
+    private const uint WmNull = 0x0000;
+    private const uint WmLButtonUp = 0x0202;
+    private const uint WmRButtonUp = 0x0205;
+    private const uint WmContextMenu = 0x007B;
+    private const uint WmUser = 0x0400;
+    private const uint WmApp = 0x8000;
+    private const uint NinSelect = WmUser;
+    private const uint NinKeySelect = WmUser + 1;
+
+    private const uint NimAdd = 0x00000000;
+    private const uint NimDelete = 0x00000002;
+    private const uint NimSetVersion = 0x00000004;
+    private const uint NifMessage = 0x00000001;
+    private const uint NifIcon = 0x00000002;
+    private const uint NifTip = 0x00000004;
+    private const uint NotifyIconVersion4 = 4;
+
+    private const uint MfString = 0x00000000;
+    private const uint MfGrayed = 0x00000001;
+    private const uint MfDisabled = 0x00000002;
+    private const uint MfChecked = 0x00000008;
+    private const uint MfSeparator = 0x00000800;
+
+    private const uint TpmRightButton = 0x0002;
+    private const uint TpmReturnCmd = 0x0100;
+    private const uint TpmNonotify = 0x0080;
+
+    private const uint ImageIcon = 1;
+    private const uint LrLoadFromFile = 0x00000010;
+    private static readonly nint IdiApplication = new(32512);
+
+    private delegate nint WndProc(nint hWnd, uint message, nint wParam, nint lParam);
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct WndClassEx
     {
-        private readonly Action _execute;
-
-        public ActionCommand(Action execute)
-        {
-            _execute = execute;
-        }
-
-        public event EventHandler? CanExecuteChanged
-        {
-            add { }
-            remove { }
-        }
-
-        public bool CanExecute(object? parameter) => true;
-
-        public void Execute(object? parameter)
-        {
-            _execute();
-        }
+        public uint cbSize;
+        public uint style;
+        [MarshalAs(UnmanagedType.FunctionPtr)]
+        public WndProc lpfnWndProc;
+        public int cbClsExtra;
+        public int cbWndExtra;
+        public nint hInstance;
+        public nint hIcon;
+        public nint hCursor;
+        public nint hbrBackground;
+        public string? lpszMenuName;
+        public string lpszClassName;
+        public nint hIconSm;
     }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct NotifyIconData
+    {
+        public uint cbSize;
+        public nint hWnd;
+        public uint uID;
+        public uint uFlags;
+        public uint uCallbackMessage;
+        public nint hIcon;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string szTip;
+        public uint dwState;
+        public uint dwStateMask;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+        public string szInfo;
+        public uint uVersion;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+        public string szInfoTitle;
+        public uint dwInfoFlags;
+        public Guid guidItem;
+        public nint hBalloonIcon;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Point
+    {
+        public int X;
+        public int Y;
+    }
+
+    [DllImport("shell32.dll", EntryPoint = "Shell_NotifyIconW", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShellNotifyIcon(uint dwMessage, ref NotifyIconData lpData);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern ushort RegisterClassEx(ref WndClassEx lpWndClass);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool UnregisterClass(string lpClassName, nint hInstance);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern uint RegisterWindowMessage(string lpString);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern nint CreateWindowEx(
+        uint dwExStyle,
+        string lpClassName,
+        string lpWindowName,
+        uint dwStyle,
+        int x,
+        int y,
+        int nWidth,
+        int nHeight,
+        nint hWndParent,
+        nint hMenu,
+        nint hInstance,
+        nint lpParam);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DestroyWindow(nint hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern nint DefWindowProc(nint hWnd, uint msg, nint wParam, nint lParam);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern nint LoadImage(nint hinst, string lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint LoadIcon(nint hInstance, nint lpIconName);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DestroyIcon(nint hIcon);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint CreatePopupMenu();
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool AppendMenu(nint hMenu, uint uFlags, UIntPtr uIDNewItem, string? lpNewItem);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool DestroyMenu(nint hMenu);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern int TrackPopupMenuEx(nint hMenu, uint uFlags, int x, int y, nint hWnd, nint lptpm);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetCursorPos(out Point lpPoint);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(nint hWnd);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool PostMessage(nint hWnd, uint msg, nint wParam, nint lParam);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern nint GetModuleHandle(string? lpModuleName);
 }
