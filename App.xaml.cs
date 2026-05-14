@@ -1,4 +1,5 @@
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using PowerPlan.Models;
@@ -16,7 +17,6 @@ public partial class App : Application
     private readonly PowerPlanService _powerPlanService = new();
     private readonly StartupService _startupService = new();
     private bool _isExiting;
-    private bool _isDestroyingMainWindow;
     private bool _lastKnownAutoStart;
     private bool _lastKnownTrayEnabled;
     private bool _pendingMainPageRefresh;
@@ -262,7 +262,7 @@ public partial class App : Application
 
     private MainPage? GetMainPage() => _shellPage?.GetMainPage();
 
-    private void OnMainWindowClosed(object sender, WindowEventArgs args)
+    private void OnMainWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
     {
         if (_isExiting || _window is null)
         {
@@ -271,13 +271,13 @@ public partial class App : Application
 
         if (SettingsService.Current.TrayEnabled && _trayService is not null)
         {
-            args.Handled = true;
+            args.Cancel = true;
             HideMainWindowIfCreated();
-            _ = _window.DispatcherQueue.TryEnqueue(DestroyMainWindow);
+            _pendingMainPageRefresh = true;
             return;
         }
 
-        args.Handled = true;
+        args.Cancel = true;
         HideMainWindowIfCreated();
         _ = _window.DispatcherQueue.TryEnqueue(ExitApplication);
     }
@@ -290,7 +290,7 @@ public partial class App : Application
         _trayService?.Dispose();
         _trayService = null;
 
-        DestroyMainWindow(closeWindow: false);
+        CloseMainWindowForExit();
         DestroyWindowIcon();
         Exit();
     }
@@ -338,46 +338,27 @@ public partial class App : Application
             rootElement.ActualThemeChanged += OnRootActualThemeChanged;
         }
 
-        _window.Closed -= OnMainWindowClosed;
-        _window.Closed += OnMainWindowClosed;
+        _window.AppWindow.Closing -= OnMainWindowClosing;
+        _window.AppWindow.Closing += OnMainWindowClosing;
         return true;
     }
 
-    private void DestroyMainWindow()
+    private void CloseMainWindowForExit()
     {
-        DestroyMainWindow(closeWindow: true);
-    }
-
-    private void DestroyMainWindow(bool closeWindow)
-    {
-        if (_window is null || _isDestroyingMainWindow)
+        if (_window is null)
         {
             return;
         }
 
-        _isDestroyingMainWindow = true;
-        try
+        if (_window.Content is FrameworkElement rootElement)
         {
-            if (_window.Content is FrameworkElement rootElement)
-            {
-                rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
-            }
-
-            _window.Closed -= OnMainWindowClosed;
-            if (closeWindow)
-            {
-                _window.Close();
-            }
-
-            _window = null;
-            _shellPage = null;
-            _pendingMainPageRefresh = true;
-            DestroyWindowIcon();
+            rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
         }
-        finally
-        {
-            _isDestroyingMainWindow = false;
-        }
+
+        _window.AppWindow.Closing -= OnMainWindowClosing;
+        _window.Close();
+        _window = null;
+        _shellPage = null;
     }
 
     private void HideMainWindowIfCreated()
