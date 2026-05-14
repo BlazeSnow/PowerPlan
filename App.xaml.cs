@@ -290,7 +290,7 @@ public partial class App : Application
         _trayService?.Dispose();
         _trayService = null;
 
-        CloseMainWindowForExit();
+        ReleaseMainWindowForExit();
         DestroyWindowIcon();
         Exit();
     }
@@ -343,7 +343,7 @@ public partial class App : Application
         return true;
     }
 
-    private void CloseMainWindowForExit()
+    private void ReleaseMainWindowForExit()
     {
         if (_window is null)
         {
@@ -356,7 +356,6 @@ public partial class App : Application
         }
 
         _window.AppWindow.Closing -= OnMainWindowClosing;
-        _window.Close();
         _window = null;
         _shellPage = null;
     }
