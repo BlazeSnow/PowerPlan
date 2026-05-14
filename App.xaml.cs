@@ -272,48 +272,59 @@ public partial class App : Application
         if (SettingsService.Current.TrayEnabled && _trayService is not null)
         {
             args.Handled = true;
+            HideMainWindowIfCreated();
             _ = _window.DispatcherQueue.TryEnqueue(DestroyMainWindow);
             return;
         }
 
         args.Handled = true;
+        HideMainWindowIfCreated();
         _ = _window.DispatcherQueue.TryEnqueue(ExitApplication);
     }
 
     private void ExitApplication()
     {
         _isExiting = true;
+        HideMainWindowIfCreated();
         _uiSettings.ColorValuesChanged -= OnColorValuesChanged;
         _trayService?.Dispose();
         _trayService = null;
 
-        DestroyMainWindow();
+        DestroyMainWindow(closeWindow: false);
         DestroyWindowIcon();
         Exit();
     }
 
     private void ShowMainWindow()
     {
-        EnsureMainWindowCreated(navigateToHomeOnStartup: true);
+        var created = EnsureMainWindowCreated(navigateToHomeOnStartup: true);
 
         if (_window is null || _shellPage is null)
         {
             return;
         }
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
-        _ = ShowWindow(hwnd, 5);
+
+        if (!created)
+        {
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+            _ = ShowWindow(hwnd, SwShow);
+        }
+
         _window.Activate();
         ApplySystemTitleBarTheme();
 
-        var page = _shellPage.EnsureMainPageLoaded();
-        _ = RefreshMainPageAfterShowAsync(page);
+        if (!created || _pendingMainPageRefresh)
+        {
+            var page = _shellPage.EnsureMainPageLoaded();
+            _ = RefreshMainPageAfterShowAsync(page);
+        }
     }
 
-    private void EnsureMainWindowCreated(bool navigateToHomeOnStartup)
+    private bool EnsureMainWindowCreated(bool navigateToHomeOnStartup)
     {
         if (_window is not null && _shellPage is not null)
         {
-            return;
+            return false;
         }
 
         _window ??= new Window();
@@ -329,9 +340,15 @@ public partial class App : Application
 
         _window.Closed -= OnMainWindowClosed;
         _window.Closed += OnMainWindowClosed;
+        return true;
     }
 
     private void DestroyMainWindow()
+    {
+        DestroyMainWindow(closeWindow: true);
+    }
+
+    private void DestroyMainWindow(bool closeWindow)
     {
         if (_window is null || _isDestroyingMainWindow)
         {
@@ -347,7 +364,11 @@ public partial class App : Application
             }
 
             _window.Closed -= OnMainWindowClosed;
-            _window.Close();
+            if (closeWindow)
+            {
+                _window.Close();
+            }
+
             _window = null;
             _shellPage = null;
             _pendingMainPageRefresh = true;
@@ -357,6 +378,17 @@ public partial class App : Application
         {
             _isDestroyingMainWindow = false;
         }
+    }
+
+    private void HideMainWindowIfCreated()
+    {
+        if (_window is null)
+        {
+            return;
+        }
+
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        _ = ShowWindow(hwnd, SwHide);
     }
 
     private async Task RefreshMainPageAfterShowAsync(MainPage page)
@@ -554,6 +586,8 @@ public partial class App : Application
     private const uint LrLoadFromFile = 0x00000010;
     private const uint DwmaUseImmersiveDarkMode = 20;
     private const uint DwmaUseImmersiveDarkModeBefore20H1 = 19;
+    private const int SwHide = 0;
+    private const int SwShow = 5;
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
