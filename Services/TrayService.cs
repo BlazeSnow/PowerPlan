@@ -175,6 +175,8 @@ public sealed class TrayService : IDisposable
                 })
                 .ToArray();
         }
+
+        UpdateTrayTooltip();
     }
 
     public void ShowBalloon(string message)
@@ -284,7 +286,7 @@ public sealed class TrayService : IDisposable
         var iconData = CreateNotifyIconData();
         iconData.uFlags = NifMessage | NifIcon | NifTip | NifShowTip;
         iconData.hIcon = _trayIconHandle;
-        iconData.szTip = AppTitleText;
+        iconData.szTip = BuildTooltipText();
 
         if (!ShellNotifyIcon(NimAdd, ref iconData))
         {
@@ -307,6 +309,46 @@ public sealed class TrayService : IDisposable
         var iconData = CreateNotifyIconData();
         _ = ShellNotifyIcon(NimDelete, ref iconData);
         _trayIconAdded = false;
+    }
+
+    private void UpdateTrayTooltip()
+    {
+        RunOnUiThread(() =>
+        {
+            if (!_trayIconAdded || _messageWindowHandle == IntPtr.Zero)
+            {
+                return;
+            }
+
+            var iconData = CreateNotifyIconData();
+            iconData.uFlags = NifTip | NifShowTip;
+            iconData.szTip = BuildTooltipText();
+            _ = ShellNotifyIcon(NimModify, ref iconData);
+        });
+    }
+
+    private string BuildTooltipText()
+    {
+        string? activePlanName;
+        lock (_plansLock)
+        {
+            activePlanName = _cachedPlans.FirstOrDefault(plan => plan.IsActive)?.Name;
+        }
+
+        var planText = string.IsNullOrWhiteSpace(activePlanName)
+            ? LocalizationService.Get("Tray.Tooltip.PlanUnavailable")
+            : LocalizationService.Format("Tray.Tooltip.Plan", activePlanName);
+        var startupState = LocalizationService.Get(_isStartupEnabled() ? "App.Status.On" : "App.Status.Off");
+        var startupText = LocalizationService.Format("Tray.Tooltip.AutoStart", startupState);
+        return TruncateTooltip($"{AppTitleText}\n{planText}\n{startupText}");
+    }
+
+    private static string TruncateTooltip(string text)
+    {
+        const int maxTooltipLength = 127;
+        return text.Length <= maxTooltipLength
+            ? text
+            : text[..maxTooltipLength];
     }
 
     private NotifyIconData CreateNotifyIconData()
@@ -516,6 +558,7 @@ public sealed class TrayService : IDisposable
         {
             await _setActivePlanAsync(planGuid);
             SetActivePlanInCache(planGuid);
+            UpdateTrayTooltip();
             _log(LocalizationService.Format("Tray.SwitchTo", planName), InfoBarSeverity.Success);
         }
         catch (Exception ex)
@@ -558,6 +601,7 @@ public sealed class TrayService : IDisposable
         {
             var next = !_isStartupEnabled();
             _ = await _setStartupEnabled(next);
+            UpdateTrayTooltip();
         }
         catch (Exception ex)
         {
@@ -639,6 +683,7 @@ public sealed class TrayService : IDisposable
     private const uint NinKeySelect = WmUser + 1;
 
     private const uint NimAdd = 0x00000000;
+    private const uint NimModify = 0x00000001;
     private const uint NimDelete = 0x00000002;
     private const uint NimSetVersion = 0x00000004;
     private const uint NifMessage = 0x00000001;
