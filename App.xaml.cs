@@ -1,5 +1,4 @@
 using Microsoft.UI.Dispatching;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using PowerPlan.Models;
@@ -52,15 +51,35 @@ public partial class App : Application
         _lastKnownAutoStart = SettingsService.Current.AutoStart;
         _lastKnownTrayEnabled = SettingsService.Current.TrayEnabled;
 
-        await ApplyStartupSettingAsync();
-        if (startupTaskLaunch && SettingsService.Current.TrayEnabled)
+        _window ??= new Window();
+        var launchToTray = startupTaskLaunch && SettingsService.Current.TrayEnabled;
+        _shellPage ??= new ShellPage(navigateToHomeOnStartup: !launchToTray);
+        _window.Content = _shellPage;
+        ConfigureWindowAppearance();
+
+        _window.Activate();
+        if (launchToTray)
         {
-            await EnsureTrayStateAsync();
-            return;
+            HideMainWindow();
+        }
+        if (_window.Content is FrameworkElement rootElement)
+        {
+            rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
+            rootElement.ActualThemeChanged += OnRootActualThemeChanged;
+        }
+        if (IsMainWindowVisible())
+        {
+            ApplySystemTitleBarTheme();
         }
 
-        ShowMainWindow();
+        ApplyTrayTheme();
+        _window.Closed -= OnMainWindowClosed;
+        _window.Closed += OnMainWindowClosed;
+
+        await ApplyStartupSettingAsync();
         await EnsureTrayStateAsync();
+
+        // For startup-task launch with tray enabled, window is already hidden before async initialization.
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
@@ -90,14 +109,9 @@ public partial class App : Application
 
             if (expected)
             {
-                var effectiveEnabled = await _startupService.GetEffectiveEnabledAsync();
-                if (!effectiveEnabled)
-                {
-                    SettingsService.Current.AutoStart = false;
-                    _lastKnownAutoStart = false;
-                    await SettingsService.SaveCurrentAsync();
-                }
-
+                // Keep desired=true stable here. Reading StartupTask state immediately after
+                // user-initiated enable can be transiently false and would wrongly revert settings.
+                _ = await _startupService.GetEffectiveEnabledAsync();
                 return;
             }
 
@@ -126,7 +140,7 @@ public partial class App : Application
             return;
         }
 
-        if (_trayService is not null)
+        if (_trayService is not null || _window is null)
         {
             return;
         }
@@ -154,10 +168,11 @@ public partial class App : Application
                     }
 
                     page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid), InfoBarSeverity.Success);
-                    return;
                 }
-
-                _pendingMainPageRefresh = true;
+                else
+                {
+                    _pendingMainPageRefresh = true;
+                }
             },
             getHiddenUltimatePlanGuid: () =>
             {
@@ -254,15 +269,17 @@ public partial class App : Application
         if (page is not null)
         {
             await page.RefreshFromExternalAsync(forceRefresh: true);
-            return;
+        }
+        else if (GetMainPage() is not null)
+        {
+            _pendingMainPageRefresh = true;
         }
 
-        _pendingMainPageRefresh = true;
     }
 
     private MainPage? GetMainPage() => _shellPage?.GetMainPage();
 
-    private void OnMainWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
+    private void OnMainWindowClosed(object sender, WindowEventArgs args)
     {
         if (_isExiting || _window is null)
         {
@@ -271,96 +288,47 @@ public partial class App : Application
 
         if (SettingsService.Current.TrayEnabled && _trayService is not null)
         {
-            args.Cancel = true;
-            HideMainWindowIfCreated();
-            _pendingMainPageRefresh = true;
-            return;
+            args.Handled = true;
+            HideMainWindow();
         }
-
-        args.Cancel = true;
-        HideMainWindowIfCreated();
-        _ = _window.DispatcherQueue.TryEnqueue(ExitApplication);
     }
 
     private void ExitApplication()
     {
         _isExiting = true;
-        HideMainWindowIfCreated();
         _uiSettings.ColorValuesChanged -= OnColorValuesChanged;
         _trayService?.Dispose();
         _trayService = null;
-
-        ReleaseMainWindowForExit();
-        DestroyWindowIcon();
+        if (_windowIconHandle != IntPtr.Zero)
+        {
+            _ = DestroyIcon(_windowIconHandle);
+            _windowIconHandle = IntPtr.Zero;
+        }
         Exit();
     }
 
     private void ShowMainWindow()
-    {
-        var created = EnsureMainWindowCreated(navigateToHomeOnStartup: true);
-
-        if (_window is null || _shellPage is null)
-        {
-            return;
-        }
-
-        if (!created)
-        {
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
-            _ = ShowWindow(hwnd, SwShow);
-        }
-
-        _window.Activate();
-        ApplySystemTitleBarTheme();
-
-        if (!created || _pendingMainPageRefresh)
-        {
-            var page = _shellPage.EnsureMainPageLoaded();
-            _ = RefreshMainPageAfterShowAsync(page);
-        }
-    }
-
-    private bool EnsureMainWindowCreated(bool navigateToHomeOnStartup)
-    {
-        if (_window is not null && _shellPage is not null)
-        {
-            return false;
-        }
-
-        _window ??= new Window();
-        _shellPage ??= new ShellPage(navigateToHomeOnStartup: navigateToHomeOnStartup);
-        _window.Content = _shellPage;
-        ConfigureWindowAppearance();
-
-        if (_window.Content is FrameworkElement rootElement)
-        {
-            rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
-            rootElement.ActualThemeChanged += OnRootActualThemeChanged;
-        }
-
-        _window.AppWindow.Closing -= OnMainWindowClosing;
-        _window.AppWindow.Closing += OnMainWindowClosing;
-        return true;
-    }
-
-    private void ReleaseMainWindowForExit()
     {
         if (_window is null)
         {
             return;
         }
 
-        if (_window.Content is FrameworkElement rootElement)
+        if (_shellPage is null)
         {
-            rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
+            return;
         }
 
-        _window.AppWindow.Closing -= OnMainWindowClosing;
-        _window = null;
-        _shellPage = null;
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        _ = ShowWindow(hwnd, 5);
+        _window.Activate();
+        ApplySystemTitleBarTheme();
+
+        var page = _shellPage.EnsureMainPageLoaded();
+        _ = RefreshMainPageAfterShowAsync(page);
     }
 
-    private void HideMainWindowIfCreated()
+    private void HideMainWindow()
     {
         if (_window is null)
         {
@@ -368,7 +336,7 @@ public partial class App : Application
         }
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
-        _ = ShowWindow(hwnd, SwHide);
+        _ = ShowWindow(hwnd, 0);
     }
 
     private async Task RefreshMainPageAfterShowAsync(MainPage page)
@@ -432,7 +400,6 @@ public partial class App : Application
             return;
         }
 
-        DestroyWindowIcon();
         _windowIconHandle = LoadImage(IntPtr.Zero, iconPath, ImageIcon, 0, 0, LrLoadFromFile);
         if (_windowIconHandle == IntPtr.Zero)
         {
@@ -441,17 +408,6 @@ public partial class App : Application
 
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconSmall, _windowIconHandle);
         _ = SendMessage(hwnd, WmSetIcon, (nint)IconBig, _windowIconHandle);
-    }
-
-    private void DestroyWindowIcon()
-    {
-        if (_windowIconHandle == IntPtr.Zero)
-        {
-            return;
-        }
-
-        _ = DestroyIcon(_windowIconHandle);
-        _windowIconHandle = IntPtr.Zero;
     }
 
     private void ApplySystemBackdrop()
@@ -477,6 +433,8 @@ public partial class App : Application
         {
             ApplySystemTitleBarTheme();
         }
+
+        ApplyTrayTheme();
     }
 
     private void OnColorValuesChanged(UISettings sender, object args)
@@ -489,6 +447,7 @@ public partial class App : Application
         var dispatcherQueue = _window.DispatcherQueue;
         if (dispatcherQueue.HasThreadAccess)
         {
+            ApplyTrayTheme();
             if (IsMainWindowVisible())
             {
                 ApplySystemTitleBarTheme();
@@ -499,11 +458,18 @@ public partial class App : Application
 
         _ = dispatcherQueue.TryEnqueue(() =>
         {
+            ApplyTrayTheme();
             if (IsMainWindowVisible())
             {
                 ApplySystemTitleBarTheme();
             }
         });
+    }
+
+    private void ApplyTrayTheme()
+    {
+        var theme = GetEffectiveTheme();
+        ApplyNativeMenuTheme(theme);
     }
 
     private ElementTheme GetEffectiveTheme()
@@ -526,6 +492,21 @@ public partial class App : Application
         catch
         {
             return false;
+        }
+    }
+
+    private static void ApplyNativeMenuTheme(ElementTheme theme)
+    {
+        try
+        {
+            // The tray menu uses Win32 popup menus. These undocumented
+            // uxtheme entries enable dark menu rendering on supported Windows builds.
+            _ = SetPreferredAppMode(theme == ElementTheme.Dark ? PreferredAppMode.ForceDark : PreferredAppMode.ForceLight);
+            FlushMenuThemes();
+        }
+        catch
+        {
+            // Native menu dark mode APIs are undocumented and may be unavailable on some systems.
         }
     }
 
@@ -566,8 +547,15 @@ public partial class App : Application
     private const uint LrLoadFromFile = 0x00000010;
     private const uint DwmaUseImmersiveDarkMode = 20;
     private const uint DwmaUseImmersiveDarkModeBefore20H1 = 19;
-    private const int SwHide = 0;
-    private const int SwShow = 5;
+
+    private enum PreferredAppMode
+    {
+        Default,
+        AllowDark,
+        ForceDark,
+        ForceLight,
+        Max
+    }
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
@@ -589,4 +577,9 @@ public partial class App : Application
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(nint hwnd, uint dwAttribute, ref int pvAttribute, int cbAttribute);
 
+    [DllImport("uxtheme.dll", EntryPoint = "#135", ExactSpelling = true)]
+    private static extern PreferredAppMode SetPreferredAppMode(PreferredAppMode appMode);
+
+    [DllImport("uxtheme.dll", EntryPoint = "#136", ExactSpelling = true)]
+    private static extern void FlushMenuThemes();
 }
