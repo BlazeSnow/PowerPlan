@@ -282,7 +282,7 @@ public sealed class TrayService : IDisposable
         }
 
         var iconData = CreateNotifyIconData();
-        iconData.uFlags = NifMessage | NifIcon | NifTip;
+        iconData.uFlags = NifMessage | NifIcon | NifTip | NifShowTip;
         iconData.hIcon = _trayIconHandle;
         iconData.szTip = AppTitleText;
 
@@ -644,6 +644,7 @@ public sealed class TrayService : IDisposable
     private const uint NifMessage = 0x00000001;
     private const uint NifIcon = 0x00000002;
     private const uint NifTip = 0x00000004;
+    private const uint NifShowTip = 0x00000080;
     private const uint NotifyIconVersion4 = 4;
 
     private const uint MfString = 0x00000000;
