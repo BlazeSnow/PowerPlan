@@ -90,8 +90,8 @@ public partial class App : Application
 
             if (expected)
             {
-                var effective = await _startupService.GetEffectiveEnabledAsync();
-                if (!effective)
+                var effectiveEnabled = await _startupService.GetEffectiveEnabledAsync();
+                if (!effectiveEnabled)
                 {
                     SettingsService.Current.AutoStart = false;
                     _lastKnownAutoStart = false;
