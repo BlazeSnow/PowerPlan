@@ -129,12 +129,31 @@ public sealed partial class SettingsPage : Page
     private async Task SaveSettingsAsync()
     {
         var previousAutoStart = _settingsService.Current.AutoStart;
+        var autoStartChanged = AutoStartToggle.IsOn != previousAutoStart;
+        var startupStateChanged = false;
 
         try
         {
             var desiredAutoStart = AutoStartToggle.IsOn;
             var trayEnabled = TrayToggle.IsOn;
-            var effectiveAutoStart = await EnsureStartupStateAsync(desiredAutoStart);
+            var effectiveAutoStart = previousAutoStart;
+
+            if (autoStartChanged)
+            {
+                try
+                {
+                    effectiveAutoStart = await EnsureStartupStateAsync(desiredAutoStart);
+                    startupStateChanged = true;
+                }
+                catch (Exception ex)
+                {
+                    RestoreSettingsToggles();
+                    await ShowOperationDialogAsync(
+                        LocalizationService.Get("Settings.PageTitle"),
+                        LocalizationService.Format("App.Status.StartupSettingFailed", ex.Message));
+                    return;
+                }
+            }
 
             var settings = new AppSettings
             {
@@ -147,19 +166,22 @@ public sealed partial class SettingsPage : Page
         }
         catch (Exception ex)
         {
-            try
+            if (startupStateChanged)
             {
-                _ = await _startupService.SetEnabledAsync(previousAutoStart);
-            }
-            catch
-            {
-                // Prefer showing the original settings failure instead of masking it.
+                try
+                {
+                    _ = await _startupService.SetEnabledAsync(previousAutoStart);
+                }
+                catch
+                {
+                    // Prefer showing the original settings failure instead of masking it.
+                }
             }
 
             RestoreSettingsToggles();
             await ShowOperationDialogAsync(
                 LocalizationService.Get("Settings.PageTitle"),
-                LocalizationService.Format("App.Status.StartupSettingFailed", ex.Message));
+                LocalizationService.Format("Settings.SaveFailed", ex.Message));
         }
     }
 

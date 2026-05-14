@@ -400,8 +400,8 @@ public sealed class TrayService : IDisposable
             return;
         }
 
-        var menu = BuildMenu();
-        if (menu == IntPtr.Zero)
+        var context = BuildMenuContext();
+        if (context.Menu == IntPtr.Zero)
         {
             return;
         }
@@ -416,7 +416,7 @@ public sealed class TrayService : IDisposable
             ApplyNativeMenuTheme(_isDarkTheme());
             _ = SetForegroundWindow(_messageWindowHandle);
             var command = TrackPopupMenu(
-                menu,
+                context.Menu,
                 TpmReturnCmd | TpmRightButton,
                 point.X,
                 point.Y,
@@ -427,12 +427,12 @@ public sealed class TrayService : IDisposable
 
             if (command != 0)
             {
-                HandleMenuCommand(command);
+                HandleMenuCommand(command, context);
             }
         }
         finally
         {
-            _ = DestroyMenu(menu);
+            _ = DestroyMenu(context.Menu);
         }
     }
 
@@ -449,12 +449,12 @@ public sealed class TrayService : IDisposable
         }
     }
 
-    private nint BuildMenu()
+    private TrayMenuContext BuildMenuContext()
     {
         var menu = CreatePopupMenu();
         if (menu == IntPtr.Zero)
         {
-            return IntPtr.Zero;
+            return new TrayMenuContext(IntPtr.Zero, new Dictionary<int, PowerPlanInfo>(), null);
         }
 
         IReadOnlyList<PowerPlanInfo> plans;
@@ -463,6 +463,7 @@ public sealed class TrayService : IDisposable
             plans = _cachedPlans.ToArray();
         }
 
+        var planCommands = new Dictionary<int, PowerPlanInfo>();
         AppendMenuText(menu, MfDisabled | MfGrayed, 0, AppTitleText);
         AppendMenuText(menu, MfString, CommandOpenMainWindow, OpenMainWindowText);
         AppendMenuSeparator(menu);
@@ -470,8 +471,10 @@ public sealed class TrayService : IDisposable
         for (var i = 0; i < plans.Count; i++)
         {
             var plan = plans[i];
+            var commandId = CommandPlanBase + i;
             var flags = MfString | (plan.IsActive ? MfChecked : 0);
-            AppendMenuText(menu, flags, CommandPlanBase + i, "\u26A1 " + plan.Name);
+            planCommands[commandId] = CopyPlan(plan);
+            AppendMenuText(menu, flags, commandId, "\u26A1 " + plan.Name);
         }
 
         var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid();
@@ -493,7 +496,17 @@ public sealed class TrayService : IDisposable
         AppendMenuSeparator(menu);
         AppendMenuText(menu, MfString, CommandExit, ExitText);
 
-        return menu;
+        return new TrayMenuContext(menu, planCommands, hasHiddenUltimate ? hiddenUltimatePlanGuid : null);
+    }
+
+    private static PowerPlanInfo CopyPlan(PowerPlanInfo plan)
+    {
+        return new PowerPlanInfo
+        {
+            Guid = plan.Guid,
+            Name = plan.Name,
+            IsActive = plan.IsActive
+        };
     }
 
     private static void AppendMenuText(nint menu, uint flags, int commandId, string text)
@@ -506,7 +519,7 @@ public sealed class TrayService : IDisposable
         _ = AppendMenu(menu, MfSeparator, UIntPtr.Zero, null);
     }
 
-    private void HandleMenuCommand(int command)
+    private void HandleMenuCommand(int command, TrayMenuContext context)
     {
         switch (command)
         {
@@ -523,10 +536,9 @@ public sealed class TrayService : IDisposable
                 _ = _uiDispatcherQueue.TryEnqueue(() => _exitApplication());
                 return;
             case CommandHiddenUltimate:
-                var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid();
-                if (!string.IsNullOrWhiteSpace(hiddenUltimatePlanGuid))
+                if (!string.IsNullOrWhiteSpace(context.HiddenUltimatePlanGuid))
                 {
-                    _ = OnActivateHiddenUltimateAsync(hiddenUltimatePlanGuid);
+                    _ = OnActivateHiddenUltimateAsync(context.HiddenUltimatePlanGuid);
                 }
 
                 return;
@@ -537,16 +549,7 @@ public sealed class TrayService : IDisposable
             return;
         }
 
-        PowerPlanInfo? selectedPlan;
-        lock (_plansLock)
-        {
-            var index = command - CommandPlanBase;
-            selectedPlan = index >= 0 && index < _cachedPlans.Count
-                ? _cachedPlans[index]
-                : null;
-        }
-
-        if (selectedPlan is not null)
+        if (context.PlanCommands.TryGetValue(command, out var selectedPlan))
         {
             _ = OnSwitchPlanAsync(selectedPlan.Guid, selectedPlan.Name);
         }
@@ -566,6 +569,11 @@ public sealed class TrayService : IDisposable
             _log(LocalizationService.Format("Tray.SwitchFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
+
+    private sealed record TrayMenuContext(
+        nint Menu,
+        IReadOnlyDictionary<int, PowerPlanInfo> PlanCommands,
+        string? HiddenUltimatePlanGuid);
 
     private async Task OnActivateHiddenUltimateAsync(string planGuid)
     {
