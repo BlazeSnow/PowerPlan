@@ -28,6 +28,7 @@ public sealed class TrayService : IDisposable
     private readonly Func<string, Task> _activateHiddenUltimatePlanAsync;
     private readonly Func<bool> _isStartupEnabled;
     private readonly Func<bool, Task<bool>> _setStartupEnabled;
+    private readonly Func<bool> _isDarkTheme;
     private readonly Func<Task> _onPlansRefreshed;
     private readonly Action _showMainWindow;
     private readonly Action _exitApplication;
@@ -59,6 +60,7 @@ public sealed class TrayService : IDisposable
         Func<string, Task> activateHiddenUltimatePlanAsync,
         Func<bool> isStartupEnabled,
         Func<bool, Task<bool>> setStartupEnabled,
+        Func<bool> isDarkTheme,
         Func<Task> onPlansRefreshed,
         Action showMainWindow,
         Action exitApplication,
@@ -71,6 +73,7 @@ public sealed class TrayService : IDisposable
         _activateHiddenUltimatePlanAsync = activateHiddenUltimatePlanAsync;
         _isStartupEnabled = isStartupEnabled;
         _setStartupEnabled = setStartupEnabled;
+        _isDarkTheme = isDarkTheme;
         _onPlansRefreshed = onPlansRefreshed;
         _showMainWindow = showMainWindow;
         _exitApplication = exitApplication;
@@ -361,6 +364,7 @@ public sealed class TrayService : IDisposable
             point = default;
         }
 
+        ApplyNativeMenuTheme(_isDarkTheme());
         _ = SetForegroundWindow(_messageWindowHandle);
         var command = TrackPopupMenu(
             menu,
@@ -378,6 +382,19 @@ public sealed class TrayService : IDisposable
         }
 
         _ = DestroyMenu(menu);
+    }
+
+    private static void ApplyNativeMenuTheme(bool useDarkTheme)
+    {
+        try
+        {
+            _ = SetPreferredAppMode(useDarkTheme ? PreferredAppMode.ForceDark : PreferredAppMode.ForceLight);
+            FlushMenuThemes();
+        }
+        catch
+        {
+            // Let Windows fall back to its default native menu rendering when this API is unavailable.
+        }
     }
 
     private nint BuildMenu()
@@ -634,6 +651,15 @@ public sealed class TrayService : IDisposable
     private const uint LrLoadFromFile = 0x00000010;
     private static readonly nint IdiApplication = new(32512);
 
+    private enum PreferredAppMode
+    {
+        Default,
+        AllowDark,
+        ForceDark,
+        ForceLight,
+        Max
+    }
+
     private delegate nint WndProc(nint hWnd, uint message, nint wParam, nint lParam);
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -755,6 +781,12 @@ public sealed class TrayService : IDisposable
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool PostMessage(nint hWnd, uint msg, nint wParam, nint lParam);
+
+    [DllImport("uxtheme.dll", EntryPoint = "#135", ExactSpelling = true)]
+    private static extern PreferredAppMode SetPreferredAppMode(PreferredAppMode appMode);
+
+    [DllImport("uxtheme.dll", EntryPoint = "#136", ExactSpelling = true)]
+    private static extern void FlushMenuThemes();
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern nint GetModuleHandle(string? lpModuleName);
