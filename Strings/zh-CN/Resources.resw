@@ -399,9 +399,6 @@
   <data name="Common.Ok" xml:space="preserve">
     <value>确定</value>
   </data>
-  <data name="PowerPlan.UltimateKeywordZh" xml:space="preserve">
-    <value>卓越性能</value>
-  </data>
   <data name="PowerPlan.Error.InvalidPlanGuid" xml:space="preserve">
     <value>电源计划 GUID 无效。</value>
   </data>
