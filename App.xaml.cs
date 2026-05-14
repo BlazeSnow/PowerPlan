@@ -273,6 +273,20 @@ public partial class App : Application
         _uiSettings.ColorValuesChanged -= OnColorValuesChanged;
         _trayService?.Dispose();
         _trayService = null;
+
+        if (_window is not null)
+        {
+            if (_window.Content is FrameworkElement rootElement)
+            {
+                rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
+            }
+
+            _window.Closed -= OnMainWindowClosed;
+            _window.Close();
+            _window = null;
+            _shellPage = null;
+        }
+
         if (_windowIconHandle != IntPtr.Zero)
         {
             _ = DestroyIcon(_windowIconHandle);
