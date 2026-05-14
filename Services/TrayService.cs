@@ -9,7 +9,7 @@ public sealed class TrayService : IDisposable
 {
     private static readonly string AppTitleText = LocalizationService.Get("App.WindowTitle", "PowerPlan");
     private static readonly string OpenMainWindowText = "\u2302 " + LocalizationService.Get("Tray.Menu.OpenMainWindow");
-    private static readonly string OpenHiddenUltimateText = "\u25C8 " + LocalizationService.Get("Tray.Menu.OpenHiddenUltimate");
+    private static readonly string OpenHiddenUltimateText = "\u26A1 " + LocalizationService.Get("Tray.Menu.OpenHiddenUltimate");
     private static readonly string RefreshPlansText = "\u21BB " + LocalizationService.Get("Tray.Menu.RefreshPlans");
     private static readonly string EnableAutoStartText = "\u23FB " + LocalizationService.Get("Tray.Menu.EnableAutoStart");
     private static readonly string DisableAutoStartText = "\u23FB " + LocalizationService.Get("Tray.Menu.DisableAutoStart");
