@@ -352,7 +352,7 @@
     <value>刷新计划</value>
   </data>
   <data name="Tray.Menu.OpenHiddenUltimate" xml:space="preserve">
-    <value>打开隐藏的卓越性能计划</value>
+    <value>隐藏的卓越性能</value>
   </data>
   <data name="Tray.Menu.DisableAutoStart" xml:space="preserve">
     <value>关闭开机自启动</value>
