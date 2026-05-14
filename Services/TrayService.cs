@@ -44,7 +44,6 @@ public sealed class TrayService : IDisposable
     private nint _messageWindowHandle;
     private nint _moduleHandle;
     private nint _trayIconHandle;
-    private nint _currentMenuHandle;
     private uint _taskbarCreatedMessage;
     private string _windowClassName = string.Empty;
     private readonly WndProc _windowProc;
@@ -192,8 +191,6 @@ public sealed class TrayService : IDisposable
         RunOnUiThread(() =>
         {
             RemoveTrayIcon();
-            DestroyCurrentMenu();
-
             if (_messageWindowHandle != IntPtr.Zero)
             {
                 _ = DestroyWindow(_messageWindowHandle);
@@ -353,9 +350,8 @@ public sealed class TrayService : IDisposable
             return;
         }
 
-        DestroyCurrentMenu();
-        _currentMenuHandle = BuildMenu();
-        if (_currentMenuHandle == IntPtr.Zero)
+        var menu = BuildMenu();
+        if (menu == IntPtr.Zero)
         {
             return;
         }
@@ -366,20 +362,22 @@ public sealed class TrayService : IDisposable
         }
 
         _ = SetForegroundWindow(_messageWindowHandle);
-        var command = TrackPopupMenuEx(
-            _currentMenuHandle,
-            TpmReturnCmd | TpmRightButton | TpmNonotify,
+        var command = TrackPopupMenu(
+            menu,
+            TpmReturnCmd | TpmRightButton,
             point.X,
             point.Y,
+            0,
             _messageWindowHandle,
             IntPtr.Zero);
         _ = PostMessage(_messageWindowHandle, WmNull, IntPtr.Zero, IntPtr.Zero);
-        DestroyCurrentMenu();
 
         if (command != 0)
         {
             HandleMenuCommand(command);
         }
+
+        _ = DestroyMenu(menu);
     }
 
     private nint BuildMenu()
@@ -548,17 +546,6 @@ public sealed class TrayService : IDisposable
         _log(LocalizationService.Get("Tray.RefreshStarted"), InfoBarSeverity.Informational);
     }
 
-    private void DestroyCurrentMenu()
-    {
-        if (_currentMenuHandle == IntPtr.Zero)
-        {
-            return;
-        }
-
-        _ = DestroyMenu(_currentMenuHandle);
-        _currentMenuHandle = IntPtr.Zero;
-    }
-
     private static InvalidOperationException CreateWin32Exception(string operation)
     {
         var error = Marshal.GetLastWin32Error();
@@ -642,7 +629,6 @@ public sealed class TrayService : IDisposable
 
     private const uint TpmRightButton = 0x0002;
     private const uint TpmReturnCmd = 0x0100;
-    private const uint TpmNonotify = 0x0080;
 
     private const uint ImageIcon = 1;
     private const uint LrLoadFromFile = 0x00000010;
@@ -756,7 +742,7 @@ public sealed class TrayService : IDisposable
     private static extern bool DestroyMenu(nint hMenu);
 
     [DllImport("user32.dll", SetLastError = true)]
-    private static extern int TrackPopupMenuEx(nint hMenu, uint uFlags, int x, int y, nint hWnd, nint lptpm);
+    private static extern int TrackPopupMenu(nint hMenu, uint uFlags, int x, int y, int nReserved, nint hWnd, nint prcRect);
 
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
