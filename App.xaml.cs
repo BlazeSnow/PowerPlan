@@ -51,34 +51,15 @@ public partial class App : Application
         _lastKnownAutoStart = SettingsService.Current.AutoStart;
         _lastKnownTrayEnabled = SettingsService.Current.TrayEnabled;
 
-        _window ??= new Window();
-        var launchToTray = startupTaskLaunch && SettingsService.Current.TrayEnabled;
-        _shellPage ??= new ShellPage(navigateToHomeOnStartup: !launchToTray);
-        _window.Content = _shellPage;
-        ConfigureWindowAppearance();
-
-        _window.Activate();
-        if (launchToTray)
-        {
-            HideMainWindow();
-        }
-        if (_window.Content is FrameworkElement rootElement)
-        {
-            rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
-            rootElement.ActualThemeChanged += OnRootActualThemeChanged;
-        }
-        if (IsMainWindowVisible())
-        {
-            ApplySystemTitleBarTheme();
-        }
-
-        _window.Closed -= OnMainWindowClosed;
-        _window.Closed += OnMainWindowClosed;
-
         await ApplyStartupSettingAsync();
-        await EnsureTrayStateAsync();
+        if (startupTaskLaunch && SettingsService.Current.TrayEnabled)
+        {
+            await EnsureTrayStateAsync();
+            return;
+        }
 
-        // For startup-task launch with tray enabled, window is already hidden before async initialization.
+        ShowMainWindow();
+        await EnsureTrayStateAsync();
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
@@ -139,7 +120,7 @@ public partial class App : Application
             return;
         }
 
-        if (_trayService is not null || _window is null)
+        if (_trayService is not null)
         {
             return;
         }
@@ -157,6 +138,7 @@ public partial class App : Application
             setActivePlanAsync: async guid =>
             {
                 await _powerPlanService.SetActivePlanAsync(guid);
+                _pendingMainPageRefresh = true;
 
                 var page = GetVisibleMainPage();
                 if (page is not null)
@@ -167,10 +149,6 @@ public partial class App : Application
                     }
 
                     page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid), InfoBarSeverity.Success);
-                }
-                else
-                {
-                    _pendingMainPageRefresh = true;
                 }
             },
             getHiddenUltimatePlanGuid: () =>
@@ -269,10 +247,7 @@ public partial class App : Application
         {
             await page.RefreshFromExternalAsync(forceRefresh: true);
         }
-        else if (GetMainPage() is not null)
-        {
-            _pendingMainPageRefresh = true;
-        }
+        _pendingMainPageRefresh = true;
 
     }
 
@@ -308,16 +283,12 @@ public partial class App : Application
 
     private void ShowMainWindow()
     {
-        if (_window is null)
+        EnsureMainWindowCreated(navigateToHomeOnStartup: true);
+
+        if (_window is null || _shellPage is null)
         {
             return;
         }
-
-        if (_shellPage is null)
-        {
-            return;
-        }
-
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         _ = ShowWindow(hwnd, 5);
         _window.Activate();
@@ -325,6 +296,28 @@ public partial class App : Application
 
         var page = _shellPage.EnsureMainPageLoaded();
         _ = RefreshMainPageAfterShowAsync(page);
+    }
+
+    private void EnsureMainWindowCreated(bool navigateToHomeOnStartup)
+    {
+        if (_window is not null && _shellPage is not null)
+        {
+            return;
+        }
+
+        _window ??= new Window();
+        _shellPage ??= new ShellPage(navigateToHomeOnStartup: navigateToHomeOnStartup);
+        _window.Content = _shellPage;
+        ConfigureWindowAppearance();
+
+        if (_window.Content is FrameworkElement rootElement)
+        {
+            rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
+            rootElement.ActualThemeChanged += OnRootActualThemeChanged;
+        }
+
+        _window.Closed -= OnMainWindowClosed;
+        _window.Closed += OnMainWindowClosed;
     }
 
     private void HideMainWindow()
