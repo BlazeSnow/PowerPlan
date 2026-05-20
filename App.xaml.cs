@@ -4,6 +4,7 @@ using Microsoft.Windows.AppLifecycle;
 using PowerPlan.Models;
 using PowerPlan.Services;
 using System.Runtime.InteropServices;
+using Windows.ApplicationModel;
 using Windows.UI.ViewManagement;
 
 namespace PowerPlan;
@@ -20,8 +21,10 @@ public partial class App : Application
     private bool _lastKnownTrayEnabled;
     private bool _pendingMainPageRefresh;
     private bool _pendingActivationShow;
+    private bool _packageUpdateExitRequested;
     private nint _windowIconHandle;
     private readonly UISettings _uiSettings = new();
+    private PackageCatalog? _packageCatalog;
 
     public App()
     {
@@ -49,6 +52,7 @@ public partial class App : Application
 
         AppInstance.GetCurrent().Activated -= OnAppActivated;
         AppInstance.GetCurrent().Activated += OnAppActivated;
+        InitializePackageUpdateWatcher();
 
         var startupTaskLaunch = IsStartupTaskLaunch();
 
@@ -115,6 +119,39 @@ public partial class App : Application
         }
 
         _ = dispatcherQueue.TryEnqueue(ShowMainWindow);
+    }
+
+    private void InitializePackageUpdateWatcher()
+    {
+        try
+        {
+            _packageCatalog ??= PackageCatalog.OpenForCurrentPackage();
+            _packageCatalog.PackageUpdating -= OnPackageUpdating;
+            _packageCatalog.PackageUpdating += OnPackageUpdating;
+        }
+        catch
+        {
+            // Package catalog is only available when the app has package identity.
+        }
+    }
+
+    private void OnPackageUpdating(PackageCatalog sender, PackageUpdatingEventArgs args)
+    {
+        if (_packageUpdateExitRequested)
+        {
+            return;
+        }
+
+        _packageUpdateExitRequested = true;
+
+        var dispatcherQueue = _window?.DispatcherQueue;
+        if (dispatcherQueue is not null && dispatcherQueue.TryEnqueue(ExitApplication))
+        {
+            return;
+        }
+
+        _isExiting = true;
+        Exit();
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
