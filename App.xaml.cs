@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Windows.ApplicationModel;
 using Windows.UI.ViewManagement;
+using WinAppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
 
 namespace PowerPlan;
 
@@ -42,17 +43,17 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
-        var mainInstance = AppInstance.FindOrRegisterForKey("PowerPlan.Main");
+        var mainInstance = WinAppInstance.FindOrRegisterForKey("PowerPlan.Main");
         if (!mainInstance.IsCurrent)
         {
-            var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+            var activatedArgs = WinAppInstance.GetCurrent().GetActivatedEventArgs();
             await mainInstance.RedirectActivationToAsync(activatedArgs);
             Exit();
             return;
         }
 
-        AppInstance.GetCurrent().Activated -= OnAppActivated;
-        AppInstance.GetCurrent().Activated += OnAppActivated;
+        WinAppInstance.GetCurrent().Activated -= OnAppActivated;
+        WinAppInstance.GetCurrent().Activated += OnAppActivated;
         InitializePackageUpdateWatcher();
 
         var startupTaskLaunch = IsStartupTaskLaunch();
@@ -589,7 +590,7 @@ public partial class App : Application
     {
         try
         {
-            return AppInstance.GetCurrent().GetActivatedEventArgs().Kind == ExtendedActivationKind.StartupTask;
+            return WinAppInstance.GetCurrent().GetActivatedEventArgs().Kind == ExtendedActivationKind.StartupTask;
         }
         catch
         {
