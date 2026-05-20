@@ -19,6 +19,7 @@ public partial class App : Application
     private bool _lastKnownAutoStart;
     private bool _lastKnownTrayEnabled;
     private bool _pendingMainPageRefresh;
+    private bool _pendingActivationShow;
     private nint _windowIconHandle;
     private readonly UISettings _uiSettings = new();
 
@@ -37,6 +38,18 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
+        var mainInstance = AppInstance.FindOrRegisterForKey("PowerPlan.Main");
+        if (!mainInstance.IsCurrent)
+        {
+            var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+            await mainInstance.RedirectActivationToAsync(activatedArgs);
+            Exit();
+            return;
+        }
+
+        AppInstance.GetCurrent().Activated -= OnAppActivated;
+        AppInstance.GetCurrent().Activated += OnAppActivated;
+
         var startupTaskLaunch = IsStartupTaskLaunch();
 
         try
@@ -78,7 +91,30 @@ public partial class App : Application
         await ApplyStartupSettingAsync();
         await EnsureTrayStateAsync();
 
+        if (_pendingActivationShow)
+        {
+            _pendingActivationShow = false;
+            ShowMainWindow();
+        }
+
         // For startup-task launch with tray enabled, window is already hidden before async initialization.
+    }
+
+    private void OnAppActivated(AppInstance sender, AppActivationArguments args)
+    {
+        if (args.Kind == ExtendedActivationKind.StartupTask)
+        {
+            return;
+        }
+
+        var dispatcherQueue = _window?.DispatcherQueue;
+        if (dispatcherQueue is null)
+        {
+            _pendingActivationShow = true;
+            return;
+        }
+
+        _ = dispatcherQueue.TryEnqueue(ShowMainWindow);
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
