@@ -4,7 +4,10 @@ using Microsoft.Windows.AppLifecycle;
 using PowerPlan.Models;
 using PowerPlan.Services;
 using System.Runtime.InteropServices;
+using System.Threading;
+using Windows.ApplicationModel;
 using Windows.UI.ViewManagement;
+using WinAppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
 
 namespace PowerPlan;
 
@@ -19,8 +22,12 @@ public partial class App : Application
     private bool _lastKnownAutoStart;
     private bool _lastKnownTrayEnabled;
     private bool _pendingMainPageRefresh;
+    private int _pendingActivationShowRequested;
+    private int _packageUpdateExitRequested;
     private nint _windowIconHandle;
+    private DispatcherQueue? _uiDispatcherQueue;
     private readonly UISettings _uiSettings = new();
+    private PackageCatalog? _packageCatalog;
 
     public App()
     {
@@ -37,6 +44,20 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
+        var mainInstance = WinAppInstance.FindOrRegisterForKey("PowerPlan.Main");
+        if (!mainInstance.IsCurrent)
+        {
+            var activatedArgs = WinAppInstance.GetCurrent().GetActivatedEventArgs();
+            await mainInstance.RedirectActivationToAsync(activatedArgs);
+            ExitApplicationSafely();
+            return;
+        }
+
+        WinAppInstance.GetCurrent().Activated -= OnAppActivated;
+        WinAppInstance.GetCurrent().Activated += OnAppActivated;
+        _uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        InitializePackageUpdateWatcher();
+
         var startupTaskLaunch = IsStartupTaskLaunch();
 
         try
@@ -78,7 +99,77 @@ public partial class App : Application
         await ApplyStartupSettingAsync();
         await EnsureTrayStateAsync();
 
+        if (Interlocked.Exchange(ref _pendingActivationShowRequested, 0) == 1)
+        {
+            ShowMainWindow();
+        }
+
         // For startup-task launch with tray enabled, window is already hidden before async initialization.
+    }
+
+    private void OnAppActivated(object? sender, AppActivationArguments args)
+    {
+        if (args.Kind == ExtendedActivationKind.StartupTask)
+        {
+            return;
+        }
+
+        RequestShowMainWindow();
+    }
+
+    private void RequestShowMainWindow()
+    {
+        var dispatcherQueue = _window?.DispatcherQueue;
+        if (dispatcherQueue is null)
+        {
+            MarkPendingActivationShow();
+            return;
+        }
+
+        if (!dispatcherQueue.TryEnqueue(ShowMainWindow))
+        {
+            MarkPendingActivationShow();
+        }
+    }
+
+    private void MarkPendingActivationShow()
+    {
+        Interlocked.Exchange(ref _pendingActivationShowRequested, 1);
+    }
+
+    private void InitializePackageUpdateWatcher()
+    {
+        try
+        {
+            _packageCatalog ??= PackageCatalog.OpenForCurrentPackage();
+            _packageCatalog.PackageUpdating -= OnPackageUpdating;
+            _packageCatalog.PackageUpdating += OnPackageUpdating;
+        }
+        catch
+        {
+            // Package catalog is only available when the app has package identity.
+        }
+    }
+
+    private void OnPackageUpdating(PackageCatalog sender, PackageUpdatingEventArgs args)
+    {
+        if (Interlocked.Exchange(ref _packageUpdateExitRequested, 1) == 1)
+        {
+            return;
+        }
+
+        RequestExitForPackageUpdate();
+    }
+
+    private void RequestExitForPackageUpdate()
+    {
+        var dispatcherQueue = _uiDispatcherQueue ?? _window?.DispatcherQueue;
+        if (dispatcherQueue is not null && dispatcherQueue.TryEnqueue(ExitApplicationSafely))
+        {
+            return;
+        }
+
+        ExitApplicationSafely();
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
@@ -294,8 +385,25 @@ public partial class App : Application
 
     private void ExitApplication()
     {
+        ExitApplicationSafely();
+    }
+
+    private void ExitApplicationSafely()
+    {
+        CleanupBeforeExit();
+        Exit();
+    }
+
+    private void CleanupBeforeExit()
+    {
         _isExiting = true;
         _uiSettings.ColorValuesChanged -= OnColorValuesChanged;
+        if (_packageCatalog is not null)
+        {
+            _packageCatalog.PackageUpdating -= OnPackageUpdating;
+            _packageCatalog = null;
+        }
+
         _trayService?.Dispose();
         _trayService = null;
         if (_windowIconHandle != IntPtr.Zero)
@@ -303,7 +411,6 @@ public partial class App : Application
             _ = DestroyIcon(_windowIconHandle);
             _windowIconHandle = IntPtr.Zero;
         }
-        Exit();
     }
 
     private void ShowMainWindow()
@@ -506,7 +613,7 @@ public partial class App : Application
     {
         try
         {
-            return AppInstance.GetCurrent().GetActivatedEventArgs().Kind == ExtendedActivationKind.StartupTask;
+            return WinAppInstance.GetCurrent().GetActivatedEventArgs().Kind == ExtendedActivationKind.StartupTask;
         }
         catch
         {
