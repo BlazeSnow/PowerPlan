@@ -62,17 +62,6 @@
                     VerticalAlignment="Center" />
             </controls:SettingsCard>
 
-            <controls:SettingsCard x:Name="StoreUpdateCard">
-                <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE895;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
-                </controls:SettingsCard.HeaderIcon>
-                <Button
-                    x:Name="CheckStoreUpdateButton"
-                    Click="OnCheckStoreUpdateClicked"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center" />
-            </controls:SettingsCard>
-
             <controls:SettingsCard x:Name="WebsiteCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE774;" Style="{StaticResource SettingsCardHeaderIconStyle}" />

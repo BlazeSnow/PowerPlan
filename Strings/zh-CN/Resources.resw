@@ -303,15 +303,6 @@
   <data name="Settings.Tools.RestoreButton" xml:space="preserve">
     <value>恢复</value>
   </data>
-  <data name="Settings.Tools.StoreUpdate" xml:space="preserve">
-    <value>Microsoft Store 更新</value>
-  </data>
-  <data name="Settings.Tools.StoreUpdateDesc" xml:space="preserve">
-    <value>手动检查 Microsoft Store 中是否有 PowerPlan 更新</value>
-  </data>
-  <data name="Settings.Tools.CheckUpdateButton" xml:space="preserve">
-    <value>检查更新</value>
-  </data>
   <data name="Settings.Tools.FeedbackCopy" xml:space="preserve">
     <value>复制反馈邮箱</value>
   </data>
@@ -338,33 +329,6 @@
   </data>
   <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve">
     <value>取消</value>
-  </data>
-  <data name="Settings.UpdateDialog.NoUpdateTitle" xml:space="preserve">
-    <value>暂无更新</value>
-  </data>
-  <data name="Settings.UpdateDialog.NoUpdateMessage" xml:space="preserve">
-    <value>当前已是 Microsoft Store 中可用的最新版本。</value>
-  </data>
-  <data name="Settings.UpdateDialog.FailedTitle" xml:space="preserve">
-    <value>检查更新失败</value>
-  </data>
-  <data name="Settings.UpdateDialog.IncompleteTitle" xml:space="preserve">
-    <value>更新未完成</value>
-  </data>
-  <data name="Settings.UpdateDialog.FailedMessage" xml:space="preserve">
-    <value>更新未完成：{0}</value>
-  </data>
-  <data name="Settings.UpdateConfirmDialog.Title" xml:space="preserve">
-    <value>发现更新</value>
-  </data>
-  <data name="Settings.UpdateConfirmDialog.Message" xml:space="preserve">
-    <value>Microsoft Store 中发现 PowerPlan 可用更新。下载并安装期间，应用可能会自动关闭。</value>
-  </data>
-  <data name="Settings.UpdateConfirmDialog.Confirm" xml:space="preserve">
-    <value>下载并安装</value>
-  </data>
-  <data name="Settings.UpdateConfirmDialog.Cancel" xml:space="preserve">
-    <value>稍后</value>
   </data>
   <data name="Settings.FeedbackDialog.Title" xml:space="preserve">
     <value>复制成功</value>

@@ -2,7 +2,6 @@
 using PowerPlan.Services;
 using System.Diagnostics;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Services.Store;
 
 namespace PowerPlan.Views;
 
@@ -44,10 +43,6 @@ public sealed partial class SettingsPage : Page
         RestorePowerPlansCard.Header = LocalizationService.Get("Settings.Tools.RestorePowerPlans");
         RestorePowerPlansCard.Description = LocalizationService.Get("Settings.Tools.RestorePowerPlansDesc");
         RestorePowerPlansButton.Content = LocalizationService.Get("Settings.Tools.RestoreButton");
-
-        StoreUpdateCard.Header = LocalizationService.Get("Settings.Tools.StoreUpdate");
-        StoreUpdateCard.Description = LocalizationService.Get("Settings.Tools.StoreUpdateDesc");
-        CheckStoreUpdateButton.Content = LocalizationService.Get("Settings.Tools.CheckUpdateButton");
 
         WebsiteCard.Header = LocalizationService.Get("Settings.Tools.Website");
         WebsiteCard.Description = LocalizationService.Get("Settings.Tools.WebsiteDesc");
@@ -268,78 +263,6 @@ public sealed partial class SettingsPage : Page
 
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary;
-    }
-
-    private async void OnCheckStoreUpdateClicked(object sender, RoutedEventArgs e)
-    {
-        CheckStoreUpdateButton.IsEnabled = false;
-        try
-        {
-            var updateManager = StoreContext.GetDefault();
-            InitializeStoreContext(updateManager);
-            var updates = await updateManager.GetAppAndOptionalStorePackageUpdatesAsync();
-            if (updates.Count == 0)
-            {
-                await ShowOperationDialogAsync(
-                    LocalizationService.Get("Settings.UpdateDialog.NoUpdateTitle"),
-                    LocalizationService.Get("Settings.UpdateDialog.NoUpdateMessage"));
-                return;
-            }
-
-            var confirmed = await ShowStoreUpdateConfirmationDialogAsync();
-            if (!confirmed)
-            {
-                return;
-            }
-
-            var result = await updateManager.RequestDownloadAndInstallStorePackageUpdatesAsync(updates).AsTask();
-            if (result.OverallState != StorePackageUpdateState.Completed)
-            {
-                await ShowOperationDialogAsync(
-                    LocalizationService.Get("Settings.UpdateDialog.IncompleteTitle"),
-                    LocalizationService.Format("Settings.UpdateDialog.FailedMessage", result.OverallState));
-            }
-        }
-        catch (Exception ex)
-        {
-            await ShowOperationDialogAsync(
-                LocalizationService.Get("Settings.UpdateDialog.FailedTitle"),
-                LocalizationService.Format("Settings.UpdateDialog.FailedMessage", ex.Message));
-        }
-        finally
-        {
-            CheckStoreUpdateButton.IsEnabled = true;
-        }
-    }
-
-    private async Task<bool> ShowStoreUpdateConfirmationDialogAsync()
-    {
-        var dialog = new ContentDialog
-        {
-            Title = LocalizationService.Get("Settings.UpdateConfirmDialog.Title"),
-            Content = LocalizationService.Get("Settings.UpdateConfirmDialog.Message"),
-            PrimaryButtonText = LocalizationService.Get("Settings.UpdateConfirmDialog.Confirm"),
-            CloseButtonText = LocalizationService.Get("Settings.UpdateConfirmDialog.Cancel"),
-            DefaultButton = ContentDialogButton.Primary,
-            XamlRoot = XamlRoot
-        };
-
-        var result = await dialog.ShowAsync();
-        return result == ContentDialogResult.Primary;
-    }
-
-    private static void InitializeStoreContext(StoreContext updateManager)
-    {
-        if (Application.Current is not App app)
-        {
-            return;
-        }
-
-        var hwnd = app.GetWindowHandle();
-        if (hwnd != IntPtr.Zero)
-        {
-            WinRT.Interop.InitializeWithWindow.Initialize(updateManager, hwnd);
-        }
     }
 
     private void OnOpenWebsiteClicked(object sender, RoutedEventArgs e)
