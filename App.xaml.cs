@@ -4,6 +4,7 @@ using Microsoft.Windows.AppLifecycle;
 using PowerPlan.Models;
 using PowerPlan.Services;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Windows.ApplicationModel;
 using Windows.UI.ViewManagement;
 
@@ -21,7 +22,7 @@ public partial class App : Application
     private bool _lastKnownTrayEnabled;
     private bool _pendingMainPageRefresh;
     private bool _pendingActivationShow;
-    private bool _packageUpdateExitRequested;
+    private int _packageUpdateExitRequested;
     private nint _windowIconHandle;
     private readonly UISettings _uiSettings = new();
     private PackageCatalog? _packageCatalog;
@@ -137,12 +138,10 @@ public partial class App : Application
 
     private void OnPackageUpdating(PackageCatalog sender, PackageUpdatingEventArgs args)
     {
-        if (_packageUpdateExitRequested)
+        if (Interlocked.Exchange(ref _packageUpdateExitRequested, 1) == 1)
         {
             return;
         }
-
-        _packageUpdateExitRequested = true;
 
         var dispatcherQueue = _window?.DispatcherQueue;
         if (dispatcherQueue is not null && dispatcherQueue.TryEnqueue(ExitApplication))
@@ -150,7 +149,7 @@ public partial class App : Application
             return;
         }
 
-        _isExiting = true;
+        CleanupBeforeExit();
         Exit();
     }
 
@@ -367,8 +366,20 @@ public partial class App : Application
 
     private void ExitApplication()
     {
+        CleanupBeforeExit();
+        Exit();
+    }
+
+    private void CleanupBeforeExit()
+    {
         _isExiting = true;
         _uiSettings.ColorValuesChanged -= OnColorValuesChanged;
+        if (_packageCatalog is not null)
+        {
+            _packageCatalog.PackageUpdating -= OnPackageUpdating;
+            _packageCatalog = null;
+        }
+
         _trayService?.Dispose();
         _trayService = null;
         if (_windowIconHandle != IntPtr.Zero)
@@ -376,7 +387,6 @@ public partial class App : Application
             _ = DestroyIcon(_windowIconHandle);
             _windowIconHandle = IntPtr.Zero;
         }
-        Exit();
     }
 
     private void ShowMainWindow()
