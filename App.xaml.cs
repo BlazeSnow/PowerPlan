@@ -100,7 +100,7 @@ public partial class App : Application
         // For startup-task launch with tray enabled, window is already hidden before async initialization.
     }
 
-    private void OnAppActivated(AppInstance sender, AppActivationArguments args)
+    private void OnAppActivated(object? sender, AppActivationArguments args)
     {
         if (args.Kind == ExtendedActivationKind.StartupTask)
         {
