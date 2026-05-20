@@ -276,6 +276,7 @@ public sealed partial class SettingsPage : Page
         try
         {
             var updateManager = StoreContext.GetDefault();
+            InitializeStoreContext(updateManager);
             var updates = await updateManager.GetAppAndOptionalStorePackageUpdatesAsync();
             if (updates.Count == 0)
             {
@@ -325,6 +326,20 @@ public sealed partial class SettingsPage : Page
 
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary;
+    }
+
+    private static void InitializeStoreContext(StoreContext updateManager)
+    {
+        if (Application.Current is not App app)
+        {
+            return;
+        }
+
+        var hwnd = app.GetWindowHandle();
+        if (hwnd != IntPtr.Zero)
+        {
+            WinRT.Interop.InitializeWithWindow.Initialize(updateManager, hwnd);
+        }
     }
 
     private void OnOpenWebsiteClicked(object sender, RoutedEventArgs e)

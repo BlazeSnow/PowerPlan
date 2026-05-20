@@ -41,6 +41,13 @@ public partial class App : Application
     public PowerPlanService PowerPlanService => _powerPlanService;
     public StartupService StartupService => _startupService;
 
+    public nint GetWindowHandle()
+    {
+        return _window is null
+            ? IntPtr.Zero
+            : WinRT.Interop.WindowNative.GetWindowHandle(_window);
+    }
+
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
         var mainInstance = WinAppInstance.FindOrRegisterForKey("PowerPlan.Main");
