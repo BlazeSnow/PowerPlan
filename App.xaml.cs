@@ -49,7 +49,7 @@ public partial class App : Application
         {
             var activatedArgs = WinAppInstance.GetCurrent().GetActivatedEventArgs();
             await mainInstance.RedirectActivationToAsync(activatedArgs);
-            Exit();
+            ExitApplicationSafely();
             return;
         }
 
@@ -164,13 +164,12 @@ public partial class App : Application
     private void RequestExitForPackageUpdate()
     {
         var dispatcherQueue = _uiDispatcherQueue ?? _window?.DispatcherQueue;
-        if (dispatcherQueue is not null && dispatcherQueue.TryEnqueue(ExitApplication))
+        if (dispatcherQueue is not null && dispatcherQueue.TryEnqueue(ExitApplicationSafely))
         {
             return;
         }
 
-        _isExiting = true;
-        Exit();
+        ExitApplicationSafely();
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
@@ -385,6 +384,11 @@ public partial class App : Application
     }
 
     private void ExitApplication()
+    {
+        ExitApplicationSafely();
+    }
+
+    private void ExitApplicationSafely()
     {
         CleanupBeforeExit();
         Exit();
