@@ -113,6 +113,11 @@ public partial class App : Application
             return;
         }
 
+        RequestShowMainWindow();
+    }
+
+    private void RequestShowMainWindow()
+    {
         var dispatcherQueue = _window?.DispatcherQueue;
         if (dispatcherQueue is null)
         {
@@ -120,7 +125,10 @@ public partial class App : Application
             return;
         }
 
-        _ = dispatcherQueue.TryEnqueue(ShowMainWindow);
+        if (!dispatcherQueue.TryEnqueue(ShowMainWindow))
+        {
+            _pendingActivationShow = true;
+        }
     }
 
     private void InitializePackageUpdateWatcher()
