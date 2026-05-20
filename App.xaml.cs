@@ -22,9 +22,10 @@ public partial class App : Application
     private bool _lastKnownAutoStart;
     private bool _lastKnownTrayEnabled;
     private bool _pendingMainPageRefresh;
-    private bool _pendingActivationShow;
+    private int _pendingActivationShowRequested;
     private int _packageUpdateExitRequested;
     private nint _windowIconHandle;
+    private DispatcherQueue? _uiDispatcherQueue;
     private readonly UISettings _uiSettings = new();
     private PackageCatalog? _packageCatalog;
 
@@ -54,6 +55,7 @@ public partial class App : Application
 
         WinAppInstance.GetCurrent().Activated -= OnAppActivated;
         WinAppInstance.GetCurrent().Activated += OnAppActivated;
+        _uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         InitializePackageUpdateWatcher();
 
         var startupTaskLaunch = IsStartupTaskLaunch();
@@ -97,9 +99,8 @@ public partial class App : Application
         await ApplyStartupSettingAsync();
         await EnsureTrayStateAsync();
 
-        if (_pendingActivationShow)
+        if (Interlocked.Exchange(ref _pendingActivationShowRequested, 0) == 1)
         {
-            _pendingActivationShow = false;
             ShowMainWindow();
         }
 
@@ -121,14 +122,19 @@ public partial class App : Application
         var dispatcherQueue = _window?.DispatcherQueue;
         if (dispatcherQueue is null)
         {
-            _pendingActivationShow = true;
+            MarkPendingActivationShow();
             return;
         }
 
         if (!dispatcherQueue.TryEnqueue(ShowMainWindow))
         {
-            _pendingActivationShow = true;
+            MarkPendingActivationShow();
         }
+    }
+
+    private void MarkPendingActivationShow()
+    {
+        Interlocked.Exchange(ref _pendingActivationShowRequested, 1);
     }
 
     private void InitializePackageUpdateWatcher()
@@ -152,13 +158,18 @@ public partial class App : Application
             return;
         }
 
-        var dispatcherQueue = _window?.DispatcherQueue;
+        RequestExitForPackageUpdate();
+    }
+
+    private void RequestExitForPackageUpdate()
+    {
+        var dispatcherQueue = _uiDispatcherQueue ?? _window?.DispatcherQueue;
         if (dispatcherQueue is not null && dispatcherQueue.TryEnqueue(ExitApplication))
         {
             return;
         }
 
-        CleanupBeforeExit();
+        _isExiting = true;
         Exit();
     }
 
