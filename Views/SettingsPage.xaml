@@ -71,6 +71,17 @@
                     VerticalAlignment="Center" />
             </controls:SettingsCard>
 
+            <controls:SettingsCard x:Name="RepositoryCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE715;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
+                <Button
+                    x:Name="OpenRepositoryButton"
+                    Click="OnOpenRepositoryClicked"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center" />
+            </controls:SettingsCard>
+
             <controls:SettingsCard x:Name="FeedbackCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE715;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
