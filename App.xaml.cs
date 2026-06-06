@@ -375,7 +375,6 @@ public partial class App : Application
             HideMainWindow();
             return;
         }
-
     }
 
     private void ExitApplication()
@@ -388,7 +387,16 @@ public partial class App : Application
             _packageCatalog = null;
         }
 
-        Exit();
+        _trayService?.Dispose();
+        _trayService = null;
+
+        if (_window is not null)
+        {
+            _window.Close();
+            return;
+        }
+
+        Environment.Exit(0);
     }
 
     private void ShowMainWindow()
