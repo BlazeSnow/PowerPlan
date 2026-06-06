@@ -406,6 +406,13 @@ public partial class App : Application
 
         _trayService?.Dispose();
         _trayService = null;
+
+        if (_window is not null)
+        {
+            _window.Closed -= OnMainWindowClosed;
+            _window.SetTitleBar(null);
+            _window.Content = null;
+        }
     }
 
     private void ShowMainWindow()
