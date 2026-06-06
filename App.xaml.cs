@@ -92,6 +92,8 @@ public partial class App : Application
             ApplySystemTitleBarTheme();
         }
 
+        ApplyTrayTheme();
+
         _window.Closed -= OnMainWindowClosed;
         _window.Closed += OnMainWindowClosed;
 
@@ -292,6 +294,8 @@ public partial class App : Application
             showMainWindow: ShowMainWindow,
             exitApplication: ExitApplication,
             log: (message, severity) => AddStatusToVisibleMainPage(message, severity));
+
+        _trayService.ApplyTheme(GetEffectiveTheme());
 
         try
         {
@@ -542,6 +546,8 @@ public partial class App : Application
 
     private void OnRootActualThemeChanged(FrameworkElement sender, object args)
     {
+        ApplyTrayTheme();
+
         if (IsMainWindowVisible())
         {
             ApplySystemTitleBarTheme();
@@ -558,6 +564,8 @@ public partial class App : Application
         var dispatcherQueue = _window.DispatcherQueue;
         if (dispatcherQueue.HasThreadAccess)
         {
+            ApplyTrayTheme();
+
             if (IsMainWindowVisible())
             {
                 ApplySystemTitleBarTheme();
@@ -568,11 +576,20 @@ public partial class App : Application
 
         _ = dispatcherQueue.TryEnqueue(() =>
         {
+            ApplyTrayTheme();
+
             if (IsMainWindowVisible())
             {
                 ApplySystemTitleBarTheme();
             }
         });
+    }
+
+    private void ApplyTrayTheme()
+    {
+        var theme = GetEffectiveTheme();
+        ApplyNativeMenuTheme(theme);
+        _trayService?.ApplyTheme(theme);
     }
 
     private ElementTheme GetEffectiveTheme()
@@ -662,6 +679,19 @@ public partial class App : Application
         }
     }
 
+    private static void ApplyNativeMenuTheme(ElementTheme theme)
+    {
+        try
+        {
+            _ = SetPreferredAppMode(theme == ElementTheme.Dark ? PreferredAppMode.ForceDark : PreferredAppMode.ForceLight);
+            FlushMenuThemes();
+        }
+        catch
+        {
+            // Native popup menu dark mode APIs are undocumented and may be unavailable on some systems.
+        }
+    }
+
     private static bool IsStartupTaskLaunch()
     {
         try
@@ -677,6 +707,15 @@ public partial class App : Application
     private const uint DwmaUseImmersiveDarkMode = 20;
     private const uint DwmaUseImmersiveDarkModeBefore20H1 = 19;
 
+    private enum PreferredAppMode
+    {
+        Default,
+        AllowDark,
+        ForceDark,
+        ForceLight,
+        Max
+    }
+
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
 
@@ -686,5 +725,11 @@ public partial class App : Application
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(nint hwnd, uint dwAttribute, ref int pvAttribute, int cbAttribute);
+
+    [DllImport("uxtheme.dll", EntryPoint = "#135", ExactSpelling = true)]
+    private static extern PreferredAppMode SetPreferredAppMode(PreferredAppMode appMode);
+
+    [DllImport("uxtheme.dll", EntryPoint = "#136", ExactSpelling = true)]
+    private static extern void FlushMenuThemes();
 
 }

@@ -38,6 +38,7 @@ public sealed class TrayService : IDisposable
     private TaskbarIcon? _taskbarIcon;
     private MenuFlyout? _contextFlyout;
     private string _lastMenuSignature = string.Empty;
+    private ElementTheme _currentTheme = ElementTheme.Default;
     private bool _disposed;
 
     public TrayService(
@@ -143,6 +144,17 @@ public sealed class TrayService : IDisposable
         _log(message, InfoBarSeverity.Informational);
     }
 
+    public void ApplyTheme(ElementTheme theme)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _currentTheme = theme;
+        _ = RunOnUiThread(ApplyContextFlyoutTheme);
+    }
+
     public void Dispose()
     {
         if (_disposed)
@@ -215,6 +227,7 @@ public sealed class TrayService : IDisposable
             ContextFlyout = _contextFlyout
         };
         _taskbarIcon.ForceCreate(enablesEfficiencyMode: false);
+        ApplyContextFlyoutTheme();
     }
 
     private void UpdateTaskbarIcon(bool forceRebuild = false)
@@ -344,7 +357,22 @@ public sealed class TrayService : IDisposable
                 Text = ExitIcon + LocalizationService.Get("Tray.Menu.Exit"),
                 Command = new RelayCommand(RequestExit)
             });
+
+            ApplyContextFlyoutTheme();
         });
+    }
+
+    private void ApplyContextFlyoutTheme()
+    {
+        if (_contextFlyout is null)
+        {
+            return;
+        }
+
+        foreach (var item in _contextFlyout.Items)
+        {
+            item.RequestedTheme = _currentTheme;
+        }
     }
 
     private async Task OnSwitchPlanAsync(string planGuid, string planName)
