@@ -378,15 +378,6 @@
   <data name="Tray.Menu.Exit" xml:space="preserve">
     <value>退出</value>
   </data>
-  <data name="Tray.Tooltip.Plan" xml:space="preserve">
-    <value>电源计划：{0}</value>
-  </data>
-  <data name="Tray.Tooltip.PlanUnavailable" xml:space="preserve">
-    <value>电源计划：未读取</value>
-  </data>
-  <data name="Tray.Tooltip.AutoStart" xml:space="preserve">
-    <value>开机自启动：{0}</value>
-  </data>
   <data name="Tray.RefreshStarted" xml:space="preserve">
     <value>[托盘] 已开始刷新计划列表</value>
   </data>

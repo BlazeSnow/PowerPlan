@@ -423,7 +423,7 @@ public partial class App : Application
             _packageCatalog = null;
         }
 
-        _trayService?.Dispose();
+        _trayService?.PrepareForExit();
         _trayService = null;
     }
 

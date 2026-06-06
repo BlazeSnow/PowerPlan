@@ -154,6 +154,32 @@ public sealed class TrayService : IDisposable
         _ = RunOnUiThread(SafeDisposeTaskbarIcon);
     }
 
+    public void PrepareForExit()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+        _ = RunOnUiThread(() =>
+        {
+            try
+            {
+                if (_taskbarIcon is not null)
+                {
+                    _taskbarIcon.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch
+            {
+                // The app is exiting; avoid surfacing tray teardown failures.
+            }
+
+            _lastMenuSignature = string.Empty;
+        });
+    }
+
     private void SafeDisposeTaskbarIcon()
     {
         try
@@ -211,7 +237,7 @@ public sealed class TrayService : IDisposable
             ContextMenuMode = ContextMenuMode.PopupMenu,
             NoLeftClickDelay = true,
             Visibility = Visibility.Visible,
-            ToolTipText = BuildTooltipText(),
+            ToolTipText = AppTitleText,
             ContextFlyout = _contextFlyout
         };
         _taskbarIcon.ForceCreate(enablesEfficiencyMode: false);
@@ -226,7 +252,7 @@ public sealed class TrayService : IDisposable
                 return;
             }
 
-            _taskbarIcon.ToolTipText = BuildTooltipText();
+            _taskbarIcon.ToolTipText = AppTitleText;
             RebuildMenuIfNeeded(forceRebuild);
         });
     }
@@ -345,30 +371,6 @@ public sealed class TrayService : IDisposable
                 Command = new RelayCommand(RequestExit)
             });
         });
-    }
-
-    private string BuildTooltipText()
-    {
-        string? activePlanName;
-        lock (_plansLock)
-        {
-            activePlanName = _cachedPlans.FirstOrDefault(plan => plan.IsActive)?.Name;
-        }
-
-        var planText = string.IsNullOrWhiteSpace(activePlanName)
-            ? LocalizationService.Get("Tray.Tooltip.PlanUnavailable")
-            : LocalizationService.Format("Tray.Tooltip.Plan", activePlanName);
-        var startupState = LocalizationService.Get(_isStartupEnabled() ? "App.Status.On" : "App.Status.Off");
-        var startupText = LocalizationService.Format("Tray.Tooltip.AutoStart", startupState);
-        return TruncateTooltip($"{AppTitleText}\n{planText}\n{startupText}");
-    }
-
-    private static string TruncateTooltip(string text)
-    {
-        const int maxTooltipLength = 127;
-        return text.Length <= maxTooltipLength
-            ? text
-            : text[..maxTooltipLength];
     }
 
     private async Task OnSwitchPlanAsync(string planGuid, string planName)

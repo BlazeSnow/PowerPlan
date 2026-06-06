@@ -1,7 +1,8 @@
 {
   "profiles": {
     "PowerPlan (Package)": {
-      "commandName": "MsixPackage"
+      "commandName": "MsixPackage",
+      "nativeDebugging": true
     },
     "PowerPlan (Unpackaged)": {
       "commandName": "Project"
