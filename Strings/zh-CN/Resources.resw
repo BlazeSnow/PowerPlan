@@ -295,10 +295,16 @@
     <value>将 Windows 电源计划恢复为默认状态，并清空已保存的卓越性能 UUID</value>
   </data>
   <data name="Settings.Tools.Website" xml:space="preserve">
-    <value>前往本软件代码仓库</value>
+    <value>前往软件官网</value>
   </data>
   <data name="Settings.Tools.WebsiteDesc" xml:space="preserve">
-    <value>打开 GitHub 仓库查看源代码与发布信息</value>
+    <value>https://www.blazesnow.com/powerplan/</value>
+  </data>
+  <data name="Settings.Tools.Repository" xml:space="preserve">
+    <value>前往本软件代码仓库</value>
+  </data>
+  <data name="Settings.Tools.RepositoryDesc" xml:space="preserve">
+    <value>https://github.com/BlazeSnow/PowerPlan</value>
   </data>
   <data name="Settings.Tools.Feedback" xml:space="preserve">
     <value>反馈到开发者邮箱</value>
@@ -395,6 +401,15 @@
   </data>
   <data name="Tray.AutoStartState" xml:space="preserve">
     <value>[托盘] 开机自启动：{0}</value>
+  </data>
+  <data name="Tray.Tooltip.Plan" xml:space="preserve">
+    <value>电源计划：{0}</value>
+  </data>
+  <data name="Tray.Tooltip.PlanUnavailable" xml:space="preserve">
+    <value>电源计划：未读取</value>
+  </data>
+  <data name="Tray.Tooltip.AutoStart" xml:space="preserve">
+    <value>开机自启动：{0}</value>
   </data>
   <data name="Tray.AutoStartToggleFailed" xml:space="preserve">
     <value>[托盘] 自启动切换失败：{0}</value>

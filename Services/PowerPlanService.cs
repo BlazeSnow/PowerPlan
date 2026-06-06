@@ -8,7 +8,7 @@ namespace PowerPlan.Services;
 public sealed class PowerPlanService
 {
     public const string UltimatePerformanceGuid = "e9a42b02-d5df-448d-aa00-03f14749eb61";
-    private static readonly TimeSpan PlansCacheDuration = TimeSpan.FromMilliseconds(750);
+    private static readonly TimeSpan PlansCacheDuration = TimeSpan.FromMinutes(5);
 
     private static readonly object PlansCacheLock = new();
     private static Task<IReadOnlyList<PowerPlanInfo>>? _plansFetchTask;

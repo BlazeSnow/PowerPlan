@@ -9,6 +9,8 @@ namespace PowerPlan.Views;
 public sealed partial class SettingsPage : Page
 {
     private const string FeedbackMail = "powerplan@blazesnow.com";
+    private const string OfficialWebsiteUrl = "https://www.blazesnow.com/powerplan/";
+    private const string RepositoryUrl = "https://github.com/BlazeSnow/PowerPlan";
 
     private readonly SettingsService _settingsService;
     private readonly StartupService _startupService;
@@ -47,6 +49,10 @@ public sealed partial class SettingsPage : Page
         WebsiteCard.Header = LocalizationService.Get("Settings.Tools.Website");
         WebsiteCard.Description = LocalizationService.Get("Settings.Tools.WebsiteDesc");
         OpenWebsiteButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
+
+        RepositoryCard.Header = LocalizationService.Get("Settings.Tools.Repository");
+        RepositoryCard.Description = LocalizationService.Get("Settings.Tools.RepositoryDesc");
+        OpenRepositoryButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
 
         FeedbackCard.Header = LocalizationService.Get("Settings.Tools.Feedback");
         FeedbackCard.Description = LocalizationService.Get("Settings.Tools.FeedbackDesc");
@@ -276,7 +282,12 @@ public sealed partial class SettingsPage : Page
 
     private void OnOpenWebsiteClicked(object sender, RoutedEventArgs e)
     {
-        OpenExternal("https://github.com/BlazeSnow/PowerPlan");
+        OpenExternal(OfficialWebsiteUrl);
+    }
+
+    private void OnOpenRepositoryClicked(object sender, RoutedEventArgs e)
+    {
+        OpenExternal(RepositoryUrl);
     }
 
     private void OnSendFeedbackClicked(object sender, RoutedEventArgs e)
