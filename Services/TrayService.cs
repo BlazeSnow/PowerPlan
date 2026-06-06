@@ -154,32 +154,6 @@ public sealed class TrayService : IDisposable
         _ = RunOnUiThread(SafeDisposeTaskbarIcon);
     }
 
-    public void PrepareForExit()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _disposed = true;
-        _ = RunOnUiThread(() =>
-        {
-            try
-            {
-                if (_taskbarIcon is not null)
-                {
-                    _taskbarIcon.Visibility = Visibility.Collapsed;
-                }
-            }
-            catch
-            {
-                // The app is exiting; avoid surfacing tray teardown failures.
-            }
-
-            _lastMenuSignature = string.Empty;
-        });
-    }
-
     private void SafeDisposeTaskbarIcon()
     {
         try

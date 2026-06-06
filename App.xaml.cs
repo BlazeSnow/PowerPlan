@@ -26,7 +26,6 @@ public partial class App : Application
     private bool _pendingMainPageRefresh;
     private int _pendingActivationShowRequested;
     private int _packageUpdateExitRequested;
-    private int _exitRequested;
     private DispatcherQueue? _uiDispatcherQueue;
     private readonly UISettings _uiSettings = new();
     private PackageCatalog? _packageCatalog;
@@ -51,7 +50,7 @@ public partial class App : Application
         {
             var activatedArgs = WinAppInstance.GetCurrent().GetActivatedEventArgs();
             await mainInstance.RedirectActivationToAsync(activatedArgs);
-            ExitApplicationCore();
+            Exit();
             return;
         }
 
@@ -164,7 +163,7 @@ public partial class App : Application
 
     private void RequestExitForPackageUpdate()
     {
-        RequestExitApplication();
+        ExitApplication();
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
@@ -377,43 +376,9 @@ public partial class App : Application
             return;
         }
 
-        args.Handled = true;
-        RequestExitApplication();
     }
 
     private void ExitApplication()
-    {
-        RequestExitApplication();
-    }
-
-    private void RequestExitApplication()
-    {
-        if (Interlocked.Exchange(ref _exitRequested, 1) == 1)
-        {
-            return;
-        }
-
-        _isExiting = true;
-        var dispatcherQueue = _uiDispatcherQueue ?? _window?.DispatcherQueue;
-        if (dispatcherQueue is not null && dispatcherQueue.TryEnqueue(async () =>
-            {
-                await Task.Delay(100);
-                ExitApplicationCore();
-            }))
-        {
-            return;
-        }
-
-        ExitApplicationCore();
-    }
-
-    private void ExitApplicationCore()
-    {
-        CleanupBeforeExit();
-        Exit();
-    }
-
-    private void CleanupBeforeExit()
     {
         _isExiting = true;
         _uiSettings.ColorValuesChanged -= OnColorValuesChanged;
@@ -423,8 +388,7 @@ public partial class App : Application
             _packageCatalog = null;
         }
 
-        _trayService?.PrepareForExit();
-        _trayService = null;
+        Exit();
     }
 
     private void ShowMainWindow()
