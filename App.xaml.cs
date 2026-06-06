@@ -26,6 +26,7 @@ public partial class App : Application
     private bool _pendingMainPageRefresh;
     private int _pendingActivationShowRequested;
     private int _packageUpdateExitRequested;
+    private int _exitRequested;
     private DispatcherQueue? _uiDispatcherQueue;
     private readonly UISettings _uiSettings = new();
     private PackageCatalog? _packageCatalog;
@@ -50,7 +51,7 @@ public partial class App : Application
         {
             var activatedArgs = WinAppInstance.GetCurrent().GetActivatedEventArgs();
             await mainInstance.RedirectActivationToAsync(activatedArgs);
-            ExitApplicationSafely();
+            ExitApplicationCore();
             return;
         }
 
@@ -163,13 +164,7 @@ public partial class App : Application
 
     private void RequestExitForPackageUpdate()
     {
-        var dispatcherQueue = _uiDispatcherQueue ?? _window?.DispatcherQueue;
-        if (dispatcherQueue is not null && dispatcherQueue.TryEnqueue(ExitApplicationSafely))
-        {
-            return;
-        }
-
-        ExitApplicationSafely();
+        RequestExitApplication();
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
@@ -385,10 +380,31 @@ public partial class App : Application
 
     private void ExitApplication()
     {
-        ExitApplicationSafely();
+        RequestExitApplication();
     }
 
-    private void ExitApplicationSafely()
+    private void RequestExitApplication()
+    {
+        if (Interlocked.Exchange(ref _exitRequested, 1) == 1)
+        {
+            return;
+        }
+
+        _isExiting = true;
+        var dispatcherQueue = _uiDispatcherQueue ?? _window?.DispatcherQueue;
+        if (dispatcherQueue is not null && dispatcherQueue.TryEnqueue(async () =>
+            {
+                await Task.Delay(100);
+                ExitApplicationCore();
+            }))
+        {
+            return;
+        }
+
+        ExitApplicationCore();
+    }
+
+    private void ExitApplicationCore()
     {
         CleanupBeforeExit();
         Exit();
@@ -406,13 +422,6 @@ public partial class App : Application
 
         _trayService?.Dispose();
         _trayService = null;
-
-        if (_window is not null)
-        {
-            _window.Closed -= OnMainWindowClosed;
-            _window.SetTitleBar(null);
-            _window.Content = null;
-        }
     }
 
     private void ShowMainWindow()

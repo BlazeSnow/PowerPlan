@@ -150,7 +150,19 @@ public sealed class TrayService : IDisposable
         }
 
         _disposed = true;
-        _taskbarIcon?.Dispose();
+        try
+        {
+            if (_taskbarIcon is not null)
+            {
+                _taskbarIcon.ContextFlyout = null;
+                _taskbarIcon.Dispose();
+            }
+        }
+        catch
+        {
+            // The app is exiting; do not let tray cleanup failures crash shutdown.
+        }
+
         _taskbarIcon = null;
     }
 
@@ -236,7 +248,7 @@ public sealed class TrayService : IDisposable
         foreach (var plan in plans)
         {
             var planCopy = CopyPlan(plan);
-            menu.Items.Add(new RadioMenuFlyoutItem
+            menu.Items.Add(new ToggleMenuFlyoutItem
             {
                 Text = PowerPlanIcon + planCopy.Name,
                 IsChecked = planCopy.IsActive,
@@ -368,11 +380,7 @@ public sealed class TrayService : IDisposable
 
     private void RequestExit()
     {
-        _ = _uiDispatcherQueue.TryEnqueue(async () =>
-        {
-            await Task.Yield();
-            _exitApplication();
-        });
+        _exitApplication();
     }
 
     private static PowerPlanInfo CopyPlan(PowerPlanInfo plan)
