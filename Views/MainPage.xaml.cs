@@ -15,6 +15,7 @@ public sealed partial class MainPage : Page
     private readonly SettingsService _settingsService;
     private readonly SemaphoreSlim _refreshSemaphore = new(1, 1);
     private bool _isUpdatingSelection;
+    private bool _hasLoadedPlans;
     private DateTimeOffset _lastStatusAt;
     private string _lastStatusMessage = string.Empty;
     private InfoBarSeverity _lastStatusSeverity;
@@ -34,9 +35,15 @@ public sealed partial class MainPage : Page
 
     private async void MainPage_Loaded(object sender, RoutedEventArgs e)
     {
+        if (_hasLoadedPlans)
+        {
+            return;
+        }
+
         try
         {
             await RefreshPlansAsync();
+            _hasLoadedPlans = true;
             SetStatus(LocalizationService.Get("Main.Status.InitSuccess"), InfoBarSeverity.Success);
         }
         catch (Exception ex)
@@ -68,26 +75,7 @@ public sealed partial class MainPage : Page
         try
         {
             var plans = await _powerPlanService.GetPlansAsync(forceRefresh);
-
-            SynchronizePlans(plans);
-
-            var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
-            var hasUltimate = plans.Any(plan => IsVisibleUltimatePerformancePlan(plan, savedUltimatePlanGuid));
-            var hasHiddenUltimate = !string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
-                && !plans.Any(plan => string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
-
-            UltimateCard.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
-            CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
-
-            if (!hasUltimate)
-            {
-                UltimateCardIcon.Glyph = hasHiddenUltimate ? HiddenUltimateIconGlyph : MissingUltimateIconGlyph;
-                UltimateCard.Header = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenTitle" : "Main.UltimateMissingTitle");
-                UltimateCard.Description = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenMessage" : "Main.UltimateMissingMessage");
-                CreateUltimateButton.Content = LocalizationService.Get(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
-            }
-
-            SelectPlan(Plans.FirstOrDefault(x => x.IsActive));
+            ApplyPlansToView(plans);
 
             if (Application.Current is App app)
             {
@@ -348,6 +336,12 @@ public sealed partial class MainPage : Page
         await RefreshPlansAsync(forceRefresh: forceRefresh);
     }
 
+    public void ApplyPlansFromExternalSnapshot(IReadOnlyList<PowerPlanInfo> plans)
+    {
+        ApplyPlansToView(plans);
+        _hasLoadedPlans = true;
+    }
+
     public bool TryApplyActivePlanFromExternal(string activePlanGuid)
     {
         if (!Plans.Any(plan => string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase)))
@@ -378,6 +372,29 @@ public sealed partial class MainPage : Page
                 IsActive = plan.IsActive
             })
             .ToArray();
+    }
+
+    private void ApplyPlansToView(IReadOnlyList<PowerPlanInfo> plans)
+    {
+        SynchronizePlans(plans);
+
+        var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
+        var hasUltimate = plans.Any(plan => IsVisibleUltimatePerformancePlan(plan, savedUltimatePlanGuid));
+        var hasHiddenUltimate = !string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
+            && !plans.Any(plan => string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
+
+        UltimateCard.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
+        CreateUltimateButton.Visibility = hasUltimate ? Visibility.Collapsed : Visibility.Visible;
+
+        if (!hasUltimate)
+        {
+            UltimateCardIcon.Glyph = hasHiddenUltimate ? HiddenUltimateIconGlyph : MissingUltimateIconGlyph;
+            UltimateCard.Header = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenTitle" : "Main.UltimateMissingTitle");
+            UltimateCard.Description = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenMessage" : "Main.UltimateMissingMessage");
+            CreateUltimateButton.Content = LocalizationService.Get(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
+        }
+
+        SelectPlan(Plans.FirstOrDefault(x => x.IsActive));
     }
 }
 

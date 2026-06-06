@@ -22,7 +22,7 @@ public sealed class TrayService : IDisposable
     private readonly Func<string, Task> _activateHiddenUltimatePlanAsync;
     private readonly Func<bool> _isStartupEnabled;
     private readonly Func<bool, Task<bool>> _setStartupEnabled;
-    private readonly Func<Task> _onPlansRefreshed;
+    private readonly Func<IReadOnlyList<PowerPlanInfo>, Task> _onPlansRefreshed;
     private readonly Action _showMainWindow;
     private readonly Action _exitApplication;
     private readonly Action<string, InfoBarSeverity> _log;
@@ -38,6 +38,7 @@ public sealed class TrayService : IDisposable
     private TaskbarIcon? _taskbarIcon;
     private MenuFlyout? _contextFlyout;
     private string _lastMenuSignature = string.Empty;
+    private string _lastTooltipText = string.Empty;
     private ElementTheme _currentTheme = ElementTheme.Default;
     private bool _disposed;
 
@@ -49,7 +50,7 @@ public sealed class TrayService : IDisposable
         Func<string, Task> activateHiddenUltimatePlanAsync,
         Func<bool> isStartupEnabled,
         Func<bool, Task<bool>> setStartupEnabled,
-        Func<Task> onPlansRefreshed,
+        Func<IReadOnlyList<PowerPlanInfo>, Task> onPlansRefreshed,
         Action showMainWindow,
         Action exitApplication,
         Action<string, InfoBarSeverity> log)
@@ -156,6 +157,11 @@ public sealed class TrayService : IDisposable
             return;
         }
 
+        if (_currentTheme == theme)
+        {
+            return;
+        }
+
         _currentTheme = theme;
         _ = RunOnUiThread(ApplyContextFlyoutTheme);
     }
@@ -185,6 +191,7 @@ public sealed class TrayService : IDisposable
         _taskbarIcon = null;
         _contextFlyout = null;
         _lastMenuSignature = string.Empty;
+        _lastTooltipText = string.Empty;
     }
 
     private async Task RefreshPlansCoreAsync(bool forceRefresh)
@@ -193,7 +200,7 @@ public sealed class TrayService : IDisposable
         {
             var plans = await _getPlansAsync(forceRefresh);
             UpdatePlansSnapshot(plans);
-            await _onPlansRefreshed();
+            await _onPlansRefreshed(plans);
         }
         catch (Exception ex)
         {
@@ -228,10 +235,10 @@ public sealed class TrayService : IDisposable
             ContextMenuMode = ContextMenuMode.PopupMenu,
             NoLeftClickDelay = true,
             Visibility = Visibility.Visible,
-            ToolTipText = BuildTooltipText(),
+            ToolTipText = UpdateLastTooltipText(),
             ContextFlyout = _contextFlyout
         };
-        _taskbarIcon.ForceCreate(enablesEfficiencyMode: false);
+        _taskbarIcon.ForceCreate(enablesEfficiencyMode: true);
         ApplyContextFlyoutTheme();
     }
 
@@ -244,9 +251,21 @@ public sealed class TrayService : IDisposable
                 return;
             }
 
-            _taskbarIcon.ToolTipText = BuildTooltipText();
+            var tooltipText = BuildTooltipText();
+            if (!string.Equals(tooltipText, _lastTooltipText, StringComparison.Ordinal))
+            {
+                _lastTooltipText = tooltipText;
+                _taskbarIcon.ToolTipText = tooltipText;
+            }
+
             RebuildMenuIfNeeded(forceRebuild);
         });
+    }
+
+    private string UpdateLastTooltipText()
+    {
+        _lastTooltipText = BuildTooltipText();
+        return _lastTooltipText;
     }
 
     private string BuildTooltipText()

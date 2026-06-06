@@ -23,6 +23,8 @@ public partial class App : Application
     private bool _lastKnownAutoStart;
     private bool _lastKnownTrayEnabled;
     private bool _pendingMainPageRefresh;
+    private IReadOnlyList<PowerPlanInfo>? _pendingMainPagePlans;
+    private ElementTheme? _lastAppliedTrayTheme;
     private int _pendingActivationShowRequested;
     private int _packageUpdateExitRequested;
     private DispatcherQueue? _uiDispatcherQueue;
@@ -258,6 +260,7 @@ public partial class App : Application
                 else
                 {
                     _pendingMainPageRefresh = true;
+                    _pendingMainPagePlans = null;
                 }
             },
             getHiddenUltimatePlanGuid: () =>
@@ -329,7 +332,6 @@ public partial class App : Application
         }
     }
 
-
     public void UpdateTrayPlans(IReadOnlyList<PowerPlanInfo> plans)
     {
         _trayService?.UpdatePlansSnapshot(plans);
@@ -350,18 +352,20 @@ public partial class App : Application
         await _trayService.RefreshPlansAsync(forceRefresh);
     }
 
-    private async Task SyncMainPageAfterPlansRefreshAsync()
+    private Task SyncMainPageAfterPlansRefreshAsync(IReadOnlyList<PowerPlanInfo> plans)
     {
         var page = GetVisibleMainPage();
         if (page is not null)
         {
-            await page.RefreshFromExternalAsync(forceRefresh: true);
+            page.ApplyPlansFromExternalSnapshot(plans);
         }
         else if (GetMainPage() is not null)
         {
             _pendingMainPageRefresh = true;
+            _pendingMainPagePlans = plans;
         }
 
+        return Task.CompletedTask;
     }
 
     private MainPage? GetMainPage() => _shellPage?.GetMainPage();
@@ -434,11 +438,21 @@ public partial class App : Application
 
     private async Task RefreshMainPageAfterShowAsync(MainPage page)
     {
-        if (_pendingMainPageRefresh)
+        if (!_pendingMainPageRefresh)
         {
-            _pendingMainPageRefresh = false;
-            await page.RefreshFromExternalAsync(forceRefresh: true);
+            return;
         }
+
+        _pendingMainPageRefresh = false;
+        var pendingPlans = _pendingMainPagePlans;
+        _pendingMainPagePlans = null;
+        if (pendingPlans is not null)
+        {
+            page.ApplyPlansFromExternalSnapshot(pendingPlans);
+            return;
+        }
+
+        await page.RefreshFromExternalAsync(forceRefresh: true);
     }
 
     private void AddStatusToVisibleMainPage(string message, bool isError = false)
@@ -589,6 +603,12 @@ public partial class App : Application
     private void ApplyTrayTheme()
     {
         var theme = GetEffectiveTheme();
+        if (_lastAppliedTrayTheme == theme)
+        {
+            return;
+        }
+
+        _lastAppliedTrayTheme = theme;
         ApplyNativeMenuTheme(theme);
         _trayService?.ApplyTheme(theme);
     }
