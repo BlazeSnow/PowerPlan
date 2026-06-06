@@ -375,6 +375,9 @@ public partial class App : Application
             HideMainWindow();
             return;
         }
+
+        args.Handled = true;
+        ExitApplication();
     }
 
     private void ExitApplication()
@@ -389,12 +392,6 @@ public partial class App : Application
 
         _trayService?.Dispose();
         _trayService = null;
-
-        if (_window is not null)
-        {
-            _window.Close();
-            return;
-        }
 
         Environment.Exit(0);
     }
