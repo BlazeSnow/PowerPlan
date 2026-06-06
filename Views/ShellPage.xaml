@@ -18,7 +18,8 @@
             x:Uid="AppTitleBar"
             Title="PowerPlan"
             IsBackButtonVisible="False"
-            IsPaneToggleButtonVisible="False">
+            IsPaneToggleButtonVisible="True"
+            PaneToggleRequested="OnTitleBarPaneToggleRequested">
             <TitleBar.IconSource>
                 <ImageIconSource ImageSource="/Assets/powerplan.ico" />
             </TitleBar.IconSource>
@@ -30,7 +31,9 @@
             Background="Transparent"
             IsBackEnabled="False"
             IsBackButtonVisible="Collapsed"
+            IsPaneToggleButtonVisible="False"
             IsSettingsVisible="False"
+            IsTitleBarAutoPaddingEnabled="False"
             OpenPaneLength="220"
             CompactPaneLength="48"
             PaneDisplayMode="Left"
