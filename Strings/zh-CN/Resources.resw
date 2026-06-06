@@ -123,11 +123,14 @@
   <data name="AppTitleBar.Title" xml:space="preserve">
     <value>PowerPlan</value>
   </data>
+  <data name="AppTitleBar.Subtitle" xml:space="preserve">
+    <value>快速切换 Windows 电源计划</value>
+  </data>
   <data name="AppDisplayName" xml:space="preserve">
     <value>PowerPlan</value>
   </data>
   <data name="AppDescription" xml:space="preserve">
-    <value>Windows 电源计划快速切换工具</value>
+    <value>快速切换 Windows 电源计划</value>
   </data>
   <data name="App.Status.StartupSettingFailed" xml:space="preserve">
     <value>设置开机自启动失败：{0}</value>
@@ -155,9 +158,6 @@
   </data>
   <data name="Shell.Settings" xml:space="preserve">
     <value>设置</value>
-  </data>
-  <data name="Main.Subtitle" xml:space="preserve">
-    <value>快速切换 Windows 电源计划</value>
   </data>
   <data name="Main.RefreshPlansButton" xml:space="preserve">
     <value>刷新计划</value>

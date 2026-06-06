@@ -16,7 +16,8 @@
         <TitleBar
             x:Name="AppTitleBar"
             x:Uid="AppTitleBar"
-            Title="PowerPlan"
+            Title="-"
+            Subtitle="-"
             IsBackButtonVisible="False"
             IsPaneToggleButtonVisible="True"
             PaneToggleRequested="OnTitleBarPaneToggleRequested">
