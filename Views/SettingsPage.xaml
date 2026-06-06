@@ -73,7 +73,7 @@
 
             <controls:SettingsCard x:Name="RepositoryCard">
                 <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE715;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                    <FontIcon Glyph="&#xE943;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
                 <Button
                     x:Name="OpenRepositoryButton"
