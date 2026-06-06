@@ -120,6 +120,12 @@
   <data name="App.WindowTitle" xml:space="preserve">
     <value>PowerPlan</value>
   </data>
+  <data name="AppDisplayName" xml:space="preserve">
+    <value>PowerPlan</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>Windows 电源计划快速切换工具</value>
+  </data>
   <data name="App.Status.StartupSettingFailed" xml:space="preserve">
     <value>设置开机自启动失败：{0}</value>
   </data>
