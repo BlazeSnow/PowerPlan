@@ -83,6 +83,15 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center" />
             </controls:SettingsCard>
+
+            <controls:SettingsCard x:Name="AppVersionCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE946;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
+                <TextBlock
+                    x:Name="AppVersionTextBlock"
+                    TextWrapping="WrapWholeWords" />
+            </controls:SettingsCard>
         </StackPanel>
     </ScrollViewer>
 </Page>

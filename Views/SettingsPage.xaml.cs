@@ -1,6 +1,7 @@
 ﻿using PowerPlan.Models;
 using PowerPlan.Services;
 using System.Diagnostics;
+using Windows.ApplicationModel;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace PowerPlan.Views;
@@ -22,6 +23,7 @@ public sealed partial class SettingsPage : Page
         _startupService = app.StartupService;
         _powerPlanService = app.PowerPlanService;
         ApplyLocalization();
+        AppVersionTextBlock.Text = GetAppVersion();
 
         Loaded += SettingsPage_Loaded;
     }
@@ -51,6 +53,15 @@ public sealed partial class SettingsPage : Page
         FeedbackCard.Header = LocalizationService.Get("Settings.Tools.Feedback");
         FeedbackCard.Description = LocalizationService.Get("Settings.Tools.FeedbackDesc");
         SendFeedbackButton.Content = LocalizationService.Get("Settings.Tools.FeedbackCopy");
+
+        AppVersionCard.Header = LocalizationService.Get("Settings.AppVersion.Title");
+        AppVersionCard.Description = LocalizationService.Get("Settings.AppVersion.Desc");
+    }
+
+    private static string GetAppVersion()
+    {
+        PackageVersion version = Package.Current.Id.Version;
+        return $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
     }
 
     private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
