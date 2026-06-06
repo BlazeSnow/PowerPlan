@@ -3,9 +3,6 @@
     "PowerPlan (Package)": {
       "commandName": "MsixPackage",
       "nativeDebugging": true
-    },
-    "PowerPlan (Unpackaged)": {
-      "commandName": "Project"
     }
   }
 }
