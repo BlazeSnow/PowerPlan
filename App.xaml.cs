@@ -290,7 +290,6 @@ public partial class App : Application
             },
             isStartupEnabled: () => SettingsService.Current.AutoStart,
             setStartupEnabled: UpdateAutoStartFromTrayAsync,
-            isDarkTheme: () => GetEffectiveTheme() == ElementTheme.Dark,
             onPlansRefreshed: SyncMainPageAfterPlansRefreshAsync,
             showMainWindow: ShowMainWindow,
             exitApplication: ExitApplication,
@@ -375,7 +374,11 @@ public partial class App : Application
         {
             args.Handled = true;
             HideMainWindow();
+            return;
         }
+
+        args.Handled = true;
+        RequestExitApplication();
     }
 
     private void ExitApplication()
