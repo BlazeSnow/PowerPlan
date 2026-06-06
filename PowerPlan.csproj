@@ -90,21 +90,21 @@
         <SignAssembly>False</SignAssembly>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-      <NoWarn>IL2104</NoWarn>
+      <NoWarn></NoWarn>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      <NoWarn>IL2104</NoWarn>
+      <NoWarn></NoWarn>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-      <NoWarn>IL2104</NoWarn>
+      <NoWarn></NoWarn>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-      <NoWarn>IL2104</NoWarn>
+      <NoWarn></NoWarn>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      <NoWarn>IL2104</NoWarn>
+      <NoWarn></NoWarn>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-      <NoWarn>IL2104</NoWarn>
+      <NoWarn></NoWarn>
     </PropertyGroup>
 </Project>
