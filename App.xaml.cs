@@ -178,6 +178,7 @@ public partial class App : Application
         if (autoStartChanged)
         {
             await ApplyStartupSettingAsync();
+            _trayService?.UpdateStatus();
         }
 
         if (trayChanged)

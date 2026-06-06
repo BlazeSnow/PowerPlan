@@ -139,6 +139,11 @@ public sealed class TrayService : IDisposable
         UpdateTaskbarIcon(forceRebuild: true);
     }
 
+    public void UpdateStatus()
+    {
+        UpdateTaskbarIcon();
+    }
+
     public void ShowBalloon(string message)
     {
         _log(message, InfoBarSeverity.Informational);
@@ -223,7 +228,7 @@ public sealed class TrayService : IDisposable
             ContextMenuMode = ContextMenuMode.PopupMenu,
             NoLeftClickDelay = true,
             Visibility = Visibility.Visible,
-            ToolTipText = AppTitleText,
+            ToolTipText = BuildTooltipText(),
             ContextFlyout = _contextFlyout
         };
         _taskbarIcon.ForceCreate(enablesEfficiencyMode: false);
@@ -239,9 +244,33 @@ public sealed class TrayService : IDisposable
                 return;
             }
 
-            _taskbarIcon.ToolTipText = AppTitleText;
+            _taskbarIcon.ToolTipText = BuildTooltipText();
             RebuildMenuIfNeeded(forceRebuild);
         });
+    }
+
+    private string BuildTooltipText()
+    {
+        string? activePlanName;
+        lock (_plansLock)
+        {
+            activePlanName = _cachedPlans.FirstOrDefault(plan => plan.IsActive)?.Name;
+        }
+
+        var planText = string.IsNullOrWhiteSpace(activePlanName)
+            ? LocalizationService.Get("Tray.Tooltip.PlanUnavailable")
+            : LocalizationService.Format("Tray.Tooltip.Plan", activePlanName);
+        var startupState = LocalizationService.Get(_isStartupEnabled() ? "App.Status.On" : "App.Status.Off");
+        var startupText = LocalizationService.Format("Tray.Tooltip.AutoStart", startupState);
+        return TruncateTooltip($"{AppTitleText}\n{planText}\n{startupText}");
+    }
+
+    private static string TruncateTooltip(string text)
+    {
+        const int maxTooltipLength = 127;
+        return text.Length <= maxTooltipLength
+            ? text
+            : text[..maxTooltipLength];
     }
 
     private void RebuildMenuIfNeeded(bool forceRebuild = false)

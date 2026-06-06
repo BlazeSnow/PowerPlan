@@ -396,6 +396,15 @@
   <data name="Tray.AutoStartState" xml:space="preserve">
     <value>[托盘] 开机自启动：{0}</value>
   </data>
+  <data name="Tray.Tooltip.Plan" xml:space="preserve">
+    <value>电源计划：{0}</value>
+  </data>
+  <data name="Tray.Tooltip.PlanUnavailable" xml:space="preserve">
+    <value>电源计划：未读取</value>
+  </data>
+  <data name="Tray.Tooltip.AutoStart" xml:space="preserve">
+    <value>开机自启动：{0}</value>
+  </data>
   <data name="Tray.AutoStartToggleFailed" xml:space="preserve">
     <value>[托盘] 自启动切换失败：{0}</value>
   </data>
