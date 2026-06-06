@@ -460,7 +460,13 @@ public sealed class TrayService : IDisposable
 
     private void RequestExit()
     {
-        _exitApplication();
+        _ = RequestExitAsync();
+    }
+
+    private async Task RequestExitAsync()
+    {
+        await Task.Delay(300);
+        _ = _uiDispatcherQueue.TryEnqueue(() => _exitApplication());
     }
 
     private static PowerPlanInfo CopyPlan(PowerPlanInfo plan)
