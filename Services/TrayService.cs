@@ -10,6 +10,11 @@ namespace PowerPlan.Services;
 public sealed class TrayService : IDisposable
 {
     private static readonly string AppTitleText = LocalizationService.Get("App.WindowTitle", "PowerPlan");
+    private const string OpenMainWindowIcon = "\u2302 ";
+    private const string PowerPlanIcon = "\u26A1 ";
+    private const string RefreshPlansIcon = "\u21BB ";
+    private const string StartupIcon = "\u23FB ";
+    private const string ExitIcon = "\u2715 ";
 
     private readonly Func<bool, Task<IReadOnlyList<PowerPlanInfo>>> _getPlansAsync;
     private readonly Func<string, Task> _setActivePlanAsync;
@@ -217,7 +222,7 @@ public sealed class TrayService : IDisposable
         });
         menu.Items.Add(new MenuFlyoutItem
         {
-            Text = LocalizationService.Get("Tray.Menu.OpenMainWindow"),
+            Text = OpenMainWindowIcon + LocalizationService.Get("Tray.Menu.OpenMainWindow"),
             Command = new RelayCommand(_showMainWindow)
         });
         menu.Items.Add(new MenuFlyoutSeparator());
@@ -233,7 +238,7 @@ public sealed class TrayService : IDisposable
             var planCopy = CopyPlan(plan);
             menu.Items.Add(new RadioMenuFlyoutItem
             {
-                Text = planCopy.Name,
+                Text = PowerPlanIcon + planCopy.Name,
                 IsChecked = planCopy.IsActive,
                 Command = new RelayCommand(() => _ = OnSwitchPlanAsync(planCopy.Guid, planCopy.Name))
             });
@@ -246,7 +251,7 @@ public sealed class TrayService : IDisposable
             var ultimatePlanGuid = hiddenUltimatePlanGuid;
             menu.Items.Add(new MenuFlyoutItem
             {
-                Text = LocalizationService.Get("Tray.Menu.OpenHiddenUltimate"),
+                Text = PowerPlanIcon + LocalizationService.Get("Tray.Menu.OpenHiddenUltimate"),
                 Command = new RelayCommand(() => _ = OnActivateHiddenUltimateAsync(ultimatePlanGuid))
             });
         }
@@ -254,21 +259,20 @@ public sealed class TrayService : IDisposable
         menu.Items.Add(new MenuFlyoutSeparator());
         menu.Items.Add(new MenuFlyoutItem
         {
-            Text = LocalizationService.Get("Tray.Menu.RefreshPlans"),
+            Text = RefreshPlansIcon + LocalizationService.Get("Tray.Menu.RefreshPlans"),
             Command = new RelayCommand(OnRefreshPlansRequested)
         });
-        menu.Items.Add(new ToggleMenuFlyoutItem
+        menu.Items.Add(new MenuFlyoutItem
         {
-            Text = _isStartupEnabled()
+            Text = StartupIcon + (_isStartupEnabled()
                 ? LocalizationService.Get("Tray.Menu.DisableAutoStart")
-                : LocalizationService.Get("Tray.Menu.EnableAutoStart"),
-            IsChecked = _isStartupEnabled(),
+                : LocalizationService.Get("Tray.Menu.EnableAutoStart")),
             Command = new RelayCommand(() => _ = ToggleStartupAsync())
         });
         menu.Items.Add(new MenuFlyoutSeparator());
         menu.Items.Add(new MenuFlyoutItem
         {
-            Text = LocalizationService.Get("Tray.Menu.Exit"),
+            Text = ExitIcon + LocalizationService.Get("Tray.Menu.Exit"),
             Command = new RelayCommand(RequestExit)
         });
 
