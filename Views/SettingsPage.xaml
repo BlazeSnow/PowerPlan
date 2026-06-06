@@ -16,8 +16,6 @@
     </Page.Resources>
     <ScrollViewer Background="Transparent">
         <StackPanel Padding="24" Spacing="16">
-            <TextBlock x:Name="PageTitleText" Text="-" FontSize="28" FontWeight="SemiBold" />
-
             <controls:SettingsCard x:Name="AutoStartCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE7E8;" Style="{StaticResource SettingsCardHeaderIconStyle}" />

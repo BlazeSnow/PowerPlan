@@ -30,8 +30,6 @@ public sealed partial class SettingsPage : Page
 
     private void ApplyLocalization()
     {
-        PageTitleText.Text = LocalizationService.Get("Settings.PageTitle");
-
         AutoStartCard.Header = LocalizationService.Get("Settings.AutoStart.Title");
         AutoStartCard.Description = LocalizationService.Get("Settings.AutoStart.Desc");
 
