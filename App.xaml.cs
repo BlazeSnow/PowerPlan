@@ -1,4 +1,5 @@
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using PowerPlan.Models;
@@ -7,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Windows.ApplicationModel;
 using Windows.UI.ViewManagement;
+using WinRT.Interop;
 using WinAppInstance = Microsoft.Windows.AppLifecycle.AppInstance;
 
 namespace PowerPlan;
@@ -24,7 +26,6 @@ public partial class App : Application
     private bool _pendingMainPageRefresh;
     private int _pendingActivationShowRequested;
     private int _packageUpdateExitRequested;
-    private nint _windowIconHandle;
     private DispatcherQueue? _uiDispatcherQueue;
     private readonly UISettings _uiSettings = new();
     private PackageCatalog? _packageCatalog;
@@ -75,7 +76,6 @@ public partial class App : Application
         _window ??= new Window();
         var launchToTray = startupTaskLaunch && SettingsService.Current.TrayEnabled;
         _shellPage ??= new ShellPage(navigateToHomeOnStartup: !launchToTray);
-        _window.Content = _shellPage;
         ConfigureWindowAppearance();
 
         _window.Activate();
@@ -406,11 +406,6 @@ public partial class App : Application
 
         _trayService?.Dispose();
         _trayService = null;
-        if (_windowIconHandle != IntPtr.Zero)
-        {
-            _ = DestroyIcon(_windowIconHandle);
-            _windowIconHandle = IntPtr.Zero;
-        }
     }
 
     private void ShowMainWindow()
@@ -425,7 +420,7 @@ public partial class App : Application
             return;
         }
 
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        var hwnd = WindowNative.GetWindowHandle(_window);
         _ = ShowWindow(hwnd, 5);
         _window.Activate();
         ApplySystemTitleBarTheme();
@@ -441,7 +436,7 @@ public partial class App : Application
             return;
         }
 
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        var hwnd = WindowNative.GetWindowHandle(_window);
         _ = ShowWindow(hwnd, 0);
     }
 
@@ -485,7 +480,7 @@ public partial class App : Application
             return false;
         }
 
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        var hwnd = WindowNative.GetWindowHandle(_window);
         return IsWindowVisible(hwnd);
     }
 
@@ -497,23 +492,48 @@ public partial class App : Application
         }
 
         _window.Title = LocalizationService.Get("App.WindowTitle", "PowerPlan");
+        ConfigureWindowContent();
         ApplySystemBackdrop();
+        SetWindowIcon();
+    }
 
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "powerplan.ico");
-        if (!File.Exists(iconPath))
+    private void ConfigureWindowContent()
+    {
+        if (_window is null || _shellPage is null)
         {
             return;
         }
 
-        _windowIconHandle = LoadImage(IntPtr.Zero, iconPath, ImageIcon, 0, 0, LrLoadFromFile);
-        if (_windowIconHandle == IntPtr.Zero)
+        _window.ExtendsContentIntoTitleBar = true;
+        _window.Content = _shellPage;
+        _window.SetTitleBar(_shellPage.AppTitleBarElement);
+    }
+
+    private void SetWindowIcon()
+    {
+        if (_window is null)
         {
             return;
         }
 
-        _ = SendMessage(hwnd, WmSetIcon, (nint)IconSmall, _windowIconHandle);
-        _ = SendMessage(hwnd, WmSetIcon, (nint)IconBig, _windowIconHandle);
+        try
+        {
+            var hwnd = WindowNative.GetWindowHandle(_window);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+            var appWindow = AppWindow.GetFromWindowId(windowId);
+
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "powerplan.ico");
+            if (!File.Exists(iconPath))
+            {
+                return;
+            }
+
+            appWindow.SetIcon(iconPath);
+        }
+        catch
+        {
+            // Ignore icon setup failures to avoid affecting startup flow.
+        }
     }
 
     private void ApplySystemBackdrop()
@@ -598,7 +618,7 @@ public partial class App : Application
             return;
         }
 
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        var hwnd = WindowNative.GetWindowHandle(_window);
         var useDarkMode = GetEffectiveTheme() == ElementTheme.Dark ? 1 : 0;
         var size = Marshal.SizeOf<int>();
 
@@ -606,6 +626,52 @@ public partial class App : Application
         if (result != 0)
         {
             _ = DwmSetWindowAttribute(hwnd, DwmaUseImmersiveDarkModeBefore20H1, ref useDarkMode, size);
+        }
+
+        ApplyCaptionButtonTheme(useDarkMode == 1);
+    }
+
+    private void ApplyCaptionButtonTheme(bool isDark)
+    {
+        if (_window is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!AppWindowTitleBar.IsCustomizationSupported())
+            {
+                return;
+            }
+
+            var hwnd = WindowNative.GetWindowHandle(_window);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+            var appWindow = AppWindow.GetFromWindowId(windowId);
+
+            var foreground = isDark
+                ? Windows.UI.Color.FromArgb(255, 255, 255, 255)
+                : Windows.UI.Color.FromArgb(255, 0, 0, 0);
+            var inactiveForeground = isDark
+                ? Windows.UI.Color.FromArgb(160, 255, 255, 255)
+                : Windows.UI.Color.FromArgb(160, 0, 0, 0);
+            var hoverBackground = isDark
+                ? Windows.UI.Color.FromArgb(32, 255, 255, 255)
+                : Windows.UI.Color.FromArgb(24, 0, 0, 0);
+            var pressedBackground = isDark
+                ? Windows.UI.Color.FromArgb(48, 255, 255, 255)
+                : Windows.UI.Color.FromArgb(36, 0, 0, 0);
+
+            appWindow.TitleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+            appWindow.TitleBar.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+            appWindow.TitleBar.ButtonHoverBackgroundColor = hoverBackground;
+            appWindow.TitleBar.ButtonPressedBackgroundColor = pressedBackground;
+            appWindow.TitleBar.ButtonForegroundColor = foreground;
+            appWindow.TitleBar.ButtonInactiveForegroundColor = inactiveForeground;
+        }
+        catch
+        {
+            // Ignore title bar button theme failures to avoid affecting startup flow.
         }
     }
 
@@ -621,11 +687,6 @@ public partial class App : Application
         }
     }
 
-    private const uint WmSetIcon = 0x0080;
-    private const int IconSmall = 0;
-    private const int IconBig = 1;
-    private const uint ImageIcon = 1;
-    private const uint LrLoadFromFile = 0x00000010;
     private const uint DwmaUseImmersiveDarkMode = 20;
     private const uint DwmaUseImmersiveDarkModeBefore20H1 = 19;
 
@@ -635,16 +696,6 @@ public partial class App : Application
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool IsWindowVisible(nint hWnd);
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern nint LoadImage(nint hinst, string lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern nint SendMessage(nint hWnd, uint msg, nint wParam, nint lParam);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool DestroyIcon(nint hIcon);
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(nint hwnd, uint dwAttribute, ref int pvAttribute, int cbAttribute);

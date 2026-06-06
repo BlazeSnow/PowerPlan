@@ -22,6 +22,8 @@ public sealed partial class ShellPage : Page
         SettingsItem.Content = LocalizationService.Get("Shell.Settings");
     }
 
+    public TitleBar AppTitleBarElement => AppTitleBar;
+
     private void OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (args.SelectedItemContainer?.Tag is not string tag)

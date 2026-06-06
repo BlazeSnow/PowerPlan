@@ -120,6 +120,9 @@
   <data name="App.WindowTitle" xml:space="preserve">
     <value>PowerPlan</value>
   </data>
+  <data name="AppTitleBar.Title" xml:space="preserve">
+    <value>PowerPlan</value>
+  </data>
   <data name="AppDisplayName" xml:space="preserve">
     <value>PowerPlan</value>
   </data>
