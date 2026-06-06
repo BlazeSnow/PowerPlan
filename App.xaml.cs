@@ -5,7 +5,6 @@ using Microsoft.Windows.AppLifecycle;
 using PowerPlan.Models;
 using PowerPlan.Services;
 using System.Runtime.InteropServices;
-using System.Threading;
 using Windows.ApplicationModel;
 using Windows.UI.ViewManagement;
 using WinRT.Interop;
