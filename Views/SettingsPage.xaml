@@ -16,8 +16,6 @@
     </Page.Resources>
     <ScrollViewer Background="Transparent">
         <StackPanel Padding="24" Spacing="16">
-            <TextBlock x:Name="PageTitleText" Text="-" FontSize="28" FontWeight="SemiBold" />
-
             <controls:SettingsCard x:Name="AutoStartCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE7E8;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
@@ -82,6 +80,15 @@
                     Click="OnSendFeedbackClicked"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center" />
+            </controls:SettingsCard>
+
+            <controls:SettingsCard x:Name="AppVersionCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE946;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
+                <TextBlock
+                    x:Name="AppVersionTextBlock"
+                    TextWrapping="WrapWholeWords" />
             </controls:SettingsCard>
         </StackPanel>
     </ScrollViewer>

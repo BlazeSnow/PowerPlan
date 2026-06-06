@@ -1,6 +1,6 @@
 # AI编程指导文件
 
-1. 禁止对本文件进行修改
+1. 默认禁止对本文件进行修改；只有用户明确授权时才可修订
 2. 所有文件都以UTF-8格式存储
 
 ## 程序目的
@@ -53,10 +53,14 @@
 
 ## 托盘
 
-1. 使用winui 3原生托盘，带icon
-2. 性能计划列表，用户可点击切换
-3. 软件开机自启动的开关，用户可点击控制开关
-4. 软件的退出，用户可点击退出
+1. 使用`H.NotifyIcon.WinUI`实现托盘，带icon
+2. 托盘菜单使用`PopupMenu`模式，不使用`SecondWindow`模式
+3. 性能计划列表，用户可点击切换
+4. 当前电源计划使用菜单项勾选状态标识
+5. 其他菜单项的图标拼入菜单文本，不使用会挤压文本的菜单图标槽
+6. 软件开机自启动的开关，用户可点击控制开关
+7. 软件的退出，用户可点击退出
+8. 托盘退出需避开`PopupMenu`命令回调同步退出，先延后回到UI线程后再执行退出逻辑
 
 ## 设置页面
 
@@ -67,22 +71,34 @@
 5. 恢复电源计划（按钮）：恢复电源计划到默认状态`powercfg -restoredefaultschemes`
 6. 开发者官网（按钮）：<https://www.blazesnow.com>
 7. 反馈邮箱（复制按钮）：<powerplan@blazesnow.com>
+8. 软件版本号：显示当前安装包版本，不硬编码版本号
 
 ### 持久化设置
 
-1. 设置内容保存到`settings.json`
-2. `settings.json`：
-   1. 当软件为打包状态，保存到`%appdata%\Local\Packages\BlazeSnow.PowerPlan_cavwvnm5yrdtm\LocalState`
-   2. 若软件为未打包状态，回退到`%appdata%/PowerPlan/`
-3. 开机自启动的id：`startup`
-4. 启用托盘的id：`tray`
-5. 卓越性能计划的id：`UltimatePerformance`
+1. 设置内容保存到`ApplicationData.Current.LocalSettings`
+2. 旧版本`settings.json`仅用于一次性迁移
+3. 迁移成功后，将旧`settings.json`重命名为`settings.json.migrated`
+4. LocalSettings字段：
+   1. 开机自启动：`AutoStartEnabled`
+   2. 启用托盘：`TrayEnabled`
+   3. 卓越性能计划UUID：`UltimatePerformancePlanGuid`
+5. 旧JSON字段仍需保持读取兼容：
+   1. 开机自启动：`startup`
+   2. 启用托盘：`tray`
+   3. 卓越性能计划UUID：`UltimatePerformance`
 
 ## 侧边栏
 
 1. 采用winui 3原生侧边栏
 2. 切换主页和设置页
-3. 提供伸缩侧边栏按钮
+3. 伸缩侧边栏按钮放在标题栏上
+
+## 标题栏
+
+1. 使用WinUI `TitleBar`
+2. 标题栏显示软件名称和软件简介
+3. 软件简介同时作为标题栏副标题
+4. 标题栏文本使用资源文件，不硬编码可见字符串
 
 ## 语言
 

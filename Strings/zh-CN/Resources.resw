@@ -120,6 +120,18 @@
   <data name="App.WindowTitle" xml:space="preserve">
     <value>PowerPlan</value>
   </data>
+  <data name="AppTitleBar.Title" xml:space="preserve">
+    <value>PowerPlan</value>
+  </data>
+  <data name="AppTitleBar.Subtitle" xml:space="preserve">
+    <value>快速切换 Windows 电源计划</value>
+  </data>
+  <data name="AppDisplayName" xml:space="preserve">
+    <value>PowerPlan</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>快速切换 Windows 电源计划</value>
+  </data>
   <data name="App.Status.StartupSettingFailed" xml:space="preserve">
     <value>设置开机自启动失败：{0}</value>
   </data>
@@ -146,9 +158,6 @@
   </data>
   <data name="Shell.Settings" xml:space="preserve">
     <value>设置</value>
-  </data>
-  <data name="Main.Subtitle" xml:space="preserve">
-    <value>快速切换 Windows 电源计划</value>
   </data>
   <data name="Main.RefreshPlansButton" xml:space="preserve">
     <value>刷新计划</value>
@@ -306,6 +315,12 @@
   <data name="Settings.Tools.FeedbackCopy" xml:space="preserve">
     <value>复制反馈邮箱</value>
   </data>
+  <data name="Settings.AppVersion.Title" xml:space="preserve">
+    <value>软件版本</value>
+  </data>
+  <data name="Settings.AppVersion.Desc" xml:space="preserve">
+    <value>当前安装的 PowerPlan 版本</value>
+  </data>
   <data name="Settings.RestoreDialog.SuccessTitle" xml:space="preserve">
     <value>恢复完成</value>
   </data>
@@ -362,15 +377,6 @@
   </data>
   <data name="Tray.Menu.Exit" xml:space="preserve">
     <value>退出</value>
-  </data>
-  <data name="Tray.Tooltip.Plan" xml:space="preserve">
-    <value>电源计划：{0}</value>
-  </data>
-  <data name="Tray.Tooltip.PlanUnavailable" xml:space="preserve">
-    <value>电源计划：未读取</value>
-  </data>
-  <data name="Tray.Tooltip.AutoStart" xml:space="preserve">
-    <value>开机自启动：{0}</value>
   </data>
   <data name="Tray.RefreshStarted" xml:space="preserve">
     <value>[托盘] 已开始刷新计划列表</value>

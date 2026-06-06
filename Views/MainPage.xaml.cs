@@ -47,7 +47,6 @@ public sealed partial class MainPage : Page
 
     private void ApplyLocalization()
     {
-        SubtitleText.Text = LocalizationService.Get("Main.Subtitle");
         UltimateCard.Header = LocalizationService.Get("Main.UltimateMissingTitle");
         UltimateCard.Description = LocalizationService.Get("Main.UltimateMissingMessage");
         RefreshPlansButton.Content = LocalizationService.Get("Main.RefreshPlansButton");

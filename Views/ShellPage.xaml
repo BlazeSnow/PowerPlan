@@ -7,20 +7,43 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     Background="Transparent"
     mc:Ignorable="d">
-    <NavigationView
-        x:Name="AppNavigationView"
-        Background="Transparent"
-        IsBackEnabled="False"
-        IsBackButtonVisible="Collapsed"
-        IsSettingsVisible="False"
-        OpenPaneLength="220"
-        CompactPaneLength="48"
-        PaneDisplayMode="Left"
-        SelectionChanged="OnSelectionChanged">
-        <NavigationView.MenuItems>
-            <NavigationViewItem x:Name="HomeItem" Tag="home" Icon="Home" Content="-" />
-            <NavigationViewItem x:Name="SettingsItem" Tag="settings" Icon="Setting" Content="-" />
-        </NavigationView.MenuItems>
-        <Frame x:Name="ContentFrame" Background="Transparent" />
-    </NavigationView>
+    <Grid Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TitleBar
+            x:Name="AppTitleBar"
+            x:Uid="AppTitleBar"
+            Title="-"
+            Subtitle="-"
+            IsBackButtonVisible="False"
+            IsPaneToggleButtonVisible="True"
+            PaneToggleRequested="OnTitleBarPaneToggleRequested">
+            <TitleBar.IconSource>
+                <ImageIconSource ImageSource="/Assets/powerplan.ico" />
+            </TitleBar.IconSource>
+        </TitleBar>
+
+        <NavigationView
+            x:Name="AppNavigationView"
+            Grid.Row="1"
+            Background="Transparent"
+            IsBackEnabled="False"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleButtonVisible="False"
+            IsSettingsVisible="False"
+            IsTitleBarAutoPaddingEnabled="False"
+            OpenPaneLength="220"
+            CompactPaneLength="48"
+            PaneDisplayMode="Left"
+            SelectionChanged="OnSelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="HomeItem" Tag="home" Icon="Home" Content="-" />
+                <NavigationViewItem x:Name="SettingsItem" Tag="settings" Icon="Setting" Content="-" />
+            </NavigationView.MenuItems>
+            <Frame x:Name="ContentFrame" Background="Transparent" />
+        </NavigationView>
+    </Grid>
 </Page>

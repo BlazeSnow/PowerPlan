@@ -12,26 +12,26 @@
   <Identity
     Name="BlazeSnow.PowerPlan"
     Publisher="CN=C171AF55-419C-4E73-B34E-CB98C8F1EB78"
-    Version="2026.5.20.0" />
+    Version="2026.6.6.0" />
 
   <mp:PhoneIdentity PhoneProductId="9879b0b7-c14f-45c6-bfb6-e5f131d51336"
     PhonePublisherId="00000000-0000-0000-0000-000000000000" />
 
   <Properties>
-    <DisplayName>PowerPlan</DisplayName>
+    <DisplayName>ms-resource:AppDisplayName</DisplayName>
     <PublisherDisplayName>BlazeSnow</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
     <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0"
-      MaxVersionTested="10.0.19041.0" />
+      MaxVersionTested="10.0.26226.0" />
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0"
-      MaxVersionTested="10.0.19041.0" />
+      MaxVersionTested="10.0.26226.0" />
   </Dependencies>
 
   <Resources>
-    <Resource Language="zh-CN" />
+    <Resource Language="x-generate" />
   </Resources>
 
   <Applications>
@@ -39,8 +39,8 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$" uap18:TrustLevel="mediumIL" uap18:RuntimeBehavior="packagedClassicApp">
       <uap:VisualElements
-        DisplayName="PowerPlan"
-        Description="本程序针对Windows系统的电源计划，帮助用户快速切换电源计划。"
+        DisplayName="ms-resource:AppDisplayName"
+        Description="ms-resource:AppDescription"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">

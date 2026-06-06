@@ -1,13 +1,15 @@
 using PowerPlan.Models;
 using System.Text.Json;
 using Windows.ApplicationModel;
+using Windows.Storage;
 
 namespace PowerPlan.Services;
 
 public sealed class SettingsService
 {
-    private string _settingsPath;
+    private readonly string _settingsPath;
     private readonly string _fallbackPath;
+    private readonly ApplicationDataContainer _localSettings = ApplicationData.Current.LocalSettings;
 
     public SettingsService()
     {
@@ -26,20 +28,26 @@ public sealed class SettingsService
 
     public async Task<AppSettings> LoadAsync()
     {
-        var loaded = await LoadFromPathAsync(_settingsPath);
+        var loaded = LoadFromLocalSettings();
         if (loaded is not null)
         {
             return loaded;
         }
 
-        if (!_settingsPath.Equals(_fallbackPath, StringComparison.OrdinalIgnoreCase))
+        loaded = await LoadFromPathAsync(_settingsPath);
+        if (loaded is not null)
         {
-            loaded = await LoadFromPathAsync(_fallbackPath);
-            if (loaded is not null)
-            {
-                _settingsPath = _fallbackPath;
-                return loaded;
-            }
+            await SaveAsync(loaded);
+            MarkJsonSettingsMigrated(_settingsPath);
+            return loaded;
+        }
+
+        loaded = await LoadFromPathAsync(_fallbackPath);
+        if (loaded is not null)
+        {
+            await SaveAsync(loaded);
+            MarkJsonSettingsMigrated(_fallbackPath);
+            return loaded;
         }
 
         var defaults = new AppSettings();
@@ -57,27 +65,10 @@ public sealed class SettingsService
 
     public async Task SaveAsync(AppSettings settings)
     {
-        var json = JsonSerializer.Serialize(settings, AppSettingsJsonContext.Default.AppSettings);
-
-        try
-        {
-            await WriteToPathAsync(_settingsPath, json);
-        }
-        catch
-        {
-            if (!_settingsPath.Equals(_fallbackPath, StringComparison.OrdinalIgnoreCase))
-            {
-                await WriteToPathAsync(_fallbackPath, json);
-                _settingsPath = _fallbackPath;
-            }
-            else
-            {
-                throw;
-            }
-        }
-
+        SaveToLocalSettings(settings);
         Current = settings;
         SettingsChanged?.Invoke(this, Current);
+        await Task.CompletedTask;
     }
 
     public async Task SaveCurrentAsync()
@@ -86,6 +77,46 @@ public sealed class SettingsService
     }
 
     public string GetSettingsPath() => _settingsPath;
+
+    private AppSettings? LoadFromLocalSettings()
+    {
+        var values = _localSettings.Values;
+        if (!values.ContainsKey(AutoStartKey)
+            && !values.ContainsKey(TrayEnabledKey)
+            && !values.ContainsKey(UltimatePerformancePlanGuidKey))
+        {
+            return null;
+        }
+
+        return new AppSettings
+        {
+            AutoStart = GetLocalSetting(AutoStartKey, defaultValue: false),
+            TrayEnabled = GetLocalSetting(TrayEnabledKey, defaultValue: true),
+            UltimatePerformancePlanGuid = GetLocalSetting(UltimatePerformancePlanGuidKey, string.Empty)
+        };
+    }
+
+    private void SaveToLocalSettings(AppSettings settings)
+    {
+        var values = _localSettings.Values;
+        values[AutoStartKey] = settings.AutoStart;
+        values[TrayEnabledKey] = settings.TrayEnabled;
+        values[UltimatePerformancePlanGuidKey] = settings.UltimatePerformancePlanGuid;
+    }
+
+    private bool GetLocalSetting(string key, bool defaultValue)
+    {
+        return _localSettings.Values.TryGetValue(key, out var value) && value is bool boolValue
+            ? boolValue
+            : defaultValue;
+    }
+
+    private string GetLocalSetting(string key, string defaultValue)
+    {
+        return _localSettings.Values.TryGetValue(key, out var value) && value is string stringValue
+            ? stringValue
+            : defaultValue;
+    }
 
     private static async Task<AppSettings?> LoadFromPathAsync(string path)
     {
@@ -105,15 +136,27 @@ public sealed class SettingsService
         }
     }
 
-    private static async Task WriteToPathAsync(string path, string json)
+    private static void MarkJsonSettingsMigrated(string path)
     {
-        var directory = Path.GetDirectoryName(path);
-        if (!string.IsNullOrWhiteSpace(directory))
+        if (!File.Exists(path))
         {
-            Directory.CreateDirectory(directory);
+            return;
         }
 
-        await File.WriteAllTextAsync(path, json);
+        var migratedPath = path + MigratedSuffix;
+        try
+        {
+            if (File.Exists(migratedPath))
+            {
+                File.Delete(migratedPath);
+            }
+
+            File.Move(path, migratedPath);
+        }
+        catch
+        {
+            // Migration to LocalSettings already succeeded; keep the JSON file if it cannot be renamed.
+        }
     }
 
     private static string ResolvePrimaryPath()
@@ -146,4 +189,9 @@ public sealed class SettingsService
             return false;
         }
     }
+
+    private const string AutoStartKey = "AutoStartEnabled";
+    private const string TrayEnabledKey = "TrayEnabled";
+    private const string UltimatePerformancePlanGuidKey = "UltimatePerformancePlanGuid";
+    private const string MigratedSuffix = ".migrated";
 }

@@ -1,5 +1,12 @@
 # 更新日志
 
+## v2026.6.6.0
+
+1. 使用WinUI TitleBar重构标题栏
+2. 在设置页添加软件版本号卡片
+3. 使用H.NotifyIcon.WinUI重构托盘
+4. 将设置存储从settings.json迁移到LocalSettings
+
 ## v2026.5.20.0
 
 1. 启用单实例检测
