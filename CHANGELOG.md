@@ -3,6 +3,13 @@
 ## v2026.6.29.0
 
 1. 修复开机自启动的窗口创建问题
+2. PowerPlanInfo 改用 record 类型，消除冗余防御性拷贝
+3. 移除 PowerPlanService.ClonePlans() 和 TrayService.CopyPlan() 冗余克隆方法
+4. TrayService 菜单改为增量更新，切换计划时不再全量重建
+5. 修复 MainPage SemaphoreSlim 未释放的问题
+6. 托盘模式下提前跳过颜色变化时的窗口主题计算
+7. 缓存 ContentDialog 实例避免反复创建
+8. 延迟 ShellPage 创建到首次显示窗口时，减少静默启动占用
 
 ## v2026.6.6.0
 
