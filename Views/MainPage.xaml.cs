@@ -65,7 +65,7 @@ public sealed partial class MainPage : Page
         RefreshPlansButton.Content = LocalizationService.Get("Main.RefreshPlansButton");
         PlanPickerTitleText.Text = LocalizationService.Get("Main.PlanPickerTitle");
         CreateUltimateButton.Content = LocalizationService.Get("Main.CreateUltimateButton");
-        StatusInfoBar.Title = LocalizationService.Get("Main.StatusTitle");
+        StatusInfoBar.Title = DateTime.Now.ToString("HH:mm:ss");
         StatusInfoBar.Message = LocalizationService.Get("Main.StatusWaiting");
         DeletePlanHintText.Text = LocalizationService.Get("Main.DeletePlanHint");
     }
@@ -114,7 +114,7 @@ public sealed partial class MainPage : Page
         _lastStatusSeverity = severity;
         StatusInfoBar.IsOpen = true;
         StatusInfoBar.Severity = severity;
-        StatusInfoBar.Title = LocalizationService.Format("Main.Status.TitleWithTime", DateTime.Now.ToString("HH:mm:ss"));
+        StatusInfoBar.Title = DateTime.Now.ToString("HH:mm:ss");
         StatusInfoBar.Message = message;
     }
 
