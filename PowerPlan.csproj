@@ -33,10 +33,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Remove="PowerPlan.slnx" />
-    </ItemGroup>
-
-    <ItemGroup>
         <Content Include="Assets\powerplan.ico">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
@@ -45,8 +41,8 @@
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
         <PackageReference Include="H.NotifyIcon.WinUI" Version="2.4.1" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.1.3" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1839" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
 
         <Manifest Include="$(ApplicationManifest)" />
     </ItemGroup>
@@ -82,29 +78,7 @@
         <SuppressTrimAnalysisWarnings>False</SuppressTrimAnalysisWarnings>
         <TrimmerSingleWarn>True</TrimmerSingleWarn>
         <ILLinkTreatWarningsAsErrors>False</ILLinkTreatWarningsAsErrors>
-        <PublishProtocol>FileSystem</PublishProtocol>
         <PublishDir>bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\publish\</PublishDir>
         <SelfContained>true</SelfContained>
-        <PublishSingleFile>False</PublishSingleFile>
-        <PlatformTarget>AnyCPU</PlatformTarget>
-        <SignAssembly>False</SignAssembly>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-      <NoWarn></NoWarn>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      <NoWarn></NoWarn>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-      <NoWarn></NoWarn>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-      <NoWarn></NoWarn>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      <NoWarn></NoWarn>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-      <NoWarn></NoWarn>
     </PropertyGroup>
 </Project>

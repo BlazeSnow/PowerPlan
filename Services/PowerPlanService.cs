@@ -33,7 +33,7 @@ public sealed class PowerPlanService
             }
             else if (_cachedPlans is not null && DateTimeOffset.UtcNow - _cachedPlansAt <= PlansCacheDuration)
             {
-                return ClonePlans(_cachedPlans);
+                return _cachedPlans;
             }
 
             fetchVersion = _plansCacheVersion;
@@ -46,7 +46,7 @@ public sealed class PowerPlanService
         }
 
         var plans = await fetchTask;
-        return ClonePlans(plans);
+        return plans;
     }
 
     public Task SetActivePlanAsync(string planGuid)
@@ -220,18 +220,6 @@ public sealed class PowerPlanService
         ThrowIfFailed(
             PowerWriteFriendlyName(IntPtr.Zero, ref schemeGuid, IntPtr.Zero, IntPtr.Zero, buffer, (uint)buffer.Length),
             "PowerPlan.Error.WriteNameFailed");
-    }
-
-    private static IReadOnlyList<PowerPlanInfo> ClonePlans(IReadOnlyList<PowerPlanInfo> source)
-    {
-        return source
-            .Select(plan => new PowerPlanInfo
-            {
-                Guid = plan.Guid,
-                Name = plan.Name,
-                IsActive = plan.IsActive
-            })
-            .ToArray();
     }
 
     private static void InvalidatePlansCache()

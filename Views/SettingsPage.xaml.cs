@@ -16,6 +16,7 @@ public sealed partial class SettingsPage : Page
     private readonly StartupService _startupService;
     private readonly PowerPlanService _powerPlanService;
     private bool _updatingUi;
+    private ContentDialog? _operationDialog;
 
     public SettingsPage()
     {
@@ -309,15 +310,18 @@ public sealed partial class SettingsPage : Page
 
     private async Task ShowOperationDialogAsync(string title, string message)
     {
-        var dialog = new ContentDialog
+        if (_operationDialog is null)
         {
-            Title = title,
-            CloseButtonText = LocalizationService.Get("Common.Ok"),
-            Content = message,
-            XamlRoot = XamlRoot
-        };
+            _operationDialog = new ContentDialog
+            {
+                CloseButtonText = LocalizationService.Get("Common.Ok"),
+                XamlRoot = XamlRoot
+            };
+        }
 
-        await dialog.ShowAsync();
+        _operationDialog.Title = title;
+        _operationDialog.Content = message;
+        await _operationDialog.ShowAsync();
     }
 
     private static Style CreateDangerButtonStyle()

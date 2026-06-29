@@ -183,14 +183,8 @@
   <data name="Main.ActivateUltimateButton" xml:space="preserve">
     <value>启用隐藏的卓越性能计划</value>
   </data>
-  <data name="Main.StatusTitle" xml:space="preserve">
-    <value>状态</value>
-  </data>
   <data name="Main.StatusWaiting" xml:space="preserve">
     <value>等待操作</value>
-  </data>
-  <data name="Main.Status.TitleWithTime" xml:space="preserve">
-    <value>状态（{0}）</value>
   </data>
   <data name="Main.Status.InitSuccess" xml:space="preserve">
     <value>初始化完成</value>
