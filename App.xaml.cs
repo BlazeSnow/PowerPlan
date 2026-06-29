@@ -722,7 +722,15 @@ public partial class App : Application
     {
         try
         {
-            return WinAppInstance.GetCurrent().GetActivatedEventArgs().Kind == ExtendedActivationKind.StartupTask;
+            if (WinAppInstance.GetCurrent().GetActivatedEventArgs().Kind == ExtendedActivationKind.StartupTask)
+            {
+                return true;
+            }
+
+            return string.Equals(
+                Environment.GetEnvironmentVariable("POWERPLAN_SIMULATE_STARTUP"),
+                "1",
+                StringComparison.Ordinal);
         }
         catch
         {
