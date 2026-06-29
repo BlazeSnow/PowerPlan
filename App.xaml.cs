@@ -79,10 +79,15 @@ public partial class App : Application
         _shellPage ??= new ShellPage(navigateToHomeOnStartup: !launchToTray);
         ConfigureWindowAppearance();
 
-        _window.Activate();
         if (launchToTray)
         {
-            HideMainWindow();
+            // Keep the window hidden from the start for silent auto-start.
+            // The tray icon is available immediately; ShowMainWindow() will
+            // activate the window when the user clicks "Open" from the tray.
+        }
+        else
+        {
+            _window.Activate();
         }
         if (_window.Content is FrameworkElement rootElement)
         {
@@ -107,7 +112,7 @@ public partial class App : Application
             ShowMainWindow();
         }
 
-        // For startup-task launch with tray enabled, window is already hidden before async initialization.
+        // For startup-task launch with tray enabled, window was never activated so it stays hidden.
     }
 
     private void OnAppActivated(object? sender, AppActivationArguments args)
