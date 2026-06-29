@@ -62,6 +62,22 @@
 7. 软件的退出，用户可点击退出
 8. 托盘退出需避开`PopupMenu`命令回调同步退出，先延后回到UI线程后再执行退出逻辑
 
+### 开机自启动静默启动
+
+1. 检测到`StartupTask`激活且托盘启用时，跳过`_window.Activate()`，窗口不创建不显示，直接进入托盘
+2. 用户从托盘菜单点击"打开主窗口"时，通过`ShowWindow(hwnd, 5)`显示窗口
+
+### 开机自启动本地测试
+
+1. 正常启动应用，开启"开机自启"和"托盘"设置，关闭应用
+2. 设置环境变量`POWERPLAN_SIMULATE_STARTUP=1`后启动应用，模拟登录触发：
+   ```
+   $env:POWERPLAN_SIMULATE_STARTUP = "1"
+   dotnet run --project PowerPlan.csproj
+   ```
+3. 预期：窗口不弹出，图标直接进入托盘
+4. 真实链路验证：登出再登入即可，不需要重启电脑
+
 ## 设置页面
 
 1. 设置界面仿制Windows 11设置应用
