@@ -127,14 +127,7 @@ public sealed class TrayService : IDisposable
     {
         lock (_plansLock)
         {
-            _cachedPlans = plans
-                .Select(plan => new PowerPlanInfo
-                {
-                    Guid = plan.Guid,
-                    Name = plan.Name,
-                    IsActive = plan.IsActive
-                })
-                .ToArray();
+            _cachedPlans = plans;
         }
 
         UpdateTaskbarIcon(forceRebuild: true);
@@ -365,12 +358,11 @@ public sealed class TrayService : IDisposable
 
             foreach (var plan in plans)
             {
-                var planCopy = CopyPlan(plan);
                 _contextFlyout.Items.Add(new ToggleMenuFlyoutItem
                 {
-                    Text = PowerPlanIcon + planCopy.Name,
-                    IsChecked = planCopy.IsActive,
-                    Command = new RelayCommand(() => _ = OnSwitchPlanAsync(planCopy.Guid, planCopy.Name))
+                    Text = PowerPlanIcon + plan.Name,
+                    IsChecked = plan.IsActive,
+                    Command = new RelayCommand(() => _ = OnSwitchPlanAsync(plan.Guid, plan.Name))
                 });
             }
 
@@ -456,12 +448,7 @@ public sealed class TrayService : IDisposable
         lock (_plansLock)
         {
             _cachedPlans = _cachedPlans
-                .Select(plan => new PowerPlanInfo
-                {
-                    Guid = plan.Guid,
-                    Name = plan.Name,
-                    IsActive = string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase)
-                })
+                .Select(plan => plan with { IsActive = string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase) })
                 .ToArray();
         }
     }
@@ -543,16 +530,6 @@ public sealed class TrayService : IDisposable
     {
         await Task.Delay(300);
         _ = _uiDispatcherQueue.TryEnqueue(() => _exitApplication());
-    }
-
-    private static PowerPlanInfo CopyPlan(PowerPlanInfo plan)
-    {
-        return new PowerPlanInfo
-        {
-            Guid = plan.Guid,
-            Name = plan.Name,
-            IsActive = plan.IsActive
-        };
     }
 
     private sealed class RelayCommand(Action execute) : ICommand
