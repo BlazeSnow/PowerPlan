@@ -31,6 +31,12 @@ public sealed partial class MainPage : Page
         ApplyLocalization();
 
         Loaded += MainPage_Loaded;
+        Unloaded += MainPage_Unloaded;
+    }
+
+    private void MainPage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        _refreshSemaphore.Dispose();
     }
 
     private async void MainPage_Loaded(object sender, RoutedEventArgs e)

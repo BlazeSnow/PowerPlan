@@ -37,7 +37,9 @@ public sealed class TrayService : IDisposable
 
     private TaskbarIcon? _taskbarIcon;
     private MenuFlyout? _contextFlyout;
-    private string _lastMenuSignature = string.Empty;
+    private string _lastStructureSignature = string.Empty;
+    private string _lastActivePlanGuidInMenu = string.Empty;
+    private bool _lastStartupEnabledInMenu;
     private string _lastTooltipText = string.Empty;
     private ElementTheme _currentTheme = ElementTheme.Default;
     private bool _disposed;
@@ -183,7 +185,8 @@ public sealed class TrayService : IDisposable
 
         _taskbarIcon = null;
         _contextFlyout = null;
-        _lastMenuSignature = string.Empty;
+        _lastStructureSignature = string.Empty;
+        _lastActivePlanGuidInMenu = string.Empty;
         _lastTooltipText = string.Empty;
     }
 
@@ -251,7 +254,7 @@ public sealed class TrayService : IDisposable
                 _taskbarIcon.ToolTipText = tooltipText;
             }
 
-            RebuildMenuIfNeeded(forceRebuild);
+            UpdateMenuIfNeeded(forceRebuild);
         });
     }
 
@@ -285,21 +288,99 @@ public sealed class TrayService : IDisposable
             : text[..maxTooltipLength];
     }
 
-    private void RebuildMenuIfNeeded(bool forceRebuild = false)
+    private void UpdateMenuIfNeeded(bool forceRebuild = false)
     {
-        var signature = BuildMenuSignature();
-        if (!forceRebuild && string.Equals(signature, _lastMenuSignature, StringComparison.Ordinal))
-        {
-            return;
-        }
+        var structureSignature = BuildStructureSignature();
+        var needsRebuild = forceRebuild || !string.Equals(structureSignature, _lastStructureSignature, StringComparison.Ordinal);
 
-        if (RebuildMenu())
+        _ = RunOnUiThread(() =>
         {
-            _lastMenuSignature = signature;
-        }
+            if (_contextFlyout is null || _disposed)
+            {
+                return;
+            }
+
+            if (needsRebuild)
+            {
+                RebuildMenuFromScratch();
+                _lastStructureSignature = structureSignature;
+                _lastActivePlanGuidInMenu = FindActivePlanGuidInMenu();
+                _lastStartupEnabledInMenu = _isStartupEnabled();
+                ApplyContextFlyoutTheme();
+                return;
+            }
+
+            UpdateInPlace();
+        });
     }
 
-    private string BuildMenuSignature()
+    private void RebuildMenuFromScratch()
+    {
+        _contextFlyout!.Items.Clear();
+        _contextFlyout.Items.Add(new MenuFlyoutItem
+        {
+            Text = AppTitleText,
+            IsEnabled = false,
+            Width = 240
+        });
+        _contextFlyout.Items.Add(new MenuFlyoutItem
+        {
+            Text = OpenMainWindowIcon + LocalizationService.Get("Tray.Menu.OpenMainWindow"),
+            Command = new RelayCommand(_showMainWindow)
+        });
+        _contextFlyout.Items.Add(new MenuFlyoutSeparator());
+
+        IReadOnlyList<PowerPlanInfo> plans;
+        lock (_plansLock)
+        {
+            plans = _cachedPlans.ToArray();
+        }
+
+        foreach (var plan in plans)
+        {
+            _contextFlyout.Items.Add(new ToggleMenuFlyoutItem
+            {
+                Text = PowerPlanIcon + plan.Name,
+                IsChecked = plan.IsActive,
+                Tag = plan.Guid,
+                Command = new RelayCommand(() => _ = OnSwitchPlanAsync(plan.Guid, plan.Name))
+            });
+        }
+
+        var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid();
+        if (!string.IsNullOrWhiteSpace(hiddenUltimatePlanGuid)
+            && !plans.Any(plan => string.Equals(plan.Guid, hiddenUltimatePlanGuid, StringComparison.OrdinalIgnoreCase)))
+        {
+            var ultimatePlanGuid = hiddenUltimatePlanGuid;
+            _contextFlyout.Items.Add(new MenuFlyoutItem
+            {
+                Text = PowerPlanIcon + LocalizationService.Get("Tray.Menu.OpenHiddenUltimate"),
+                Command = new RelayCommand(() => _ = OnActivateHiddenUltimateAsync(ultimatePlanGuid))
+            });
+        }
+
+        _contextFlyout.Items.Add(new MenuFlyoutSeparator());
+        _contextFlyout.Items.Add(new MenuFlyoutItem
+        {
+            Text = RefreshPlansIcon + LocalizationService.Get("Tray.Menu.RefreshPlans"),
+            Command = new RelayCommand(OnRefreshPlansRequested)
+        });
+        _contextFlyout.Items.Add(new MenuFlyoutItem
+        {
+            Text = StartupIcon + (_isStartupEnabled()
+                ? LocalizationService.Get("Tray.Menu.DisableAutoStart")
+                : LocalizationService.Get("Tray.Menu.EnableAutoStart")),
+            Command = new RelayCommand(() => _ = ToggleStartupAsync())
+        });
+        _contextFlyout.Items.Add(new MenuFlyoutSeparator());
+        _contextFlyout.Items.Add(new MenuFlyoutItem
+        {
+            Text = ExitIcon + LocalizationService.Get("Tray.Menu.Exit"),
+            Command = new RelayCommand(RequestExit)
+        });
+    }
+
+    private string BuildStructureSignature()
     {
         IReadOnlyList<PowerPlanInfo> plans;
         lock (_plansLock)
@@ -309,8 +390,6 @@ public sealed class TrayService : IDisposable
 
         var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid() ?? string.Empty;
         var builder = new System.Text.StringBuilder();
-        builder.Append(_isStartupEnabled() ? '1' : '0');
-        builder.Append('|');
         builder.Append(hiddenUltimatePlanGuid);
 
         for (var i = 0; i < plans.Count; i++)
@@ -318,89 +397,59 @@ public sealed class TrayService : IDisposable
             var plan = plans[i];
             builder.Append('|');
             builder.Append(plan.Guid);
-            builder.Append(',');
-            builder.Append(plan.Name);
-            builder.Append(',');
-            builder.Append(plan.IsActive ? '1' : '0');
         }
 
         return builder.ToString();
     }
 
-    private bool RebuildMenu()
+    private string FindActivePlanGuidInMenu()
     {
-        return RunOnUiThread(() =>
+        IReadOnlyList<PowerPlanInfo> plans;
+        lock (_plansLock)
         {
-            if (_contextFlyout is null)
-            {
-                return;
-            }
+            plans = _cachedPlans.ToArray();
+        }
 
-            _contextFlyout.Items.Clear();
-            _contextFlyout.Items.Add(new MenuFlyoutItem
-            {
-                Text = AppTitleText,
-                IsEnabled = false,
-                Width = 240
-            });
-            _contextFlyout.Items.Add(new MenuFlyoutItem
-            {
-                Text = OpenMainWindowIcon + LocalizationService.Get("Tray.Menu.OpenMainWindow"),
-                Command = new RelayCommand(_showMainWindow)
-            });
-            _contextFlyout.Items.Add(new MenuFlyoutSeparator());
-
-            IReadOnlyList<PowerPlanInfo> plans;
-            lock (_plansLock)
-            {
-                plans = _cachedPlans.ToArray();
-            }
-
-            foreach (var plan in plans)
-            {
-                _contextFlyout.Items.Add(new ToggleMenuFlyoutItem
-                {
-                    Text = PowerPlanIcon + plan.Name,
-                    IsChecked = plan.IsActive,
-                    Command = new RelayCommand(() => _ = OnSwitchPlanAsync(plan.Guid, plan.Name))
-                });
-            }
-
-            var hiddenUltimatePlanGuid = _getHiddenUltimatePlanGuid();
-            if (!string.IsNullOrWhiteSpace(hiddenUltimatePlanGuid)
-                && !plans.Any(plan => string.Equals(plan.Guid, hiddenUltimatePlanGuid, StringComparison.OrdinalIgnoreCase)))
-            {
-                var ultimatePlanGuid = hiddenUltimatePlanGuid;
-                _contextFlyout.Items.Add(new MenuFlyoutItem
-                {
-                    Text = PowerPlanIcon + LocalizationService.Get("Tray.Menu.OpenHiddenUltimate"),
-                    Command = new RelayCommand(() => _ = OnActivateHiddenUltimateAsync(ultimatePlanGuid))
-                });
-            }
-
-            _contextFlyout.Items.Add(new MenuFlyoutSeparator());
-            _contextFlyout.Items.Add(new MenuFlyoutItem
-            {
-                Text = RefreshPlansIcon + LocalizationService.Get("Tray.Menu.RefreshPlans"),
-                Command = new RelayCommand(OnRefreshPlansRequested)
-            });
-            _contextFlyout.Items.Add(new MenuFlyoutItem
-            {
-                Text = StartupIcon + (_isStartupEnabled()
-                    ? LocalizationService.Get("Tray.Menu.DisableAutoStart")
-                    : LocalizationService.Get("Tray.Menu.EnableAutoStart")),
-                Command = new RelayCommand(() => _ = ToggleStartupAsync())
-            });
-            _contextFlyout.Items.Add(new MenuFlyoutSeparator());
-            _contextFlyout.Items.Add(new MenuFlyoutItem
-            {
-                Text = ExitIcon + LocalizationService.Get("Tray.Menu.Exit"),
-                Command = new RelayCommand(RequestExit)
-            });
-
-            ApplyContextFlyoutTheme();
-        });
+        return plans.FirstOrDefault(p => p.IsActive)?.Guid ?? string.Empty;
     }
+
+    private void UpdateInPlace()
+    {
+        if (_contextFlyout is null)
+        {
+            return;
+        }
+
+        var activePlanGuid = FindActivePlanGuidInMenu();
+        if (!string.Equals(activePlanGuid, _lastActivePlanGuidInMenu, StringComparison.Ordinal))
+        {
+            _lastActivePlanGuidInMenu = activePlanGuid;
+            foreach (var item in _contextFlyout.Items)
+            {
+                if (item is ToggleMenuFlyoutItem toggleItem && toggleItem.Tag is string planGuid)
+                {
+                    toggleItem.IsChecked = string.Equals(planGuid, activePlanGuid, StringComparison.OrdinalIgnoreCase);
+                }
+            }
+        }
+
+        var startupEnabled = _isStartupEnabled();
+        if (startupEnabled != _lastStartupEnabledInMenu)
+        {
+            _lastStartupEnabledInMenu = startupEnabled;
+            foreach (var item in _contextFlyout.Items)
+            {
+                if (item is MenuFlyoutItem flyoutItem && flyoutItem.Text.StartsWith(StartupIcon))
+                {
+                    flyoutItem.Text = StartupIcon + (startupEnabled
+                        ? LocalizationService.Get("Tray.Menu.DisableAutoStart")
+                        : LocalizationService.Get("Tray.Menu.EnableAutoStart"));
+                    break;
+                }
+            }
+        }
+    }
+
 
     private void ApplyContextFlyoutTheme()
     {

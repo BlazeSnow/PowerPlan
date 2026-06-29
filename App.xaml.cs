@@ -76,19 +76,18 @@ public partial class App : Application
 
         _window ??= new Window();
         var launchToTray = startupTaskLaunch && SettingsService.Current.TrayEnabled;
-        _shellPage ??= new ShellPage(navigateToHomeOnStartup: !launchToTray);
-        ConfigureWindowAppearance();
 
         if (launchToTray)
         {
-            // Keep the window hidden from the start for silent auto-start.
-            // The tray icon is available immediately; ShowMainWindow() will
-            // activate the window when the user clicks "Open" from the tray.
+            // Defer ShellPage and window content creation — only tray icon is needed.
         }
         else
         {
+            EnsureShellPageCreated();
+            ConfigureWindowAppearance();
             _window.Activate();
         }
+
         if (_window.Content is FrameworkElement rootElement)
         {
             rootElement.ActualThemeChanged -= OnRootActualThemeChanged;
@@ -416,11 +415,13 @@ public partial class App : Application
             return;
         }
 
+        EnsureShellPageCreated();
         if (_shellPage is null)
         {
             return;
         }
 
+        ConfigureWindowAppearance();
         var hwnd = WindowNative.GetWindowHandle(_window);
         _ = ShowWindow(hwnd, 5);
         _window.Activate();
@@ -428,6 +429,18 @@ public partial class App : Application
 
         var page = _shellPage.EnsureMainPageLoaded();
         _ = RefreshMainPageAfterShowAsync(page);
+    }
+
+    private void EnsureShellPageCreated()
+    {
+        if (_shellPage is not null)
+        {
+            return;
+        }
+
+        _shellPage = new ShellPage(navigateToHomeOnStartup: true);
+        _window!.Content = _shellPage;
+        _window.SetTitleBar(_shellPage.AppTitleBarElement);
     }
 
     private void HideMainWindow()
@@ -581,10 +594,16 @@ public partial class App : Application
             return;
         }
 
+        var effectiveTheme = GetEffectiveTheme();
+        if (effectiveTheme == _lastAppliedTrayTheme && _lastAppliedTrayTheme is not ElementTheme.Default)
+        {
+            return;
+        }
+
         var dispatcherQueue = _window.DispatcherQueue;
         if (dispatcherQueue.HasThreadAccess)
         {
-            ApplyTrayTheme();
+            ApplyTrayThemeFor(effectiveTheme);
 
             if (IsMainWindowVisible())
             {
@@ -596,7 +615,7 @@ public partial class App : Application
 
         _ = dispatcherQueue.TryEnqueue(() =>
         {
-            ApplyTrayTheme();
+            ApplyTrayThemeFor(effectiveTheme);
 
             if (IsMainWindowVisible())
             {
@@ -605,9 +624,8 @@ public partial class App : Application
         });
     }
 
-    private void ApplyTrayTheme()
+    private void ApplyTrayThemeFor(ElementTheme theme)
     {
-        var theme = GetEffectiveTheme();
         if (_lastAppliedTrayTheme == theme)
         {
             return;
@@ -616,6 +634,11 @@ public partial class App : Application
         _lastAppliedTrayTheme = theme;
         ApplyNativeMenuTheme(theme);
         _trayService?.ApplyTheme(theme);
+    }
+
+    private void ApplyTrayTheme()
+    {
+        ApplyTrayThemeFor(GetEffectiveTheme());
     }
 
     private ElementTheme GetEffectiveTheme()
