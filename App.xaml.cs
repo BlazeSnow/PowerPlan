@@ -186,7 +186,7 @@ public partial class App : Application
                 try
                 {
                     await _powerPlanService.SetActivePlanAsync(guid);
-                    await RefreshTrayPlansAsync();
+                    await RefreshTrayPlansAsync(forceRefresh: true);
                 }
                 catch
                 {
