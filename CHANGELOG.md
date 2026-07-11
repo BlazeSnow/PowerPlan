@@ -20,10 +20,10 @@
 
 ## v2026.6.6.0
 
-1. 使用WinUI TitleBar重构标题栏
+1. 使用 WinUI TitleBar 重构标题栏
 2. 在设置页添加软件版本号卡片
-3. 使用H.NotifyIcon.WinUI重构托盘
-4. 将设置存储从settings.json迁移到LocalSettings
+3. 使用 H.NotifyIcon.WinUI 重构托盘
+4. 将设置存储从 settings.json 迁移到 LocalSettings
 
 ## v2026.5.20.0
 
@@ -33,7 +33,7 @@
 
 ## v2026.5.14.0
 
-1. 使用Win32方式重写托盘
+1. 使用 Win32 方式重写托盘
 
 ## v2026.5.8.0
 
@@ -46,17 +46,17 @@
 ## v2026.5.5.0
 
 1. 托盘适配深色模式
-2. 为主页面卓越性能计划卡片添加icon
+2. 为主页面卓越性能计划卡片添加 icon
 
 ## v2026.5.3.0
 
-1. 升级WindowsAppSDK版本到v2.0.1
-2. 使用powrprof.dll替代powercfg命令调用
-3. 为设置界面卡片添加icon
+1. 升级 WindowsAppSDK 版本到 v2.0.1
+2. 使用 powrprof.dll 替代 powercfg 命令调用
+3. 为设置界面卡片添加 icon
 
 ## v2026.4.21.0
 
-1. 启用mica材质
+1. 启用 mica 材质
 2. 优化软件性能
 
 ## v2026.4.20.0
@@ -72,11 +72,11 @@
 
 ## v2026.4.10.0
 
-1. 重构UI
+1. 重构 UI
 
 ## v2026.4.9.0
 
-1. 托盘替换为H.NotifyIcon
+1. 托盘替换为 H.NotifyIcon
 2. 修复开机自启动到托盘功能
 
 ## v2026.4.5.0
