@@ -2,6 +2,7 @@
 using PowerPlan.Services;
 using System.Diagnostics;
 using Windows.ApplicationModel;
+using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace PowerPlan.Views;
@@ -144,9 +145,7 @@ public sealed partial class SettingsPage : Page
         {
             _settingsService.Current.Language = selectedLanguage;
             await _settingsService.SaveCurrentAsync();
-            await ShowOperationDialogAsync(
-                LocalizationService.Get("Settings.Language.RestartTitle"),
-                LocalizationService.Get("Settings.Language.RestartMessage"));
+            await ShowLanguageRestartDialogAsync(selectedLanguage);
         }
         catch (Exception ex)
         {
@@ -156,6 +155,50 @@ public sealed partial class SettingsPage : Page
                 LocalizationService.Get("Settings.PageTitle"),
                 LocalizationService.Format("Settings.SaveFailed", ex.Message));
         }
+    }
+
+    private async Task ShowLanguageRestartDialogAsync(string language)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = LocalizationService.GetForLanguage("Settings.Language.RestartTitle", language),
+            Content = LocalizationService.GetForLanguage("Settings.Language.RestartMessage", language),
+            PrimaryButtonText = LocalizationService.GetForLanguage("Settings.Language.RestartNow", language),
+            CloseButtonText = LocalizationService.GetForLanguage("Settings.Language.RestartLater", language),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot
+        };
+
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+        {
+            return;
+        }
+
+        try
+        {
+            var failureReason = Microsoft.Windows.AppLifecycle.AppInstance.Restart(string.Empty);
+            await ShowRestartFailureAsync(failureReason, language);
+        }
+        catch
+        {
+            await ShowRestartFailureAsync(AppRestartFailureReason.Other, language);
+        }
+    }
+
+    private Task ShowRestartFailureAsync(AppRestartFailureReason failureReason, string language)
+    {
+        var messageKey = failureReason switch
+        {
+            AppRestartFailureReason.RestartPending => "Settings.Language.RestartFailed.RestartPending",
+            AppRestartFailureReason.InvalidUser => "Settings.Language.RestartFailed.InvalidUser",
+            AppRestartFailureReason.NotInForeground => "Settings.Language.RestartFailed.NotInForeground",
+            _ => "Settings.Language.RestartFailed.Other"
+        };
+
+        return ShowOperationDialogAsync(
+            LocalizationService.GetForLanguage("Settings.Language.RestartFailed.Title", language),
+            LocalizationService.GetForLanguage(messageKey, language),
+            LocalizationService.GetForLanguage("Common.Ok", language));
     }
 
     private void SelectLanguage(string language)
@@ -360,19 +403,24 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private async Task ShowOperationDialogAsync(string title, string message)
+    private Task ShowOperationDialogAsync(string title, string message)
+    {
+        return ShowOperationDialogAsync(title, message, LocalizationService.Get("Common.Ok"));
+    }
+
+    private async Task ShowOperationDialogAsync(string title, string message, string closeButtonText)
     {
         if (_operationDialog is null)
         {
             _operationDialog = new ContentDialog
             {
-                CloseButtonText = LocalizationService.Get("Common.Ok"),
                 XamlRoot = XamlRoot
             };
         }
 
         _operationDialog.Title = title;
         _operationDialog.Content = message;
+        _operationDialog.CloseButtonText = closeButtonText;
         await _operationDialog.ShowAsync();
     }
 

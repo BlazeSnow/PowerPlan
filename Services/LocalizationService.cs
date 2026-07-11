@@ -38,6 +38,30 @@ public static class LocalizationService
         return result;
     }
 
+    public static string GetForLanguage(string key, string language, string? fallback = null)
+    {
+        var result = fallback ?? key;
+        try
+        {
+            var resourceManager = new ResourceManager();
+            var resourceMap = resourceManager.MainResourceMap.GetSubtree("Resources");
+            var context = resourceManager.CreateResourceContext();
+            context.QualifierValues["Language"] = language;
+            var resourceKey = key.Replace('.', '/');
+            var value = resourceMap.GetValue(resourceKey, context)?.ValueAsString;
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                result = value;
+            }
+        }
+        catch
+        {
+            // Ignore loader failures and fall back without changing the default-language cache.
+        }
+
+        return result;
+    }
+
     public static string Format(string key, params object[] args)
     {
         var format = Get(key, key);

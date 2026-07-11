@@ -51,6 +51,13 @@
   <data name="Settings.Language.Desc" xml:space="preserve"><value>Choose the display language</value></data>
   <data name="Settings.Language.RestartTitle" xml:space="preserve"><value>Language saved</value></data>
   <data name="Settings.Language.RestartMessage" xml:space="preserve"><value>The language change will take effect after you restart PowerPlan.</value></data>
+  <data name="Settings.Language.RestartNow" xml:space="preserve"><value>Restart now</value></data>
+  <data name="Settings.Language.RestartLater" xml:space="preserve"><value>Later</value></data>
+  <data name="Settings.Language.RestartFailed.Title" xml:space="preserve"><value>Restart failed</value></data>
+  <data name="Settings.Language.RestartFailed.RestartPending" xml:space="preserve"><value>PowerPlan is already waiting to restart. Please try again later.</value></data>
+  <data name="Settings.Language.RestartFailed.InvalidUser" xml:space="preserve"><value>PowerPlan could not restart under the current user.</value></data>
+  <data name="Settings.Language.RestartFailed.NotInForeground" xml:space="preserve"><value>PowerPlan must be in the foreground to restart.</value></data>
+  <data name="Settings.Language.RestartFailed.Other" xml:space="preserve"><value>PowerPlan could not restart. Please restart it manually.</value></data>
   <data name="Settings.AutoStart.Title" xml:space="preserve"><value>Launch at startup</value></data>
   <data name="Settings.AutoStart.Desc" xml:space="preserve"><value>Off by default. Start PowerPlan automatically after you sign in.</value></data>
   <data name="Settings.AutoStart.Unsupported" xml:space="preserve"><value>Available only when installed as an MSIX package</value></data>
