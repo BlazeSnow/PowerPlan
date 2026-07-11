@@ -258,6 +258,18 @@
   <data name="Settings.Tools.Title" xml:space="preserve">
     <value>工具</value>
   </data>
+  <data name="Settings.Language.Title" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="Settings.Language.Desc" xml:space="preserve">
+    <value>选择界面显示语言</value>
+  </data>
+  <data name="Settings.Language.RestartTitle" xml:space="preserve">
+    <value>语言已保存</value>
+  </data>
+  <data name="Settings.Language.RestartMessage" xml:space="preserve">
+    <value>语言设置将在重启 PowerPlan 后生效。</value>
+  </data>
   <data name="Settings.AutoStart.Title" xml:space="preserve">
     <value>开机自启动</value>
   </data>

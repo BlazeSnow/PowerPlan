@@ -10,6 +10,9 @@ public sealed class AppSettings
     [JsonPropertyName("tray")]
     public bool TrayEnabled { get; set; } = true;
 
+    [JsonPropertyName("language")]
+    public string Language { get; set; } = "zh-CN";
+
     [JsonPropertyName("UltimatePerformance")]
     public string UltimatePerformancePlanGuid { get; set; } = string.Empty;
 }

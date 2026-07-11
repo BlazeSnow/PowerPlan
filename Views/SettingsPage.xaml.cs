@@ -33,6 +33,9 @@ public sealed partial class SettingsPage : Page
 
     private void ApplyLocalization()
     {
+        LanguageCard.Header = LocalizationService.Get("Settings.Language.Title");
+        LanguageCard.Description = LocalizationService.Get("Settings.Language.Desc");
+
         AutoStartCard.Header = LocalizationService.Get("Settings.AutoStart.Title");
         AutoStartCard.Description = LocalizationService.Get("Settings.AutoStart.Desc");
 
@@ -78,6 +81,7 @@ public sealed partial class SettingsPage : Page
         AutoStartToggle.IsEnabled = startupSupported;
         AutoStartToggle.IsOn = startupSupported && settings.AutoStart;
         TrayToggle.IsOn = settings.TrayEnabled;
+        SelectLanguage(settings.Language);
 
         if (!startupSupported)
         {
@@ -119,6 +123,53 @@ public sealed partial class SettingsPage : Page
         catch
         {
             // Keep page silent when startup registration is not accessible.
+        }
+    }
+
+    private async void OnLanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_updatingUi || LanguageComboBox.SelectedItem is not ComboBoxItem item)
+        {
+            return;
+        }
+
+        var previousLanguage = _settingsService.Current.Language;
+        var selectedLanguage = SettingsService.NormalizeLanguage(item.Tag as string);
+        if (selectedLanguage == previousLanguage)
+        {
+            return;
+        }
+
+        try
+        {
+            _settingsService.Current.Language = selectedLanguage;
+            await _settingsService.SaveCurrentAsync();
+            await ShowOperationDialogAsync(
+                LocalizationService.Get("Settings.Language.RestartTitle"),
+                LocalizationService.Get("Settings.Language.RestartMessage"));
+        }
+        catch (Exception ex)
+        {
+            _settingsService.Current.Language = previousLanguage;
+            SelectLanguage(previousLanguage);
+            await ShowOperationDialogAsync(
+                LocalizationService.Get("Settings.PageTitle"),
+                LocalizationService.Format("Settings.SaveFailed", ex.Message));
+        }
+    }
+
+    private void SelectLanguage(string language)
+    {
+        var wasUpdatingUi = _updatingUi;
+        _updatingUi = true;
+        try
+        {
+            var normalized = SettingsService.NormalizeLanguage(language);
+            LanguageComboBox.SelectedIndex = normalized == SettingsService.EnglishLanguage ? 1 : 0;
+        }
+        finally
+        {
+            _updatingUi = wasUpdatingUi;
         }
     }
 
@@ -175,6 +226,7 @@ public sealed partial class SettingsPage : Page
             {
                 AutoStart = effectiveAutoStart,
                 TrayEnabled = trayEnabled,
+                Language = _settingsService.Current.Language,
                 UltimatePerformancePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid
             };
 

@@ -65,6 +65,7 @@ public sealed class SettingsService
 
     public async Task SaveAsync(AppSettings settings)
     {
+        settings.Language = NormalizeLanguage(settings.Language);
         SaveToLocalSettings(settings);
         Current = settings;
         SettingsChanged?.Invoke(this, Current);
@@ -78,11 +79,30 @@ public sealed class SettingsService
 
     public string GetSettingsPath() => _settingsPath;
 
+    public static string LoadLanguageSynchronously()
+    {
+        try
+        {
+            var values = ApplicationData.Current.LocalSettings.Values;
+            return NormalizeLanguage(values.TryGetValue(LanguageKey, out var value) ? value as string : null);
+        }
+        catch
+        {
+            return DefaultLanguage;
+        }
+    }
+
+    public static string NormalizeLanguage(string? language) =>
+        string.Equals(language, EnglishLanguage, StringComparison.OrdinalIgnoreCase)
+            ? EnglishLanguage
+            : DefaultLanguage;
+
     private AppSettings? LoadFromLocalSettings()
     {
         var values = _localSettings.Values;
         if (!values.ContainsKey(AutoStartKey)
             && !values.ContainsKey(TrayEnabledKey)
+            && !values.ContainsKey(LanguageKey)
             && !values.ContainsKey(UltimatePerformancePlanGuidKey))
         {
             return null;
@@ -92,6 +112,7 @@ public sealed class SettingsService
         {
             AutoStart = GetLocalSetting(AutoStartKey, defaultValue: false),
             TrayEnabled = GetLocalSetting(TrayEnabledKey, defaultValue: true),
+            Language = NormalizeLanguage(GetLocalSetting(LanguageKey, DefaultLanguage)),
             UltimatePerformancePlanGuid = GetLocalSetting(UltimatePerformancePlanGuidKey, string.Empty)
         };
     }
@@ -102,6 +123,7 @@ public sealed class SettingsService
         values[AutoStartKey] = settings.AutoStart;
         values[TrayEnabledKey] = settings.TrayEnabled;
         values[UltimatePerformancePlanGuidKey] = settings.UltimatePerformancePlanGuid;
+        values[LanguageKey] = NormalizeLanguage(settings.Language);
     }
 
     private bool GetLocalSetting(string key, bool defaultValue)
@@ -190,8 +212,12 @@ public sealed class SettingsService
         }
     }
 
+    public const string DefaultLanguage = "zh-CN";
+    public const string EnglishLanguage = "en-US";
+
     private const string AutoStartKey = "AutoStartEnabled";
     private const string TrayEnabledKey = "TrayEnabled";
+    private const string LanguageKey = "Language";
     private const string UltimatePerformancePlanGuidKey = "UltimatePerformancePlanGuid";
     private const string MigratedSuffix = ".migrated";
 }

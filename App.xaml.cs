@@ -1,6 +1,7 @@
 using Microsoft.UI.Dispatching;
 using PowerPlan.Models;
 using PowerPlan.Services;
+using Windows.Globalization;
 
 namespace PowerPlan;
 
@@ -22,6 +23,15 @@ public partial class App : Application
 
     public App()
     {
+        try
+        {
+            ApplicationLanguages.PrimaryLanguageOverride = SettingsService.LoadLanguageSynchronously();
+        }
+        catch
+        {
+            // Language preference must never prevent the app from starting.
+        }
+
         InitializeComponent();
 
         SettingsService = new SettingsService();
