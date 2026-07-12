@@ -49,6 +49,7 @@
   <data name="Settings.Tools.Title" xml:space="preserve"><value>Tools</value></data>
   <data name="Settings.Language.Title" xml:space="preserve"><value>Language</value></data>
   <data name="Settings.Language.Desc" xml:space="preserve"><value>Choose the display language</value></data>
+  <data name="Settings.Language.Automatic" xml:space="preserve"><value>Automatic</value></data>
   <data name="Settings.Language.RestartTitle" xml:space="preserve"><value>Language saved</value></data>
   <data name="Settings.Language.RestartMessage" xml:space="preserve"><value>The language change will take effect after you restart PowerPlan.</value></data>
   <data name="Settings.Language.RestartNow" xml:space="preserve"><value>Restart now</value></data>

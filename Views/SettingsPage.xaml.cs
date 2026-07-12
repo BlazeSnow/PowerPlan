@@ -38,6 +38,7 @@ public sealed partial class SettingsPage : Page
 
         LanguageCard.Header = LocalizationService.Get("Settings.Language.Title");
         LanguageCard.Description = LocalizationService.Get("Settings.Language.Desc");
+        AutomaticLanguageItem.Content = LocalizationService.Get("Settings.Language.Automatic");
 
         AutoStartCard.Header = LocalizationService.Get("Settings.AutoStart.Title");
         AutoStartCard.Description = LocalizationService.Get("Settings.AutoStart.Desc");
@@ -147,7 +148,7 @@ public sealed partial class SettingsPage : Page
         {
             _settingsService.Current.Language = selectedLanguage;
             await _settingsService.SaveCurrentAsync();
-            await ShowLanguageRestartDialogAsync(selectedLanguage);
+            await ShowLanguageRestartDialogAsync(SettingsService.ResolveLanguage(selectedLanguage));
         }
         catch (Exception ex)
         {
@@ -210,7 +211,12 @@ public sealed partial class SettingsPage : Page
         try
         {
             var normalized = SettingsService.NormalizeLanguage(language);
-            LanguageComboBox.SelectedIndex = normalized == SettingsService.EnglishLanguage ? 1 : 0;
+            LanguageComboBox.SelectedIndex = normalized switch
+            {
+                SettingsService.ChineseLanguage => 1,
+                SettingsService.EnglishLanguage => 2,
+                _ => 0
+            };
         }
         finally
         {

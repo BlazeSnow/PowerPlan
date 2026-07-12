@@ -1,6 +1,7 @@
 using PowerPlan.Models;
 using System.Text.Json;
 using Windows.ApplicationModel;
+using Windows.System.UserProfile;
 using Windows.Storage;
 
 namespace PowerPlan.Services;
@@ -84,18 +85,63 @@ public sealed class SettingsService
         try
         {
             var values = ApplicationData.Current.LocalSettings.Values;
-            return NormalizeLanguage(values.TryGetValue(LanguageKey, out var value) ? value as string : null);
+            var mode = NormalizeLanguage(values.TryGetValue(LanguageKey, out var value) ? value as string : null);
+            return ResolveLanguage(mode);
         }
         catch
         {
-            return DefaultLanguage;
+            return EnglishLanguage;
         }
     }
 
-    public static string NormalizeLanguage(string? language) =>
-        string.Equals(language, EnglishLanguage, StringComparison.OrdinalIgnoreCase)
-            ? EnglishLanguage
-            : DefaultLanguage;
+    public static string NormalizeLanguage(string? language)
+    {
+        if (string.Equals(language, ChineseLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            return ChineseLanguage;
+        }
+
+        if (string.Equals(language, EnglishLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            return EnglishLanguage;
+        }
+
+        return AutoLanguage;
+    }
+
+    public static string ResolveLanguage(string? language)
+    {
+        var mode = NormalizeLanguage(language);
+        if (mode != AutoLanguage)
+        {
+            return mode;
+        }
+
+        try
+        {
+            var preferredLanguage = GlobalizationPreferences.Languages.FirstOrDefault();
+            return IsSimplifiedChinese(preferredLanguage) ? ChineseLanguage : EnglishLanguage;
+        }
+        catch
+        {
+            return EnglishLanguage;
+        }
+    }
+
+    private static bool IsSimplifiedChinese(string? language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+        {
+            return false;
+        }
+
+        return language.Equals("zh-Hans", StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("zh-Hans-", StringComparison.OrdinalIgnoreCase)
+            || language.Equals(ChineseLanguage, StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith($"{ChineseLanguage}-", StringComparison.OrdinalIgnoreCase)
+            || language.Equals("zh-SG", StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("zh-SG-", StringComparison.OrdinalIgnoreCase);
+    }
 
     private AppSettings? LoadFromLocalSettings()
     {
@@ -212,8 +258,10 @@ public sealed class SettingsService
         }
     }
 
-    public const string DefaultLanguage = "zh-CN";
+    public const string AutoLanguage = "auto";
+    public const string ChineseLanguage = "zh-CN";
     public const string EnglishLanguage = "en-US";
+    public const string DefaultLanguage = AutoLanguage;
 
     private const string AutoStartKey = "AutoStartEnabled";
     private const string TrayEnabledKey = "TrayEnabled";

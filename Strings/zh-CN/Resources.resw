@@ -264,6 +264,9 @@
   <data name="Settings.Language.Desc" xml:space="preserve">
     <value>选择界面显示语言</value>
   </data>
+  <data name="Settings.Language.Automatic" xml:space="preserve">
+    <value>自动</value>
+  </data>
   <data name="Settings.Language.RestartTitle" xml:space="preserve">
     <value>语言已保存</value>
   </data>

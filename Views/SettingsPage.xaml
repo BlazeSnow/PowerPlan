@@ -30,6 +30,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     MinWidth="220">
+                    <ComboBoxItem x:Name="AutomaticLanguageItem" Tag="auto" />
                     <ComboBoxItem Content="简体中文" Tag="zh-CN" />
                     <ComboBoxItem Content="English" Tag="en-US" />
                 </ComboBox>
