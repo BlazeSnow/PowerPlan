@@ -12,7 +12,6 @@ public partial class App : Application
     private readonly WindowService _windowService = new();
     private readonly ActivationService _activationService;
     private readonly PackageUpdateService _packageUpdateService;
-    private NativeThemeService? _nativeThemeService;
     private ShellPage? _shellPage;
     private TrayService? _trayService;
     private bool _isExiting;
@@ -68,7 +67,6 @@ public partial class App : Application
         _lastKnownTrayEnabled = SettingsService.Current.TrayEnabled;
 
         var window = _windowService.EnsureWindowCreated();
-        _nativeThemeService = new NativeThemeService(_windowService, theme => _trayService?.ApplyTheme(theme));
         var launchToTray = startupTaskLaunch && SettingsService.Current.TrayEnabled;
 
         if (launchToTray)
@@ -81,7 +79,6 @@ public partial class App : Application
             window.Activate();
         }
 
-        _nativeThemeService.AttachToWindowContent();
         window.Closed -= OnMainWindowClosed;
         window.Closed += OnMainWindowClosed;
 
@@ -221,8 +218,6 @@ public partial class App : Application
             exitApplication: ExitApplication,
             log: (message, severity) => AddStatusToVisibleMainPage(message, severity));
 
-        _trayService.ApplyTheme(_nativeThemeService?.EffectiveTheme ?? ElementTheme.Light);
-
         try
         {
             await _trayService.InitializeAsync();
@@ -319,8 +314,6 @@ public partial class App : Application
         SettingsService.SettingsChanged -= OnSettingsChanged;
         _activationService.Dispose();
         _packageUpdateService.Dispose();
-        _nativeThemeService?.Dispose();
-        _nativeThemeService = null;
         _trayService?.Dispose();
         _trayService = null;
 
@@ -341,7 +334,6 @@ public partial class App : Application
         }
 
         _windowService.Show();
-        _nativeThemeService?.ApplyTheme(forceTitleBar: true);
 
         var page = _shellPage.EnsureMainPageLoaded();
         _ = RefreshMainPageAfterShowAsync(page);
@@ -356,7 +348,6 @@ public partial class App : Application
 
         _shellPage = new ShellPage(navigateToHomeOnStartup: true);
         _windowService.Configure(_shellPage);
-        _nativeThemeService?.AttachToWindowContent();
     }
 
     private async Task RefreshMainPageAfterShowAsync(MainPage page)
