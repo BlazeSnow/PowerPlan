@@ -16,6 +16,10 @@
     </Page.Resources>
     <ScrollViewer Background="Transparent">
         <StackPanel Padding="24" Spacing="16">
+            <TextBlock
+                x:Name="PageTitleTextBlock"
+                Style="{StaticResource TitleTextBlockStyle}" />
+
             <controls:SettingsCard x:Name="LanguageCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE8C1;" Style="{StaticResource SettingsCardHeaderIconStyle}" />

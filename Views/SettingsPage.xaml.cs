@@ -34,6 +34,8 @@ public sealed partial class SettingsPage : Page
 
     private void ApplyLocalization()
     {
+        PageTitleTextBlock.Text = LocalizationService.Get("Settings.PageTitle");
+
         LanguageCard.Header = LocalizationService.Get("Settings.Language.Title");
         LanguageCard.Description = LocalizationService.Get("Settings.Language.Desc");
 
