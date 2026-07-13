@@ -40,6 +40,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Remove="PowerPlan.Core\**\*.cs" />
+        <EmbeddedResource Remove="PowerPlan.Core\**\*" />
+        <None Remove="PowerPlan.Core\**\*" />
+        <ProjectReference Include="PowerPlan.Core\PowerPlan.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Content Include="Assets\powerplan.ico">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

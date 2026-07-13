@@ -7,7 +7,7 @@ namespace PowerPlan;
 
 public partial class App : Application
 {
-    private readonly PowerPlanService _powerPlanService = new();
+    private readonly IPowerPlanService _powerPlanService;
     private readonly StartupService _startupService = new();
     private readonly WindowService _windowService = new();
     private readonly ActivationService _activationService;
@@ -24,7 +24,7 @@ public partial class App : Application
     {
         try
         {
-            ApplicationLanguages.PrimaryLanguageOverride = SettingsService.LoadLanguageSynchronously();
+            ApplicationLanguages.PrimaryLanguageOverride = SettingsLanguageLoader.LoadSynchronously();
         }
         catch
         {
@@ -33,14 +33,20 @@ public partial class App : Application
 
         InitializeComponent();
 
-        SettingsService = new SettingsService();
+        _powerPlanService = new PowerPlanService(
+            new WindowsPowerSchemeNativeApi(),
+            new LocalizedPowerPlanErrorFormatter());
+        SettingsService = new SettingsService(
+            new WindowsSettingsStore(),
+            new WindowsLegacySettingsStore(),
+            new WindowsLanguagePreferenceProvider());
         SettingsService.SettingsChanged += OnSettingsChanged;
         _activationService = new ActivationService(() => _windowService.DispatcherQueue, ShowMainWindow);
         _packageUpdateService = new PackageUpdateService(ExitApplication);
     }
 
-    public SettingsService SettingsService { get; }
-    public PowerPlanService PowerPlanService => _powerPlanService;
+    public ISettingsService SettingsService { get; }
+    public IPowerPlanService PowerPlanService => _powerPlanService;
     public StartupService StartupService => _startupService;
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)

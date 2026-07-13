@@ -13,9 +13,9 @@ public sealed partial class SettingsPage : Page
     private const string OfficialWebsiteUrl = "https://www.blazesnow.com/powerplan/";
     private const string RepositoryUrl = "https://github.com/BlazeSnow/PowerPlan";
 
-    private readonly SettingsService _settingsService;
+    private readonly ISettingsService _settingsService;
     private readonly StartupService _startupService;
-    private readonly PowerPlanService _powerPlanService;
+    private readonly IPowerPlanService _powerPlanService;
     private bool _updatingUi;
     private ContentDialog? _operationDialog;
 
@@ -138,7 +138,7 @@ public sealed partial class SettingsPage : Page
         }
 
         var previousLanguage = _settingsService.Current.Language;
-        var selectedLanguage = SettingsService.NormalizeLanguage(item.Tag as string);
+        var selectedLanguage = LanguageSettings.Normalize(item.Tag as string);
         if (selectedLanguage == previousLanguage)
         {
             return;
@@ -148,7 +148,7 @@ public sealed partial class SettingsPage : Page
         {
             _settingsService.Current.Language = selectedLanguage;
             await _settingsService.SaveCurrentAsync();
-            await ShowLanguageRestartDialogAsync(SettingsService.ResolveLanguage(selectedLanguage));
+            await ShowLanguageRestartDialogAsync(_settingsService.ResolveLanguage(selectedLanguage));
         }
         catch (Exception ex)
         {
@@ -210,11 +210,11 @@ public sealed partial class SettingsPage : Page
         _updatingUi = true;
         try
         {
-            var normalized = SettingsService.NormalizeLanguage(language);
+            var normalized = LanguageSettings.Normalize(language);
             LanguageComboBox.SelectedIndex = normalized switch
             {
-                SettingsService.ChineseLanguage => 1,
-                SettingsService.EnglishLanguage => 2,
+                LanguageSettings.ChineseLanguage => 1,
+                LanguageSettings.EnglishLanguage => 2,
                 _ => 0
             };
         }

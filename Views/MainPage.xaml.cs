@@ -13,8 +13,8 @@ public sealed partial class MainPage : Page
     private static readonly TimeSpan StatusDisplayDuration = TimeSpan.FromSeconds(5);
     private const string HiddenUltimateIconGlyph = "\uE890";
     private const string MissingUltimateIconGlyph = "\uE945";
-    private readonly PowerPlanService _powerPlanService;
-    private readonly SettingsService _settingsService;
+    private readonly IPowerPlanService _powerPlanService;
+    private readonly ISettingsService _settingsService;
     private readonly SemaphoreSlim _refreshSemaphore = new(1, 1);
     private DispatcherQueueTimer? _statusDismissTimer;
     private bool _isUpdatingSelection;
