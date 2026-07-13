@@ -41,7 +41,6 @@ public sealed class TrayService : IDisposable
     private string _lastActivePlanGuidInMenu = string.Empty;
     private bool _lastStartupEnabledInMenu;
     private string _lastTooltipText = string.Empty;
-    private ElementTheme _currentTheme = ElementTheme.Default;
     private bool _disposed;
 
     public TrayService(
@@ -145,22 +144,6 @@ public sealed class TrayService : IDisposable
         _log(message, InfoBarSeverity.Informational);
     }
 
-    public void ApplyTheme(ElementTheme theme)
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        if (_currentTheme == theme)
-        {
-            return;
-        }
-
-        _currentTheme = theme;
-        _ = RunOnUiThread(ApplyContextFlyoutTheme);
-    }
-
     public void Dispose()
     {
         if (_disposed)
@@ -235,7 +218,6 @@ public sealed class TrayService : IDisposable
             ContextFlyout = _contextFlyout
         };
         _taskbarIcon.ForceCreate(enablesEfficiencyMode: true);
-        ApplyContextFlyoutTheme();
     }
 
     private void UpdateTaskbarIcon(bool forceRebuild = false)
@@ -306,7 +288,6 @@ public sealed class TrayService : IDisposable
                 _lastStructureSignature = structureSignature;
                 _lastActivePlanGuidInMenu = FindActivePlanGuidInMenu();
                 _lastStartupEnabledInMenu = _isStartupEnabled();
-                ApplyContextFlyoutTheme();
                 return;
             }
 
@@ -447,20 +428,6 @@ public sealed class TrayService : IDisposable
                     break;
                 }
             }
-        }
-    }
-
-
-    private void ApplyContextFlyoutTheme()
-    {
-        if (_contextFlyout is null)
-        {
-            return;
-        }
-
-        foreach (var item in _contextFlyout.Items)
-        {
-            item.RequestedTheme = _currentTheme;
         }
     }
 

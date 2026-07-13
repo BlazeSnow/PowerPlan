@@ -15,8 +15,14 @@
             <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
         </Style>
     </Page.Resources>
-    <ScrollViewer Background="Transparent">
-        <StackPanel Padding="24" Spacing="16">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" Background="Transparent">
+            <StackPanel Padding="24" Spacing="16">
             <controls:SettingsCard x:Name="UltimateCard" Visibility="Collapsed">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon x:Name="UltimateCardIcon" Glyph="&#xE945;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
@@ -130,14 +136,16 @@
                 </StackPanel>
             </Border>
 
-            <InfoBar
-                x:Name="StatusInfoBar"
-                IsClosable="False"
-                IsOpen="True"
-                Severity="Informational"
-                Margin="0,6,0,0"
-                Title="-"
-                Message="-" />
-        </StackPanel>
-    </ScrollViewer>
+            </StackPanel>
+        </ScrollViewer>
+
+        <InfoBar
+            x:Name="StatusInfoBar"
+            Grid.Row="1"
+            Closed="OnStatusInfoBarClosed"
+            IsClosable="True"
+            IsOpen="False"
+            Severity="Informational"
+            Margin="24,0,24,24" />
+    </Grid>
 </Page>

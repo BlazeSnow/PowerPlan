@@ -1,6 +1,7 @@
 using PowerPlan.Models;
 using System.Text.Json;
 using Windows.ApplicationModel;
+using Windows.System.UserProfile;
 using Windows.Storage;
 
 namespace PowerPlan.Services;
@@ -65,6 +66,7 @@ public sealed class SettingsService
 
     public async Task SaveAsync(AppSettings settings)
     {
+        settings.Language = NormalizeLanguage(settings.Language);
         SaveToLocalSettings(settings);
         Current = settings;
         SettingsChanged?.Invoke(this, Current);
@@ -78,11 +80,75 @@ public sealed class SettingsService
 
     public string GetSettingsPath() => _settingsPath;
 
+    public static string LoadLanguageSynchronously()
+    {
+        try
+        {
+            var values = ApplicationData.Current.LocalSettings.Values;
+            var mode = NormalizeLanguage(values.TryGetValue(LanguageKey, out var value) ? value as string : null);
+            return ResolveLanguage(mode);
+        }
+        catch
+        {
+            return EnglishLanguage;
+        }
+    }
+
+    public static string NormalizeLanguage(string? language)
+    {
+        if (string.Equals(language, ChineseLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            return ChineseLanguage;
+        }
+
+        if (string.Equals(language, EnglishLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            return EnglishLanguage;
+        }
+
+        return AutoLanguage;
+    }
+
+    public static string ResolveLanguage(string? language)
+    {
+        var mode = NormalizeLanguage(language);
+        if (mode != AutoLanguage)
+        {
+            return mode;
+        }
+
+        try
+        {
+            var preferredLanguage = GlobalizationPreferences.Languages.FirstOrDefault();
+            return IsSimplifiedChinese(preferredLanguage) ? ChineseLanguage : EnglishLanguage;
+        }
+        catch
+        {
+            return EnglishLanguage;
+        }
+    }
+
+    private static bool IsSimplifiedChinese(string? language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+        {
+            return false;
+        }
+
+        return language.Equals("zh-Hans", StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("zh-Hans-", StringComparison.OrdinalIgnoreCase)
+            || language.Equals(ChineseLanguage, StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith($"{ChineseLanguage}-", StringComparison.OrdinalIgnoreCase)
+            || language.Equals("zh-SG", StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("zh-SG-", StringComparison.OrdinalIgnoreCase);
+    }
+
     private AppSettings? LoadFromLocalSettings()
     {
         var values = _localSettings.Values;
         if (!values.ContainsKey(AutoStartKey)
             && !values.ContainsKey(TrayEnabledKey)
+            && !values.ContainsKey(LanguageKey)
             && !values.ContainsKey(UltimatePerformancePlanGuidKey))
         {
             return null;
@@ -92,6 +158,7 @@ public sealed class SettingsService
         {
             AutoStart = GetLocalSetting(AutoStartKey, defaultValue: false),
             TrayEnabled = GetLocalSetting(TrayEnabledKey, defaultValue: true),
+            Language = NormalizeLanguage(GetLocalSetting(LanguageKey, DefaultLanguage)),
             UltimatePerformancePlanGuid = GetLocalSetting(UltimatePerformancePlanGuidKey, string.Empty)
         };
     }
@@ -102,6 +169,7 @@ public sealed class SettingsService
         values[AutoStartKey] = settings.AutoStart;
         values[TrayEnabledKey] = settings.TrayEnabled;
         values[UltimatePerformancePlanGuidKey] = settings.UltimatePerformancePlanGuid;
+        values[LanguageKey] = NormalizeLanguage(settings.Language);
     }
 
     private bool GetLocalSetting(string key, bool defaultValue)
@@ -190,8 +258,14 @@ public sealed class SettingsService
         }
     }
 
+    public const string AutoLanguage = "auto";
+    public const string ChineseLanguage = "zh-CN";
+    public const string EnglishLanguage = "en-US";
+    public const string DefaultLanguage = AutoLanguage;
+
     private const string AutoStartKey = "AutoStartEnabled";
     private const string TrayEnabledKey = "TrayEnabled";
+    private const string LanguageKey = "Language";
     private const string UltimatePerformancePlanGuidKey = "UltimatePerformancePlanGuid";
     private const string MigratedSuffix = ".migrated";
 }

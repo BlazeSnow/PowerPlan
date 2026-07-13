@@ -2,6 +2,7 @@
 using PowerPlan.Services;
 using System.Diagnostics;
 using Windows.ApplicationModel;
+using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace PowerPlan.Views;
@@ -33,6 +34,12 @@ public sealed partial class SettingsPage : Page
 
     private void ApplyLocalization()
     {
+        PageTitleTextBlock.Text = LocalizationService.Get("Settings.PageTitle");
+
+        LanguageCard.Header = LocalizationService.Get("Settings.Language.Title");
+        LanguageCard.Description = LocalizationService.Get("Settings.Language.Desc");
+        AutomaticLanguageItem.Content = LocalizationService.Get("Settings.Language.Automatic");
+
         AutoStartCard.Header = LocalizationService.Get("Settings.AutoStart.Title");
         AutoStartCard.Description = LocalizationService.Get("Settings.AutoStart.Desc");
 
@@ -78,6 +85,7 @@ public sealed partial class SettingsPage : Page
         AutoStartToggle.IsEnabled = startupSupported;
         AutoStartToggle.IsOn = startupSupported && settings.AutoStart;
         TrayToggle.IsOn = settings.TrayEnabled;
+        SelectLanguage(settings.Language);
 
         if (!startupSupported)
         {
@@ -119,6 +127,100 @@ public sealed partial class SettingsPage : Page
         catch
         {
             // Keep page silent when startup registration is not accessible.
+        }
+    }
+
+    private async void OnLanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_updatingUi || LanguageComboBox.SelectedItem is not ComboBoxItem item)
+        {
+            return;
+        }
+
+        var previousLanguage = _settingsService.Current.Language;
+        var selectedLanguage = SettingsService.NormalizeLanguage(item.Tag as string);
+        if (selectedLanguage == previousLanguage)
+        {
+            return;
+        }
+
+        try
+        {
+            _settingsService.Current.Language = selectedLanguage;
+            await _settingsService.SaveCurrentAsync();
+            await ShowLanguageRestartDialogAsync(SettingsService.ResolveLanguage(selectedLanguage));
+        }
+        catch (Exception ex)
+        {
+            _settingsService.Current.Language = previousLanguage;
+            SelectLanguage(previousLanguage);
+            await ShowOperationDialogAsync(
+                LocalizationService.Get("Settings.PageTitle"),
+                LocalizationService.Format("Settings.SaveFailed", ex.Message));
+        }
+    }
+
+    private async Task ShowLanguageRestartDialogAsync(string language)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = LocalizationService.GetForLanguage("Settings.Language.RestartTitle", language),
+            Content = LocalizationService.GetForLanguage("Settings.Language.RestartMessage", language),
+            PrimaryButtonText = LocalizationService.GetForLanguage("Settings.Language.RestartNow", language),
+            CloseButtonText = LocalizationService.GetForLanguage("Settings.Language.RestartLater", language),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot
+        };
+
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+        {
+            return;
+        }
+
+        try
+        {
+            var failureReason = Microsoft.Windows.AppLifecycle.AppInstance.Restart(string.Empty);
+            await ShowRestartFailureAsync(failureReason, language);
+        }
+        catch
+        {
+            await ShowRestartFailureAsync(AppRestartFailureReason.Other, language);
+        }
+    }
+
+    private Task ShowRestartFailureAsync(AppRestartFailureReason failureReason, string language)
+    {
+        var messageKey = failureReason switch
+        {
+            AppRestartFailureReason.RestartPending => "Settings.Language.RestartFailed.RestartPending",
+            AppRestartFailureReason.InvalidUser => "Settings.Language.RestartFailed.InvalidUser",
+            AppRestartFailureReason.NotInForeground => "Settings.Language.RestartFailed.NotInForeground",
+            _ => "Settings.Language.RestartFailed.Other"
+        };
+
+        return ShowOperationDialogAsync(
+            LocalizationService.GetForLanguage("Settings.Language.RestartFailed.Title", language),
+            LocalizationService.GetForLanguage(messageKey, language),
+            LocalizationService.GetForLanguage("Common.Ok", language));
+    }
+
+    private void SelectLanguage(string language)
+    {
+        var wasUpdatingUi = _updatingUi;
+        _updatingUi = true;
+        try
+        {
+            var normalized = SettingsService.NormalizeLanguage(language);
+            LanguageComboBox.SelectedIndex = normalized switch
+            {
+                SettingsService.ChineseLanguage => 1,
+                SettingsService.EnglishLanguage => 2,
+                _ => 0
+            };
+        }
+        finally
+        {
+            _updatingUi = wasUpdatingUi;
         }
     }
 
@@ -175,6 +277,7 @@ public sealed partial class SettingsPage : Page
             {
                 AutoStart = effectiveAutoStart,
                 TrayEnabled = trayEnabled,
+                Language = _settingsService.Current.Language,
                 UltimatePerformancePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid
             };
 
@@ -308,19 +411,24 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private async Task ShowOperationDialogAsync(string title, string message)
+    private Task ShowOperationDialogAsync(string title, string message)
+    {
+        return ShowOperationDialogAsync(title, message, LocalizationService.Get("Common.Ok"));
+    }
+
+    private async Task ShowOperationDialogAsync(string title, string message, string closeButtonText)
     {
         if (_operationDialog is null)
         {
             _operationDialog = new ContentDialog
             {
-                CloseButtonText = LocalizationService.Get("Common.Ok"),
                 XamlRoot = XamlRoot
             };
         }
 
         _operationDialog.Title = title;
         _operationDialog.Content = message;
+        _operationDialog.CloseButtonText = closeButtonText;
         await _operationDialog.ShowAsync();
     }
 

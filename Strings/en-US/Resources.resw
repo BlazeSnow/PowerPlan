@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="App.WindowTitle" xml:space="preserve"><value>PowerPlan</value></data>
+  <data name="AppTitleBar.Title" xml:space="preserve"><value>PowerPlan</value></data>
+  <data name="AppTitleBar.Subtitle" xml:space="preserve"><value>Quickly switch Windows power plans</value></data>
+  <data name="AppDisplayName" xml:space="preserve"><value>PowerPlan</value></data>
+  <data name="AppDescription" xml:space="preserve"><value>Quickly switch Windows power plans</value></data>
+  <data name="App.Status.StartupSettingFailed" xml:space="preserve"><value>Failed to configure launch at startup: {0}</value></data>
+  <data name="App.Status.TraySwitched" xml:space="preserve"><value>[Tray] Switched power plan: {0}</value></data>
+  <data name="App.Status.TrayInitFailed" xml:space="preserve"><value>[Tray] Initialization failed: {0}</value></data>
+  <data name="App.Status.TrayAutoStart" xml:space="preserve"><value>[Tray] Launch at startup: {0}</value></data>
+  <data name="App.Status.TrayAutoStartFailed" xml:space="preserve"><value>[Tray] Failed to configure launch at startup: {0}</value></data>
+  <data name="App.Status.On" xml:space="preserve"><value>On</value></data>
+  <data name="App.Status.Off" xml:space="preserve"><value>Off</value></data>
+  <data name="Shell.Home" xml:space="preserve"><value>Home</value></data>
+  <data name="Shell.Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Main.RefreshPlansButton" xml:space="preserve"><value>Refresh plans</value></data>
+  <data name="Main.PlanPickerTitle" xml:space="preserve"><value>Choose a power plan</value></data>
+  <data name="Main.UltimateMissingTitle" xml:space="preserve"><value>Ultimate Performance plan not found</value></data>
+  <data name="Main.UltimateMissingMessage" xml:space="preserve"><value>Select the button to try creating the Ultimate Performance plan. Some devices may remove it automatically.</value></data>
+  <data name="Main.UltimateHiddenTitle" xml:space="preserve"><value>Hidden Ultimate Performance plan detected</value></data>
+  <data name="Main.UltimateHiddenMessage" xml:space="preserve"><value>This device may not show the plan in the list. You can activate it directly using the saved UUID.</value></data>
+  <data name="Main.CreateUltimateButton" xml:space="preserve"><value>Try to create Ultimate Performance plan</value></data>
+  <data name="Main.ActivateUltimateButton" xml:space="preserve"><value>Activate hidden Ultimate Performance plan</value></data>
+  <data name="Main.StatusWaiting" xml:space="preserve"><value>Ready</value></data>
+  <data name="Main.Status.InitSuccess" xml:space="preserve"><value>Initialization complete</value></data>
+  <data name="Main.Status.InitFailed" xml:space="preserve"><value>Initialization failed: {0}</value></data>
+  <data name="Main.Status.PlansLoaded" xml:space="preserve"><value>Power plans loaded: {0}</value></data>
+  <data name="Main.Status.RefreshFailed" xml:space="preserve"><value>Refresh failed: {0}</value></data>
+  <data name="Main.Status.SwitchSuccess" xml:space="preserve"><value>Switched power plan: {0}</value></data>
+  <data name="Main.Status.SwitchFailed" xml:space="preserve"><value>Switch failed: {0}</value></data>
+  <data name="Main.Status.UltimateExists" xml:space="preserve"><value>An Ultimate Performance plan already exists</value></data>
+  <data name="Main.Status.UltimateCreated" xml:space="preserve"><value>Attempted to create the Ultimate Performance plan. Refer to the current plan list for the result.</value></data>
+  <data name="Main.Status.UltimateActivated" xml:space="preserve"><value>Activated the Ultimate Performance plan using the saved UUID</value></data>
+  <data name="Main.Status.UltimateCreateFailed" xml:space="preserve"><value>Failed to create the Ultimate Performance plan: {0}</value></data>
+  <data name="Main.Status.UltimateActivateFailed" xml:space="preserve"><value>Failed to activate the hidden Ultimate Performance plan. The saved UUID was cleared: {0}</value></data>
+  <data name="Main.CopyPlanButton" xml:space="preserve"><value>Copy plan</value></data>
+  <data name="Main.CopyDialogTitle" xml:space="preserve"><value>Copy power plan</value></data>
+  <data name="Main.CopyDialogConfirm" xml:space="preserve"><value>Copy</value></data>
+  <data name="Main.CopyDialogCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Main.CopyDialogPlaceholder" xml:space="preserve"><value>Enter a name for the new plan</value></data>
+  <data name="Main.Status.CopyNameEmpty" xml:space="preserve"><value>Copy failed: The name cannot be empty</value></data>
+  <data name="Main.Status.CopySuccess" xml:space="preserve"><value>Power plan copied: {0}</value></data>
+  <data name="Main.Status.CopyFailed" xml:space="preserve"><value>Copy failed: {0}</value></data>
+  <data name="Main.DeletePlanHint" xml:space="preserve"><value>To delete a plan, use Control Panel</value></data>
+  <data name="Main.DefaultPlanName" xml:space="preserve"><value>Power plan</value></data>
+  <data name="Main.CopySuffix" xml:space="preserve"><value>Copy</value></data>
+  <data name="Settings.PageTitle" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings.Tools.Title" xml:space="preserve"><value>Tools</value></data>
+  <data name="Settings.Language.Title" xml:space="preserve"><value>Language</value></data>
+  <data name="Settings.Language.Desc" xml:space="preserve"><value>Choose the display language</value></data>
+  <data name="Settings.Language.Automatic" xml:space="preserve"><value>Automatic</value></data>
+  <data name="Settings.Language.RestartTitle" xml:space="preserve"><value>Language saved</value></data>
+  <data name="Settings.Language.RestartMessage" xml:space="preserve"><value>The language change will take effect after you restart PowerPlan.</value></data>
+  <data name="Settings.Language.RestartNow" xml:space="preserve"><value>Restart now</value></data>
+  <data name="Settings.Language.RestartLater" xml:space="preserve"><value>Later</value></data>
+  <data name="Settings.Language.RestartFailed.Title" xml:space="preserve"><value>Restart failed</value></data>
+  <data name="Settings.Language.RestartFailed.RestartPending" xml:space="preserve"><value>PowerPlan is already waiting to restart. Please try again later.</value></data>
+  <data name="Settings.Language.RestartFailed.InvalidUser" xml:space="preserve"><value>PowerPlan could not restart under the current user.</value></data>
+  <data name="Settings.Language.RestartFailed.NotInForeground" xml:space="preserve"><value>PowerPlan must be in the foreground to restart.</value></data>
+  <data name="Settings.Language.RestartFailed.Other" xml:space="preserve"><value>PowerPlan could not restart. Please restart it manually.</value></data>
+  <data name="Settings.AutoStart.Title" xml:space="preserve"><value>Launch at startup</value></data>
+  <data name="Settings.AutoStart.Desc" xml:space="preserve"><value>Off by default. Start PowerPlan automatically after you sign in.</value></data>
+  <data name="Settings.AutoStart.Unsupported" xml:space="preserve"><value>Available only when installed as an MSIX package</value></data>
+  <data name="Settings.Tray.Title" xml:space="preserve"><value>Enable system tray</value></data>
+  <data name="Settings.Tray.Desc" xml:space="preserve"><value>On by default. When disabled, closing the window exits the app.</value></data>
+  <data name="Settings.SaveFailed" xml:space="preserve"><value>Failed to save settings: {0}</value></data>
+  <data name="Settings.Tools.PowerOptions" xml:space="preserve"><value>Power Options</value></data>
+  <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve"><value>Open Power Options in Windows Control Panel</value></data>
+  <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve"><value>Restore power plans</value></data>
+  <data name="Settings.Tools.RestorePowerPlansDesc" xml:space="preserve"><value>Restore the default Windows power plans and clear the saved Ultimate Performance UUID</value></data>
+  <data name="Settings.Tools.Website" xml:space="preserve"><value>Official website</value></data>
+  <data name="Settings.Tools.WebsiteDesc" xml:space="preserve"><value>https://www.blazesnow.com/powerplan/</value></data>
+  <data name="Settings.Tools.Repository" xml:space="preserve"><value>Source code repository</value></data>
+  <data name="Settings.Tools.RepositoryDesc" xml:space="preserve"><value>https://github.com/BlazeSnow/PowerPlan</value></data>
+  <data name="Settings.Tools.Feedback" xml:space="preserve"><value>Contact the developer</value></data>
+  <data name="Settings.Tools.FeedbackDesc" xml:space="preserve"><value>Found a problem while using the app? Feedback is welcome.</value></data>
+  <data name="Settings.Tools.OpenButton" xml:space="preserve"><value>Open</value></data>
+  <data name="Settings.Tools.RestoreButton" xml:space="preserve"><value>Restore</value></data>
+  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve"><value>Copy email address</value></data>
+  <data name="Settings.AppVersion.Title" xml:space="preserve"><value>App version</value></data>
+  <data name="Settings.AppVersion.Desc" xml:space="preserve"><value>Currently installed version of PowerPlan</value></data>
+  <data name="Settings.RestoreDialog.SuccessTitle" xml:space="preserve"><value>Restore complete</value></data>
+  <data name="Settings.RestoreDialog.SuccessMessage" xml:space="preserve"><value>The default power plans were restored and the saved Ultimate Performance UUID was cleared.</value></data>
+  <data name="Settings.RestoreDialog.FailedTitle" xml:space="preserve"><value>Restore failed</value></data>
+  <data name="Settings.RestoreDialog.FailedMessage" xml:space="preserve"><value>Failed to restore power plans: {0}</value></data>
+  <data name="Settings.RestoreConfirmDialog.Title" xml:space="preserve"><value>Restore default power plans?</value></data>
+  <data name="Settings.RestoreConfirmDialog.Message" xml:space="preserve"><value>This will restore the default Windows power plans and clear the saved Ultimate Performance UUID. Do you want to continue?</value></data>
+  <data name="Settings.RestoreConfirmDialog.Confirm" xml:space="preserve"><value>Restore</value></data>
+  <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Settings.FeedbackDialog.Title" xml:space="preserve"><value>Copied</value></data>
+  <data name="Settings.Status.FeedbackCopied" xml:space="preserve"><value>The email address was copied to the clipboard</value></data>
+  <data name="Tray.Init" xml:space="preserve"><value>[Tray] Initialized. Left-click or right-click the tray icon to open the menu.</value></data>
+  <data name="Tray.RefreshFailed" xml:space="preserve"><value>[Tray] Refresh failed: {0}</value></data>
+  <data name="Tray.DispatcherUnavailable" xml:space="preserve"><value>[Tray] The UI thread is unavailable; the menu could not be refreshed</value></data>
+  <data name="Tray.Menu.OpenMainWindow" xml:space="preserve"><value>Open PowerPlan</value></data>
+  <data name="Tray.Menu.RefreshPlans" xml:space="preserve"><value>Refresh plans</value></data>
+  <data name="Tray.Menu.OpenHiddenUltimate" xml:space="preserve"><value>Hidden Ultimate Performance</value></data>
+  <data name="Tray.Menu.DisableAutoStart" xml:space="preserve"><value>Disable launch at startup</value></data>
+  <data name="Tray.Menu.EnableAutoStart" xml:space="preserve"><value>Enable launch at startup</value></data>
+  <data name="Tray.Menu.Exit" xml:space="preserve"><value>Exit</value></data>
+  <data name="Tray.RefreshStarted" xml:space="preserve"><value>[Tray] Refreshing the power plan list</value></data>
+  <data name="Tray.SwitchTo" xml:space="preserve"><value>[Tray] Switched to: {0}</value></data>
+  <data name="Tray.SwitchFailed" xml:space="preserve"><value>[Tray] Switch failed: {0}</value></data>
+  <data name="Tray.HiddenUltimateActivated" xml:space="preserve"><value>[Tray] Activated the hidden Ultimate Performance plan</value></data>
+  <data name="Tray.HiddenUltimateActivateFailed" xml:space="preserve"><value>[Tray] Failed to activate the hidden Ultimate Performance plan: {0}</value></data>
+  <data name="Tray.AutoStartState" xml:space="preserve"><value>[Tray] Launch at startup: {0}</value></data>
+  <data name="Tray.Tooltip.Plan" xml:space="preserve"><value>Power plan: {0}</value></data>
+  <data name="Tray.Tooltip.PlanUnavailable" xml:space="preserve"><value>Power plan: Unavailable</value></data>
+  <data name="Tray.Tooltip.AutoStart" xml:space="preserve"><value>Launch at startup: {0}</value></data>
+  <data name="Tray.AutoStartToggleFailed" xml:space="preserve"><value>[Tray] Failed to change launch-at-startup setting: {0}</value></data>
+  <data name="Common.FailedKeyword" xml:space="preserve"><value>failed</value></data>
+  <data name="Common.Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="PowerPlan.Error.InvalidPlanGuid" xml:space="preserve"><value>The power plan GUID is invalid.</value></data>
+  <data name="PowerPlan.Error.InvalidSourcePlanGuid" xml:space="preserve"><value>The source power plan GUID is invalid.</value></data>
+  <data name="PowerPlan.Error.SetActiveFailed" xml:space="preserve"><value>Failed to switch power plans</value></data>
+  <data name="PowerPlan.Error.RestoreDefaultsFailed" xml:space="preserve"><value>Failed to restore the default power plans</value></data>
+  <data name="PowerPlan.Error.EnumerateFailed" xml:space="preserve"><value>Failed to enumerate power plans</value></data>
+  <data name="PowerPlan.Error.ReadActiveFailed" xml:space="preserve"><value>Failed to read the active power plan</value></data>
+  <data name="PowerPlan.Error.DuplicateFailed" xml:space="preserve"><value>Failed to copy the power plan</value></data>
+  <data name="PowerPlan.Error.DuplicateMissingGuid" xml:space="preserve"><value>Failed to copy the power plan: Windows did not return a GUID for the new plan.</value></data>
+  <data name="PowerPlan.Error.ReadNameFailed" xml:space="preserve"><value>Failed to read the power plan name</value></data>
+  <data name="PowerPlan.Error.EmptyName" xml:space="preserve"><value>The power plan name cannot be empty.</value></data>
+  <data name="PowerPlan.Error.WriteNameFailed" xml:space="preserve"><value>Failed to write the power plan name</value></data>
+  <data name="PowerPlan.Error.Win32" xml:space="preserve"><value>{0}: {1}</value></data>
+</root>

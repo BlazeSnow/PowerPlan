@@ -1,4 +1,5 @@
-﻿using PowerPlan.Models;
+﻿using Microsoft.UI.Dispatching;
+using PowerPlan.Models;
 using PowerPlan.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -9,11 +10,13 @@ namespace PowerPlan.Views;
 public sealed partial class MainPage : Page
 {
     private static readonly TimeSpan DuplicateStatusSuppressionWindow = TimeSpan.FromMilliseconds(400);
+    private static readonly TimeSpan StatusDisplayDuration = TimeSpan.FromSeconds(5);
     private const string HiddenUltimateIconGlyph = "\uE890";
     private const string MissingUltimateIconGlyph = "\uE945";
     private readonly PowerPlanService _powerPlanService;
     private readonly SettingsService _settingsService;
     private readonly SemaphoreSlim _refreshSemaphore = new(1, 1);
+    private DispatcherQueueTimer? _statusDismissTimer;
     private bool _isUpdatingSelection;
     private bool _hasLoadedPlans;
     private DateTimeOffset _lastStatusAt;
@@ -36,7 +39,8 @@ public sealed partial class MainPage : Page
 
     private void MainPage_Unloaded(object sender, RoutedEventArgs e)
     {
-        _refreshSemaphore.Dispose();
+        _statusDismissTimer?.Stop();
+        StatusInfoBar.IsOpen = false;
     }
 
     private async void MainPage_Loaded(object sender, RoutedEventArgs e)
@@ -65,8 +69,6 @@ public sealed partial class MainPage : Page
         RefreshPlansButton.Content = LocalizationService.Get("Main.RefreshPlansButton");
         PlanPickerTitleText.Text = LocalizationService.Get("Main.PlanPickerTitle");
         CreateUltimateButton.Content = LocalizationService.Get("Main.CreateUltimateButton");
-        StatusInfoBar.Title = DateTime.Now.ToString("HH:mm:ss");
-        StatusInfoBar.Message = LocalizationService.Get("Main.StatusWaiting");
         DeletePlanHintText.Text = LocalizationService.Get("Main.DeletePlanHint");
     }
 
@@ -112,10 +114,38 @@ public sealed partial class MainPage : Page
         _lastStatusAt = now;
         _lastStatusMessage = message;
         _lastStatusSeverity = severity;
-        StatusInfoBar.IsOpen = true;
+
+        EnsureStatusDismissTimer();
+        _statusDismissTimer!.Stop();
         StatusInfoBar.Severity = severity;
         StatusInfoBar.Title = DateTime.Now.ToString("HH:mm:ss");
         StatusInfoBar.Message = message;
+        StatusInfoBar.IsOpen = true;
+        _statusDismissTimer.Start();
+    }
+
+    private void EnsureStatusDismissTimer()
+    {
+        if (_statusDismissTimer is not null)
+        {
+            return;
+        }
+
+        _statusDismissTimer = DispatcherQueue.CreateTimer();
+        _statusDismissTimer.Interval = StatusDisplayDuration;
+        _statusDismissTimer.IsRepeating = false;
+        _statusDismissTimer.Tick += OnStatusDismissTimerTick;
+    }
+
+    private void OnStatusDismissTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        StatusInfoBar.IsOpen = false;
+    }
+
+    private void OnStatusInfoBarClosed(InfoBar sender, InfoBarClosedEventArgs args)
+    {
+        _statusDismissTimer?.Stop();
     }
 
     private async void OnRefreshClicked(object sender, RoutedEventArgs e)
