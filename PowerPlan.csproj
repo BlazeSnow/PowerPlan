@@ -41,9 +41,13 @@
 
     <ItemGroup>
         <Compile Remove="PowerPlan.Core\**\*.cs" />
+        <Compile Remove="PowerPlan.Tray\**\*.cs" />
         <EmbeddedResource Remove="PowerPlan.Core\**\*" />
+        <EmbeddedResource Remove="PowerPlan.Tray\**\*" />
         <None Remove="PowerPlan.Core\**\*" />
+        <None Remove="PowerPlan.Tray\**\*" />
         <ProjectReference Include="PowerPlan.Core\PowerPlan.Core.csproj" />
+        <ProjectReference Include="PowerPlan.Tray\PowerPlan.Tray.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -54,7 +58,6 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-        <PackageReference Include="H.NotifyIcon.WinUI" Version="2.4.1" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2270" />
 

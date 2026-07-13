@@ -1,8 +1,9 @@
-﻿using Windows.ApplicationModel;
+﻿using PowerPlan.Tray.Services;
+using Windows.ApplicationModel;
 
 namespace PowerPlan.Services;
 
-public sealed class StartupService
+public sealed class StartupService : IStartupTaskService
 {
     private const string StartupTaskId = "PowerPlanStartupTask";
     public bool IsSupported => IsPackaged();

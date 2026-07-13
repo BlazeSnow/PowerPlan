@@ -1,6 +1,7 @@
 using Microsoft.UI.Dispatching;
 using PowerPlan.Models;
 using PowerPlan.Services;
+using PowerPlan.Tray.Services;
 using Windows.Globalization;
 
 namespace PowerPlan;
@@ -13,7 +14,9 @@ public partial class App : Application
     private readonly ActivationService _activationService;
     private readonly PackageUpdateService _packageUpdateService;
     private ShellPage? _shellPage;
-    private TrayService? _trayService;
+    private TrayCoordinator? _trayCoordinator;
+    private DispatcherQueue? _uiDispatcherQueue;
+    private bool _windowClosedHandlerAttached;
     private bool _isExiting;
     private bool _lastKnownAutoStart;
     private bool _lastKnownTrayEnabled;
@@ -41,7 +44,7 @@ public partial class App : Application
             new WindowsLegacySettingsStore(),
             new WindowsLanguagePreferenceProvider());
         SettingsService.SettingsChanged += OnSettingsChanged;
-        _activationService = new ActivationService(() => _windowService.DispatcherQueue, ShowMainWindow);
+        _activationService = new ActivationService(() => _uiDispatcherQueue, ShowMainWindow);
         _packageUpdateService = new PackageUpdateService(ExitApplication);
     }
 
@@ -51,6 +54,8 @@ public partial class App : Application
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
+        _uiDispatcherQueue ??= DispatcherQueue.GetForCurrentThread();
+
         if (!await _activationService.InitializeAsync())
         {
             Exit();
@@ -72,27 +77,18 @@ public partial class App : Application
         _lastKnownAutoStart = SettingsService.Current.AutoStart;
         _lastKnownTrayEnabled = SettingsService.Current.TrayEnabled;
 
-        var window = _windowService.EnsureWindowCreated();
         var launchToTray = startupTaskLaunch && SettingsService.Current.TrayEnabled;
-
-        if (launchToTray)
+        if (!launchToTray)
         {
-            // Defer ShellPage and window content creation — only tray icon is needed.
-        }
-        else
-        {
-            EnsureShellPageCreated();
+            var window = EnsureWindowAndShellCreated();
             window.Activate();
         }
-
-        window.Closed -= OnMainWindowClosed;
-        window.Closed += OnMainWindowClosed;
 
         await ApplyStartupSettingAsync();
         await EnsureTrayStateAsync();
         _activationService.ShowPendingActivationIfRequested();
 
-        // For startup-task launch with tray enabled, window was never activated so it stays hidden.
+        // Startup-task launch with tray enabled creates neither a window nor the Shell/Page tree.
     }
 
     private async void OnSettingsChanged(object? sender, AppSettings e)
@@ -106,7 +102,7 @@ public partial class App : Application
         if (autoStartChanged)
         {
             await ApplyStartupSettingAsync();
-            _trayService?.UpdateStatus();
+            _trayCoordinator?.UpdateStatus();
         }
 
         if (trayChanged)
@@ -145,132 +141,77 @@ public partial class App : Application
 
     private async Task EnsureTrayStateAsync()
     {
-        var shouldEnableTray = SettingsService.Current.TrayEnabled;
-
-        if (!shouldEnableTray)
+        if (!SettingsService.Current.TrayEnabled)
         {
-            _trayService?.Dispose();
-            _trayService = null;
+            if (_trayCoordinator is not null)
+            {
+                await _trayCoordinator.DisableAsync();
+            }
+
             return;
         }
 
-        if (_trayService is not null || _windowService.Window is null)
-        {
-            return;
-        }
-
-        var uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
-        if (uiDispatcherQueue is null)
+        if (_uiDispatcherQueue is null)
         {
             AddStatusToVisibleMainPage(LocalizationService.Get("Tray.DispatcherUnavailable"), true);
             return;
         }
 
-        _trayService = new TrayService(
-            uiDispatcherQueue: uiDispatcherQueue,
-            getPlansAsync: forceRefresh => _powerPlanService.GetPlansAsync(forceRefresh),
-            setActivePlanAsync: async guid =>
-            {
-                await _powerPlanService.SetActivePlanAsync(guid);
-
-                var page = GetVisibleMainPage();
-                if (page is not null)
-                {
-                    if (!page.TryApplyActivePlanFromExternal(guid))
-                    {
-                        await page.RefreshFromExternalAsync(forceRefresh: true);
-                    }
-
-                    page.AddExternalStatus(LocalizationService.Format("App.Status.TraySwitched", guid), InfoBarSeverity.Success);
-                }
-                else
-                {
-                    _pendingMainPageRefresh = true;
-                    _pendingMainPagePlans = null;
-                }
-            },
-            getHiddenUltimatePlanGuid: () =>
-            {
-                var guid = SettingsService.Current.UltimatePerformancePlanGuid;
-                return string.IsNullOrWhiteSpace(guid) ? null : guid;
-            },
-            activateHiddenUltimatePlanAsync: async guid =>
-            {
-                try
-                {
-                    await _powerPlanService.SetActivePlanAsync(guid);
-                    await RefreshTrayPlansAsync(forceRefresh: true);
-                }
-                catch
-                {
-                    SettingsService.Current.UltimatePerformancePlanGuid = string.Empty;
-                    try
-                    {
-                        await SettingsService.SaveCurrentAsync();
-                    }
-                    catch
-                    {
-                        // Keep tray activation failure focused on the power plan operation.
-                    }
-
-                    await RefreshTrayPlansAsync(forceRefresh: true);
-                    throw;
-                }
-            },
-            isStartupEnabled: () => SettingsService.Current.AutoStart,
-            setStartupEnabled: UpdateAutoStartFromTrayAsync,
-            onPlansRefreshed: SyncMainPageAfterPlansRefreshAsync,
-            showMainWindow: ShowMainWindow,
-            exitApplication: ExitApplication,
-            log: (message, severity) => AddStatusToVisibleMainPage(message, severity));
+        _trayCoordinator ??= new TrayCoordinator(
+            _uiDispatcherQueue,
+            _powerPlanService,
+            SettingsService,
+            _startupService,
+            new TrayLocalizer(),
+            ShowMainWindow,
+            ExitApplication,
+            ApplyActivePlanFromTrayAsync,
+            SyncMainPageAfterPlansRefreshAsync,
+            AddStatusToVisibleMainPage);
 
         try
         {
-            await _trayService.InitializeAsync();
+            await _trayCoordinator.EnsureEnabledAsync();
         }
         catch (Exception ex)
         {
             AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.TrayInitFailed", ex.Message), true);
-            _trayService?.Dispose();
-            _trayService = null;
-        }
-    }
-
-    private async Task<bool> UpdateAutoStartFromTrayAsync(bool enabled)
-    {
-        try
-        {
-            var effective = await _startupService.SetEnabledAsync(enabled);
-            SettingsService.Current.AutoStart = effective;
-            _lastKnownAutoStart = effective;
-            await SettingsService.SaveCurrentAsync();
-            var state = LocalizationService.Get(effective ? "App.Status.On" : "App.Status.Off");
-            AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.TrayAutoStart", state), InfoBarSeverity.Success);
-            return effective;
-        }
-        catch (Exception ex)
-        {
-            AddStatusToVisibleMainPage(LocalizationService.Format("App.Status.TrayAutoStartFailed", ex.Message), true);
-            return SettingsService.Current.AutoStart;
         }
     }
 
     public void UpdateTrayPlans(IReadOnlyList<PowerPlanInfo> plans)
     {
-        _trayService?.UpdatePlansSnapshot(plans);
+        _trayCoordinator?.UpdatePlansSnapshot(plans);
     }
 
-    public async Task RefreshTrayPlansAsync()
+    public Task RefreshTrayPlansAsync()
     {
-        await RefreshTrayPlansAsync(forceRefresh: false);
+        return RefreshTrayPlansAsync(forceRefresh: false);
     }
 
     public async Task RefreshTrayPlansAsync(bool forceRefresh)
     {
-        if (_trayService is not null)
+        if (_trayCoordinator is not null)
         {
-            await _trayService.RefreshPlansAsync(forceRefresh);
+            await _trayCoordinator.RefreshPlansAsync(forceRefresh);
         }
+    }
+
+    private async Task ApplyActivePlanFromTrayAsync(string guid)
+    {
+        var page = GetVisibleMainPage();
+        if (page is not null)
+        {
+            if (!page.TryApplyActivePlanFromExternal(guid))
+            {
+                await page.RefreshFromExternalAsync(forceRefresh: true);
+            }
+
+            return;
+        }
+
+        _pendingMainPageRefresh = true;
+        _pendingMainPagePlans = null;
     }
 
     private Task SyncMainPageAfterPlansRefreshAsync(IReadOnlyList<PowerPlanInfo> plans)
@@ -298,7 +239,7 @@ public partial class App : Application
             return;
         }
 
-        if (SettingsService.Current.TrayEnabled && _trayService is not null)
+        if (SettingsService.Current.TrayEnabled && _trayCoordinator?.IsEnabled == true)
         {
             args.Handled = true;
             _windowService.Hide();
@@ -320,29 +261,32 @@ public partial class App : Application
         SettingsService.SettingsChanged -= OnSettingsChanged;
         _activationService.Dispose();
         _packageUpdateService.Dispose();
-        _trayService?.Dispose();
-        _trayService = null;
+        _trayCoordinator?.Dispose();
+        _trayCoordinator = null;
 
         Environment.Exit(0);
     }
 
     private void ShowMainWindow()
     {
-        if (_windowService.Window is null)
+        var window = EnsureWindowAndShellCreated();
+        _windowService.Show();
+
+        var page = _shellPage!.EnsureMainPageLoaded();
+        _ = RefreshMainPageAfterShowAsync(page);
+    }
+
+    private Window EnsureWindowAndShellCreated()
+    {
+        var window = _windowService.EnsureWindowCreated();
+        if (!_windowClosedHandlerAttached)
         {
-            return;
+            window.Closed += OnMainWindowClosed;
+            _windowClosedHandlerAttached = true;
         }
 
         EnsureShellPageCreated();
-        if (_shellPage is null)
-        {
-            return;
-        }
-
-        _windowService.Show();
-
-        var page = _shellPage.EnsureMainPageLoaded();
-        _ = RefreshMainPageAfterShowAsync(page);
+        return window;
     }
 
     private void EnsureShellPageCreated()
