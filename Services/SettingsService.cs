@@ -1,8 +1,8 @@
 using PowerPlan.Models;
 using System.Text.Json;
 using Windows.ApplicationModel;
-using Windows.System.UserProfile;
 using Windows.Storage;
+using Windows.System.UserProfile;
 
 namespace PowerPlan.Services;
 
