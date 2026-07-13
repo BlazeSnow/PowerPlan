@@ -21,7 +21,6 @@
     <DisplayName>ms-resource:AppDisplayName</DisplayName>
     <PublisherDisplayName>BlazeSnow</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
-    <uap:SupportedLanguages>en-US;zh-CN</uap:SupportedLanguages>
   </Properties>
 
   <Dependencies>
