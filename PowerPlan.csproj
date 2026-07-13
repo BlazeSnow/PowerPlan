@@ -34,6 +34,7 @@
         <Copyright>Copyright © 2026 BlazeSnow. 保留所有权利。</Copyright>
         <PackageProjectUrl>https://github.com/BlazeSnow/PowerPlan</PackageProjectUrl>
 
+        <!-- Language -->
         <AppxBundleAutoResourcePackageQualifiers>Scale|DXFeatureLevel</AppxBundleAutoResourcePackageQualifiers>
         <AppxDefaultResourceQualifiers>Language=zh-CN;en-US</AppxDefaultResourceQualifiers>
     </PropertyGroup>
