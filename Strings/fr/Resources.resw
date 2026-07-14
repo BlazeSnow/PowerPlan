@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App.WindowTitle" xml:space="preserve">
+    <value>PowerPlan</value>
+  </data>
+  <data name="AppTitleBar.Title" xml:space="preserve">
+    <value>PowerPlan</value>
+  </data>
+  <data name="AppTitleBar.Subtitle" xml:space="preserve">
+    <value>Changer rapidement de mode de gestion d'alimentation Windows</value>
+  </data>
+  <data name="AppDisplayName" xml:space="preserve">
+    <value>PowerPlan</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>Changer rapidement de mode de gestion d'alimentation Windows</value>
+  </data>
+  <data name="App.Status.StartupSettingFailed" xml:space="preserve">
+    <value>Échec de la configuration du lancement au démarrage : {0}</value>
+  </data>
+  <data name="App.Status.TraySwitched" xml:space="preserve">
+    <value>[Zone de notification] Mode d'alimentation changé : {0}</value>
+  </data>
+  <data name="App.Status.TrayInitFailed" xml:space="preserve">
+    <value>[Zone de notification] Échec de l'initialisation : {0}</value>
+  </data>
+  <data name="App.Status.TrayAutoStart" xml:space="preserve">
+    <value>[Zone de notification] Lancement au démarrage : {0}</value>
+  </data>
+  <data name="App.Status.TrayAutoStartFailed" xml:space="preserve">
+    <value>[Zone de notification] Échec de la configuration du démarrage : {0}</value>
+  </data>
+  <data name="App.Status.On" xml:space="preserve">
+    <value>Activé</value>
+  </data>
+  <data name="App.Status.Off" xml:space="preserve">
+    <value>Désactivé</value>
+  </data>
+  <data name="Shell.Home" xml:space="preserve">
+    <value>Accueil</value>
+  </data>
+  <data name="Shell.Settings" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="Main.RefreshPlansButton" xml:space="preserve">
+    <value>Actualiser les modes</value>
+  </data>
+  <data name="Main.PlanPickerTitle" xml:space="preserve">
+    <value>Choisir un mode de gestion d'alimentation</value>
+  </data>
+  <data name="Main.UltimateMissingTitle" xml:space="preserve">
+    <value>Mode Performances ultimes introuvable</value>
+  </data>
+  <data name="Main.UltimateMissingMessage" xml:space="preserve">
+    <value>Cliquez sur le bouton pour essayer de créer le mode Performances ultimes. Certains appareils peuvent le supprimer automatiquement.</value>
+  </data>
+  <data name="Main.UltimateHiddenTitle" xml:space="preserve">
+    <value>Mode Performances ultimes masqué détecté</value>
+  </data>
+  <data name="Main.UltimateHiddenMessage" xml:space="preserve">
+    <value>Cet appareil peut ne pas afficher ce mode dans la liste. Vous pouvez l'activer directement avec l'UUID enregistré.</value>
+  </data>
+  <data name="Main.CreateUltimateButton" xml:space="preserve">
+    <value>Essayer de créer le mode Performances ultimes</value>
+  </data>
+  <data name="Main.ActivateUltimateButton" xml:space="preserve">
+    <value>Activer le mode Performances ultimes masqué</value>
+  </data>
+  <data name="Main.StatusWaiting" xml:space="preserve">
+    <value>Prêt</value>
+  </data>
+  <data name="Main.Status.InitSuccess" xml:space="preserve">
+    <value>Initialisation terminée</value>
+  </data>
+  <data name="Main.Status.InitFailed" xml:space="preserve">
+    <value>Échec de l'initialisation : {0}</value>
+  </data>
+  <data name="Main.Status.PlansLoaded" xml:space="preserve">
+    <value>Modes d'alimentation chargés : {0}</value>
+  </data>
+  <data name="Main.Status.RefreshFailed" xml:space="preserve">
+    <value>Échec de l'actualisation : {0}</value>
+  </data>
+  <data name="Main.Status.SwitchSuccess" xml:space="preserve">
+    <value>Mode d'alimentation changé : {0}</value>
+  </data>
+  <data name="Main.Status.SwitchFailed" xml:space="preserve">
+    <value>Échec du changement : {0}</value>
+  </data>
+  <data name="Main.Status.UltimateExists" xml:space="preserve">
+    <value>Un mode Performances ultimes existe déjà</value>
+  </data>
+  <data name="Main.Status.UltimateCreated" xml:space="preserve">
+    <value>Tentative de création du mode Performances ultimes. Consultez la liste actuelle pour le résultat.</value>
+  </data>
+  <data name="Main.Status.UltimateActivated" xml:space="preserve">
+    <value>Mode Performances ultimes activé avec l'UUID enregistré</value>
+  </data>
+  <data name="Main.Status.UltimateCreateFailed" xml:space="preserve">
+    <value>Échec de création du mode Performances ultimes : {0}</value>
+  </data>
+  <data name="Main.Status.UltimateActivateFailed" xml:space="preserve">
+    <value>Échec d'activation du mode Performances ultimes masqué. L'UUID enregistré a été effacé : {0}</value>
+  </data>
+  <data name="Main.CopyPlanButton" xml:space="preserve">
+    <value>Copier le mode</value>
+  </data>
+  <data name="Main.CopyDialogTitle" xml:space="preserve">
+    <value>Copier le mode d'alimentation</value>
+  </data>
+  <data name="Main.CopyDialogConfirm" xml:space="preserve">
+    <value>Copier</value>
+  </data>
+  <data name="Main.CopyDialogCancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Main.CopyDialogPlaceholder" xml:space="preserve">
+    <value>Saisir le nom du nouveau mode</value>
+  </data>
+  <data name="Main.Status.CopyNameEmpty" xml:space="preserve">
+    <value>Échec de la copie : le nom ne peut pas être vide</value>
+  </data>
+  <data name="Main.Status.CopySuccess" xml:space="preserve">
+    <value>Mode d'alimentation copié : {0}</value>
+  </data>
+  <data name="Main.Status.CopyFailed" xml:space="preserve">
+    <value>Échec de la copie : {0}</value>
+  </data>
+  <data name="Main.DeletePlanHint" xml:space="preserve">
+    <value>Pour supprimer un mode, utilisez le Panneau de configuration</value>
+  </data>
+  <data name="Main.DefaultPlanName" xml:space="preserve">
+    <value>Mode d'alimentation</value>
+  </data>
+  <data name="Main.CopySuffix" xml:space="preserve">
+    <value>Copie</value>
+  </data>
+  <data name="Settings.PageTitle" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="Settings.Tools.Title" xml:space="preserve">
+    <value>Outils</value>
+  </data>
+  <data name="Settings.Language.Title" xml:space="preserve">
+    <value>Langue</value>
+  </data>
+  <data name="Settings.Language.Desc" xml:space="preserve">
+    <value>Choisir la langue d'affichage</value>
+  </data>
+  <data name="Settings.Language.Automatic" xml:space="preserve">
+    <value>Automatique</value>
+  </data>
+  <data name="Settings.Language.RestartTitle" xml:space="preserve">
+    <value>Langue enregistrée</value>
+  </data>
+  <data name="Settings.Language.RestartMessage" xml:space="preserve">
+    <value>La nouvelle langue sera appliquée après le redémarrage de PowerPlan.</value>
+  </data>
+  <data name="Settings.Language.RestartNow" xml:space="preserve">
+    <value>Redémarrer maintenant</value>
+  </data>
+  <data name="Settings.Language.RestartLater" xml:space="preserve">
+    <value>Plus tard</value>
+  </data>
+  <data name="Settings.Language.RestartFailed.Title" xml:space="preserve">
+    <value>Échec du redémarrage</value>
+  </data>
+  <data name="Settings.Language.RestartFailed.RestartPending" xml:space="preserve">
+    <value>PowerPlan attend déjà un redémarrage. Veuillez réessayer plus tard.</value>
+  </data>
+  <data name="Settings.Language.RestartFailed.InvalidUser" xml:space="preserve">
+    <value>PowerPlan n'a pas pu redémarrer avec l'utilisateur actuel.</value>
+  </data>
+  <data name="Settings.Language.RestartFailed.NotInForeground" xml:space="preserve">
+    <value>PowerPlan doit être au premier plan pour redémarrer.</value>
+  </data>
+  <data name="Settings.Language.RestartFailed.Other" xml:space="preserve">
+    <value>PowerPlan n'a pas pu redémarrer. Veuillez le redémarrer manuellement.</value>
+  </data>
+  <data name="Settings.AutoStart.Title" xml:space="preserve">
+    <value>Lancer au démarrage</value>
+  </data>
+  <data name="Settings.AutoStart.Desc" xml:space="preserve">
+    <value>Désactivé par défaut. Lance PowerPlan automatiquement après la connexion.</value>
+  </data>
+  <data name="Settings.AutoStart.Unsupported" xml:space="preserve">
+    <value>Disponible uniquement avec un package MSIX</value>
+  </data>
+  <data name="Settings.Tray.Title" xml:space="preserve">
+    <value>Activer la zone de notification</value>
+  </data>
+  <data name="Settings.Tray.Desc" xml:space="preserve">
+    <value>Activé par défaut. Si désactivé, fermer la fenêtre quitte l'application.</value>
+  </data>
+  <data name="Settings.LaunchToTray.Title" xml:space="preserve">
+    <value>Démarrer dans la zone de notification</value>
+  </data>
+  <data name="Settings.LaunchToTray.Desc" xml:space="preserve">
+    <value>Si activé, PowerPlan démarre avec uniquement son icône dans la zone de notification.</value>
+  </data>
+  <data name="Settings.SaveFailed" xml:space="preserve">
+    <value>Échec de l'enregistrement des paramètres : {0}</value>
+  </data>
+  <data name="Settings.Tools.PowerOptions" xml:space="preserve">
+    <value>Options d'alimentation</value>
+  </data>
+  <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve">
+    <value>Ouvrir les Options d'alimentation dans le Panneau de configuration</value>
+  </data>
+  <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve">
+    <value>Restaurer les modes d'alimentation</value>
+  </data>
+  <data name="Settings.Tools.RestorePowerPlansDesc" xml:space="preserve">
+    <value>Restaurer les modes d'alimentation par défaut et effacer l'UUID Performances ultimes enregistré</value>
+  </data>
+  <data name="Settings.Tools.Website" xml:space="preserve">
+    <value>Site officiel</value>
+  </data>
+  <data name="Settings.Tools.WebsiteDesc" xml:space="preserve">
+    <value>https://www.blazesnow.com/powerplan/</value>
+  </data>
+  <data name="Settings.Tools.Repository" xml:space="preserve">
+    <value>Dépôt du code source</value>
+  </data>
+  <data name="Settings.Tools.RepositoryDesc" xml:space="preserve">
+    <value>https://github.com/BlazeSnow/PowerPlan</value>
+  </data>
+  <data name="Settings.Tools.Feedback" xml:space="preserve">
+    <value>Contacter le développeur</value>
+  </data>
+  <data name="Settings.Tools.FeedbackDesc" xml:space="preserve">
+    <value>Vous avez rencontré un problème ? Vos retours sont les bienvenus.</value>
+  </data>
+  <data name="Settings.Tools.OpenButton" xml:space="preserve">
+    <value>Ouvrir</value>
+  </data>
+  <data name="Settings.Tools.RestoreButton" xml:space="preserve">
+    <value>Restaurer</value>
+  </data>
+  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve">
+    <value>Copier l'adresse e-mail</value>
+  </data>
+  <data name="Settings.AppVersion.Title" xml:space="preserve">
+    <value>Version de l'application</value>
+  </data>
+  <data name="Settings.AppVersion.Desc" xml:space="preserve">
+    <value>Version actuellement installée de PowerPlan</value>
+  </data>
+  <data name="Settings.RestoreDialog.SuccessTitle" xml:space="preserve">
+    <value>Restauration terminée</value>
+  </data>
+  <data name="Settings.RestoreDialog.SuccessMessage" xml:space="preserve">
+    <value>Les modes d'alimentation par défaut ont été restaurés et l'UUID Performances ultimes a été effacé.</value>
+  </data>
+  <data name="Settings.RestoreDialog.FailedTitle" xml:space="preserve">
+    <value>Échec de la restauration</value>
+  </data>
+  <data name="Settings.RestoreDialog.FailedMessage" xml:space="preserve">
+    <value>Échec de la restauration des modes d'alimentation : {0}</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Title" xml:space="preserve">
+    <value>Restaurer les modes d'alimentation par défaut ?</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Message" xml:space="preserve">
+    <value>Cela va restaurer les modes d'alimentation par défaut de Windows et effacer l'UUID Performances ultimes enregistré. Voulez-vous continuer ?</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Confirm" xml:space="preserve">
+    <value>Restaurer</value>
+  </data>
+  <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Settings.FeedbackDialog.Title" xml:space="preserve">
+    <value>Copié</value>
+  </data>
+  <data name="Settings.Status.FeedbackCopied" xml:space="preserve">
+    <value>L'adresse e-mail a été copiée dans le presse-papiers</value>
+  </data>
+  <data name="Tray.Init" xml:space="preserve">
+    <value>[Zone de notification] Initialisé. Clic gauche ou droit sur l'icône pour ouvrir le menu.</value>
+  </data>
+  <data name="Tray.RefreshFailed" xml:space="preserve">
+    <value>[Zone de notification] Échec de l'actualisation : {0}</value>
+  </data>
+  <data name="Tray.DispatcherUnavailable" xml:space="preserve">
+    <value>[Zone de notification] Thread UI indisponible, le menu n'a pas pu être actualisé</value>
+  </data>
+  <data name="Tray.Menu.OpenMainWindow" xml:space="preserve">
+    <value>Ouvrir PowerPlan</value>
+  </data>
+  <data name="Tray.Menu.RefreshPlans" xml:space="preserve">
+    <value>Actualiser les modes</value>
+  </data>
+  <data name="Tray.Menu.OpenHiddenUltimate" xml:space="preserve">
+    <value>Performances ultimes masqué</value>
+  </data>
+  <data name="Tray.Menu.DisableAutoStart" xml:space="preserve">
+    <value>Désactiver le lancement au démarrage</value>
+  </data>
+  <data name="Tray.Menu.EnableAutoStart" xml:space="preserve">
+    <value>Activer le lancement au démarrage</value>
+  </data>
+  <data name="Tray.Menu.Exit" xml:space="preserve">
+    <value>Quitter</value>
+  </data>
+  <data name="Tray.RefreshStarted" xml:space="preserve">
+    <value>[Zone de notification] Actualisation de la liste des modes en cours</value>
+  </data>
+  <data name="Tray.SwitchTo" xml:space="preserve">
+    <value>[Zone de notification] Changé vers : {0}</value>
+  </data>
+  <data name="Tray.SwitchFailed" xml:space="preserve">
+    <value>[Zone de notification] Échec du changement : {0}</value>
+  </data>
+  <data name="Tray.HiddenUltimateActivated" xml:space="preserve">
+    <value>[Zone de notification] Mode Performances ultimes masqué activé</value>
+  </data>
+  <data name="Tray.HiddenUltimateActivateFailed" xml:space="preserve">
+    <value>[Zone de notification] Échec d'activation du mode Performances ultimes masqué : {0}</value>
+  </data>
+  <data name="Tray.AutoStartState" xml:space="preserve">
+    <value>[Zone de notification] Lancement au démarrage : {0}</value>
+  </data>
+  <data name="Tray.Tooltip.Plan" xml:space="preserve">
+    <value>Mode d'alimentation : {0}</value>
+  </data>
+  <data name="Tray.Tooltip.PlanUnavailable" xml:space="preserve">
+    <value>Mode d'alimentation : Indisponible</value>
+  </data>
+  <data name="Tray.Tooltip.AutoStart" xml:space="preserve">
+    <value>Lancement au démarrage : {0}</value>
+  </data>
+  <data name="Tray.AutoStartToggleFailed" xml:space="preserve">
+    <value>[Zone de notification] Échec du changement de lancement au démarrage : {0}</value>
+  </data>
+  <data name="Common.FailedKeyword" xml:space="preserve">
+    <value>échec</value>
+  </data>
+  <data name="Common.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="PowerPlan.Error.InvalidPlanGuid" xml:space="preserve">
+    <value>Le GUID du mode d'alimentation n'est pas valide.</value>
+  </data>
+  <data name="PowerPlan.Error.InvalidSourcePlanGuid" xml:space="preserve">
+    <value>Le GUID du mode d'alimentation source n'est pas valide.</value>
+  </data>
+  <data name="PowerPlan.Error.SetActiveFailed" xml:space="preserve">
+    <value>Échec du changement de mode d'alimentation</value>
+  </data>
+  <data name="PowerPlan.Error.RestoreDefaultsFailed" xml:space="preserve">
+    <value>Échec de la restauration des modes d'alimentation par défaut</value>
+  </data>
+  <data name="PowerPlan.Error.EnumerateFailed" xml:space="preserve">
+    <value>Échec de l'énumération des modes d'alimentation</value>
+  </data>
+  <data name="PowerPlan.Error.ReadActiveFailed" xml:space="preserve">
+    <value>Échec de la lecture du mode d'alimentation actif</value>
+  </data>
+  <data name="PowerPlan.Error.DuplicateFailed" xml:space="preserve">
+    <value>Échec de la copie du mode d'alimentation</value>
+  </data>
+  <data name="PowerPlan.Error.DuplicateMissingGuid" xml:space="preserve">
+    <value>Échec de la copie du mode d'alimentation : Windows n'a pas retourné de GUID pour le nouveau mode.</value>
+  </data>
+  <data name="PowerPlan.Error.ReadNameFailed" xml:space="preserve">
+    <value>Échec de la lecture du nom du mode d'alimentation</value>
+  </data>
+  <data name="PowerPlan.Error.EmptyName" xml:space="preserve">
+    <value>Le nom du mode d'alimentation ne peut pas être vide.</value>
+  </data>
+  <data name="PowerPlan.Error.WriteNameFailed" xml:space="preserve">
+    <value>Échec de l'écriture du nom du mode d'alimentation</value>
+  </data>
+  <data name="PowerPlan.Error.Win32" xml:space="preserve">
+    <value>{0} : {1}</value>
+  </data>
+</root>

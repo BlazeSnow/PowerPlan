@@ -36,7 +36,7 @@
 
         <!-- Language -->
         <AppxBundleAutoResourcePackageQualifiers>Scale|DXFeatureLevel</AppxBundleAutoResourcePackageQualifiers>
-        <AppxDefaultResourceQualifiers>Language=zh-CN;en-US;zh-HK</AppxDefaultResourceQualifiers>
+        <AppxDefaultResourceQualifiers>Language=zh-CN;en-US;zh-HK;fr</AppxDefaultResourceQualifiers>
     </PropertyGroup>
 
     <ItemGroup>

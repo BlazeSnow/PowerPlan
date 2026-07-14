@@ -6,6 +6,7 @@ public static class LanguageSettings
     public const string ChineseLanguage = "zh-CN";
     public const string TraditionalChineseLanguage = "zh-HK";
     public const string EnglishLanguage = "en-US";
+    public const string FrenchLanguage = "fr";
     public const string DefaultLanguage = AutoLanguage;
 
     public static string Normalize(string? language)
@@ -23,6 +24,11 @@ public static class LanguageSettings
         if (string.Equals(language, EnglishLanguage, StringComparison.OrdinalIgnoreCase))
         {
             return EnglishLanguage;
+        }
+
+        if (string.Equals(language, FrenchLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            return FrenchLanguage;
         }
 
         return AutoLanguage;
@@ -44,6 +50,11 @@ public static class LanguageSettings
         if (IsTraditionalChinese(preferredLanguage))
         {
             return TraditionalChineseLanguage;
+        }
+
+        if (IsFrench(preferredLanguage))
+        {
+            return FrenchLanguage;
         }
 
         return EnglishLanguage;
@@ -79,5 +90,16 @@ public static class LanguageSettings
             || language.StartsWith("zh-TW-", StringComparison.OrdinalIgnoreCase)
             || language.Equals("zh-MO", StringComparison.OrdinalIgnoreCase)
             || language.StartsWith("zh-MO-", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsFrench(string? language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+        {
+            return false;
+        }
+
+        return language.Equals(FrenchLanguage, StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("fr-", StringComparison.OrdinalIgnoreCase);
     }
 }
