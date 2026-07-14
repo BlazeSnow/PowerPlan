@@ -50,14 +50,6 @@ public sealed class WindowService
         }
     }
 
-    public void ReleaseWindow(Window window)
-    {
-        if (ReferenceEquals(_window, window))
-        {
-            _window = null;
-        }
-    }
-
     private static void SetWindowIcon(Window window)
     {
         try

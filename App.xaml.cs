@@ -16,7 +16,6 @@ public partial class App : Application, IPageHost
     private ShellPage? _shellPage;
     private TrayCoordinator? _trayCoordinator;
     private DispatcherQueue? _uiDispatcherQueue;
-    private Window? _mainWindowWithCloseHandler;
     private bool _isExiting;
     private bool _lastKnownAutoStart;
     private bool _lastKnownTrayEnabled;
@@ -239,19 +238,15 @@ public partial class App : Application, IPageHost
 
     private void OnMainWindowClosed(object sender, WindowEventArgs args)
     {
-        if (sender is not Window window || !ReferenceEquals(window, _mainWindowWithCloseHandler))
-        {
-            return;
-        }
-
-        if (_isExiting)
+        if (_isExiting || _windowService.Window is null)
         {
             return;
         }
 
         if (SettingsService.Current.TrayEnabled && _trayCoordinator?.IsEnabled == true)
         {
-            ReleaseMainUi(window);
+            args.Handled = true;
+            ReleaseMainUiToTray();
             return;
         }
 
@@ -259,13 +254,17 @@ public partial class App : Application, IPageHost
         ExitApplication();
     }
 
-    private void ReleaseMainUi(Window window)
+    private void ReleaseMainUiToTray()
     {
-        window.Closed -= OnMainWindowClosed;
-        _mainWindowWithCloseHandler = null;
+        var window = _windowService.Window;
+        if (window is null)
+        {
+            return;
+        }
+
         window.Content = null;
         _shellPage = null;
-        _windowService.ReleaseWindow(window);
+        _windowService.Hide();
     }
 
     private void ExitApplication()
@@ -297,12 +296,8 @@ public partial class App : Application, IPageHost
     private Window EnsureWindowAndShellCreated()
     {
         var window = _windowService.EnsureWindowCreated();
-        if (!ReferenceEquals(window, _mainWindowWithCloseHandler))
-        {
-            _mainWindowWithCloseHandler?.Closed -= OnMainWindowClosed;
-            window.Closed += OnMainWindowClosed;
-            _mainWindowWithCloseHandler = window;
-        }
+        window.Closed -= OnMainWindowClosed;
+        window.Closed += OnMainWindowClosed;
 
         EnsureShellPageCreated();
         return window;
