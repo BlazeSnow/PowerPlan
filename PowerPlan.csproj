@@ -42,11 +42,16 @@
     <ItemGroup>
         <Compile Remove="PowerPlan.Core\**\*.cs" />
         <Compile Remove="PowerPlan.Tray\**\*.cs" />
+        <Compile Remove="PowerPlan.Pages\**\*.cs" />
+        <Page Remove="PowerPlan.Pages\**\*.xaml" />
         <EmbeddedResource Remove="PowerPlan.Core\**\*" />
         <EmbeddedResource Remove="PowerPlan.Tray\**\*" />
+        <EmbeddedResource Remove="PowerPlan.Pages\**\*" />
         <None Remove="PowerPlan.Core\**\*" />
         <None Remove="PowerPlan.Tray\**\*" />
+        <None Remove="PowerPlan.Pages\**\*" />
         <ProjectReference Include="PowerPlan.Core\PowerPlan.Core.csproj" />
+        <ProjectReference Include="PowerPlan.Pages\PowerPlan.Pages.csproj" />
         <ProjectReference Include="PowerPlan.Tray\PowerPlan.Tray.csproj" />
     </ItemGroup>
 

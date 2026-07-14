@@ -1,11 +1,10 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Page
-    x:Class="PowerPlan.Views.MainPage"
+    x:Class="PowerPlan.Pages.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:PowerPlan.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="Transparent"
     mc:Ignorable="d">
@@ -56,7 +55,7 @@
 
                     <ListView
                         x:Name="PlansListView"
-                        ItemsSource="{x:Bind Plans}"
+                        ItemsSource="{Binding Plans}"
                         SelectionMode="Single"
                         SelectionChanged="OnPlansSelectionChanged"
                         BorderThickness="0">
@@ -68,7 +67,7 @@
                             </Style>
                         </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="local:PowerPlanItemViewModel">
+                            <DataTemplate>
                                 <Border
                                     BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
                                     BorderThickness="0,1,0,0" Padding="16,12">
@@ -81,7 +80,7 @@
 
                                         <RadioButton
                                             Grid.Column="0"
-                                            IsChecked="{x:Bind IsActive, Mode=OneWay}"
+                                            IsChecked="{Binding IsActive, Mode=OneWay}"
                                             IsHitTestVisible="False"
                                             MinWidth="0"
                                             Padding="0"
@@ -94,18 +93,18 @@
                                                 FontSize="16"
                                                 FontWeight="SemiBold"
                                                 VerticalAlignment="Center"
-                                                Text="{x:Bind Name}" />
+                                                Text="{Binding Name}" />
                                             <TextBlock
                                                 FontSize="13"
                                                 Opacity="0.75"
                                                 VerticalAlignment="Center"
-                                                Text="{x:Bind Guid}" />
+                                                Text="{Binding Guid}" />
                                         </StackPanel>
 
                                         <Button
                                             Grid.Column="2"
-                                            Content="{x:Bind CopyButtonText}"
-                                            Tag="{x:Bind Guid}"
+                                            Content="{Binding CopyButtonText}"
+                                            Tag="{Binding Guid}"
                                             Click="OnCopyPlanClicked"
                                             HorizontalAlignment="Right"
                                             VerticalAlignment="Center" />

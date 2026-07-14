@@ -1,11 +1,11 @@
-﻿using PowerPlan.Models;
+using PowerPlan.Models;
 using PowerPlan.Services;
 using System.Diagnostics;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.DataTransfer;
 
-namespace PowerPlan.Views;
+namespace PowerPlan.Pages;
 
 public sealed partial class SettingsPage : Page
 {
@@ -13,61 +13,67 @@ public sealed partial class SettingsPage : Page
     private const string OfficialWebsiteUrl = "https://www.blazesnow.com/powerplan/";
     private const string RepositoryUrl = "https://github.com/BlazeSnow/PowerPlan";
 
-    private readonly ISettingsService _settingsService;
-    private readonly StartupService _startupService;
-    private readonly IPowerPlanService _powerPlanService;
+    private IPageHost? _pageHost;
     private bool _updatingUi;
     private ContentDialog? _operationDialog;
 
     public SettingsPage()
     {
         InitializeComponent();
-        var app = (App)Application.Current;
-        _settingsService = app.SettingsService;
-        _startupService = app.StartupService;
-        _powerPlanService = app.PowerPlanService;
-        ApplyLocalization();
-        AppVersionTextBlock.Text = GetAppVersion();
-
         Loaded += SettingsPage_Loaded;
     }
 
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        _pageHost = e.Parameter as IPageHost
+            ?? throw new InvalidOperationException("SettingsPage requires an IPageHost navigation parameter.");
+        ApplyLocalization();
+        AppVersionTextBlock.Text = GetAppVersion();
+    }
+
+    private IPageHost PageHost => _pageHost
+        ?? throw new InvalidOperationException("SettingsPage has not been initialized with an IPageHost.");
+
     private void ApplyLocalization()
     {
-        PageTitleTextBlock.Text = LocalizationService.Get("Settings.PageTitle");
+        PageTitleTextBlock.Text = PageHost.GetString("Settings.PageTitle");
 
-        LanguageCard.Header = LocalizationService.Get("Settings.Language.Title");
-        LanguageCard.Description = LocalizationService.Get("Settings.Language.Desc");
-        AutomaticLanguageItem.Content = LocalizationService.Get("Settings.Language.Automatic");
+        LanguageCard.Header = PageHost.GetString("Settings.Language.Title");
+        LanguageCard.Description = PageHost.GetString("Settings.Language.Desc");
+        AutomaticLanguageItem.Content = PageHost.GetString("Settings.Language.Automatic");
 
-        AutoStartCard.Header = LocalizationService.Get("Settings.AutoStart.Title");
-        AutoStartCard.Description = LocalizationService.Get("Settings.AutoStart.Desc");
+        AutoStartCard.Header = PageHost.GetString("Settings.AutoStart.Title");
+        AutoStartCard.Description = PageHost.GetString("Settings.AutoStart.Desc");
 
-        TrayCard.Header = LocalizationService.Get("Settings.Tray.Title");
-        TrayCard.Description = LocalizationService.Get("Settings.Tray.Desc");
+        TrayCard.Header = PageHost.GetString("Settings.Tray.Title");
+        TrayCard.Description = PageHost.GetString("Settings.Tray.Desc");
 
-        PowerOptionsCard.Header = LocalizationService.Get("Settings.Tools.PowerOptions");
-        PowerOptionsCard.Description = LocalizationService.Get("Settings.Tools.PowerOptionsDesc");
-        OpenPowerOptionsButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
+        LaunchToTrayCard.Header = PageHost.GetString("Settings.LaunchToTray.Title");
+        LaunchToTrayCard.Description = PageHost.GetString("Settings.LaunchToTray.Desc");
 
-        RestorePowerPlansCard.Header = LocalizationService.Get("Settings.Tools.RestorePowerPlans");
-        RestorePowerPlansCard.Description = LocalizationService.Get("Settings.Tools.RestorePowerPlansDesc");
-        RestorePowerPlansButton.Content = LocalizationService.Get("Settings.Tools.RestoreButton");
+        PowerOptionsCard.Header = PageHost.GetString("Settings.Tools.PowerOptions");
+        PowerOptionsCard.Description = PageHost.GetString("Settings.Tools.PowerOptionsDesc");
+        OpenPowerOptionsButton.Content = PageHost.GetString("Settings.Tools.OpenButton");
 
-        WebsiteCard.Header = LocalizationService.Get("Settings.Tools.Website");
-        WebsiteCard.Description = LocalizationService.Get("Settings.Tools.WebsiteDesc");
-        OpenWebsiteButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
+        RestorePowerPlansCard.Header = PageHost.GetString("Settings.Tools.RestorePowerPlans");
+        RestorePowerPlansCard.Description = PageHost.GetString("Settings.Tools.RestorePowerPlansDesc");
+        RestorePowerPlansButton.Content = PageHost.GetString("Settings.Tools.RestoreButton");
 
-        RepositoryCard.Header = LocalizationService.Get("Settings.Tools.Repository");
-        RepositoryCard.Description = LocalizationService.Get("Settings.Tools.RepositoryDesc");
-        OpenRepositoryButton.Content = LocalizationService.Get("Settings.Tools.OpenButton");
+        WebsiteCard.Header = PageHost.GetString("Settings.Tools.Website");
+        WebsiteCard.Description = PageHost.GetString("Settings.Tools.WebsiteDesc");
+        OpenWebsiteButton.Content = PageHost.GetString("Settings.Tools.OpenButton");
 
-        FeedbackCard.Header = LocalizationService.Get("Settings.Tools.Feedback");
-        FeedbackCard.Description = LocalizationService.Get("Settings.Tools.FeedbackDesc");
-        SendFeedbackButton.Content = LocalizationService.Get("Settings.Tools.FeedbackCopy");
+        RepositoryCard.Header = PageHost.GetString("Settings.Tools.Repository");
+        RepositoryCard.Description = PageHost.GetString("Settings.Tools.RepositoryDesc");
+        OpenRepositoryButton.Content = PageHost.GetString("Settings.Tools.OpenButton");
 
-        AppVersionCard.Header = LocalizationService.Get("Settings.AppVersion.Title");
-        AppVersionCard.Description = LocalizationService.Get("Settings.AppVersion.Desc");
+        FeedbackCard.Header = PageHost.GetString("Settings.Tools.Feedback");
+        FeedbackCard.Description = PageHost.GetString("Settings.Tools.FeedbackDesc");
+        SendFeedbackButton.Content = PageHost.GetString("Settings.Tools.FeedbackCopy");
+
+        AppVersionCard.Header = PageHost.GetString("Settings.AppVersion.Title");
+        AppVersionCard.Description = PageHost.GetString("Settings.AppVersion.Desc");
     }
 
     private static string GetAppVersion()
@@ -79,17 +85,19 @@ public sealed partial class SettingsPage : Page
     private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
     {
         _updatingUi = true;
-        var settings = _settingsService.Current;
-        var startupSupported = _startupService.IsSupported;
+        var settings = PageHost.SettingsService.Current;
+        var startupSupported = PageHost.StartupTaskService.IsSupported;
 
         AutoStartToggle.IsEnabled = startupSupported;
         AutoStartToggle.IsOn = startupSupported && settings.AutoStart;
         TrayToggle.IsOn = settings.TrayEnabled;
+        LaunchToTrayToggle.IsOn = settings.LaunchToTray;
+        LaunchToTrayToggle.IsEnabled = settings.TrayEnabled;
         SelectLanguage(settings.Language);
 
         if (!startupSupported)
         {
-            AutoStartCard.Description = LocalizationService.Get("Settings.AutoStart.Unsupported");
+            AutoStartCard.Description = PageHost.GetString("Settings.AutoStart.Unsupported");
         }
 
         _updatingUi = false;
@@ -97,10 +105,10 @@ public sealed partial class SettingsPage : Page
         {
             if (settings.AutoStart)
             {
-                _settingsService.Current.AutoStart = false;
+                PageHost.SettingsService.Current.AutoStart = false;
                 try
                 {
-                    await _settingsService.SaveCurrentAsync();
+                    await PageHost.SettingsService.SaveCurrentAsync();
                 }
                 catch
                 {
@@ -113,15 +121,15 @@ public sealed partial class SettingsPage : Page
 
         try
         {
-            var effective = await _startupService.GetEffectiveEnabledAsync();
+            var effective = await PageHost.StartupTaskService.GetEffectiveEnabledAsync();
             if (effective != settings.AutoStart)
             {
                 _updatingUi = true;
                 AutoStartToggle.IsOn = effective;
                 _updatingUi = false;
 
-                _settingsService.Current.AutoStart = effective;
-                await _settingsService.SaveCurrentAsync();
+                PageHost.SettingsService.Current.AutoStart = effective;
+                await PageHost.SettingsService.SaveCurrentAsync();
             }
         }
         catch
@@ -137,7 +145,7 @@ public sealed partial class SettingsPage : Page
             return;
         }
 
-        var previousLanguage = _settingsService.Current.Language;
+        var previousLanguage = PageHost.SettingsService.Current.Language;
         var selectedLanguage = LanguageSettings.Normalize(item.Tag as string);
         if (selectedLanguage == previousLanguage)
         {
@@ -146,17 +154,17 @@ public sealed partial class SettingsPage : Page
 
         try
         {
-            _settingsService.Current.Language = selectedLanguage;
-            await _settingsService.SaveCurrentAsync();
-            await ShowLanguageRestartDialogAsync(_settingsService.ResolveLanguage(selectedLanguage));
+            PageHost.SettingsService.Current.Language = selectedLanguage;
+            await PageHost.SettingsService.SaveCurrentAsync();
+            await ShowLanguageRestartDialogAsync(PageHost.SettingsService.ResolveLanguage(selectedLanguage));
         }
         catch (Exception ex)
         {
-            _settingsService.Current.Language = previousLanguage;
+            PageHost.SettingsService.Current.Language = previousLanguage;
             SelectLanguage(previousLanguage);
             await ShowOperationDialogAsync(
-                LocalizationService.Get("Settings.PageTitle"),
-                LocalizationService.Format("Settings.SaveFailed", ex.Message));
+                PageHost.GetString("Settings.PageTitle"),
+                PageHost.FormatString("Settings.SaveFailed", ex.Message));
         }
     }
 
@@ -164,10 +172,10 @@ public sealed partial class SettingsPage : Page
     {
         var dialog = new ContentDialog
         {
-            Title = LocalizationService.GetForLanguage("Settings.Language.RestartTitle", language),
-            Content = LocalizationService.GetForLanguage("Settings.Language.RestartMessage", language),
-            PrimaryButtonText = LocalizationService.GetForLanguage("Settings.Language.RestartNow", language),
-            CloseButtonText = LocalizationService.GetForLanguage("Settings.Language.RestartLater", language),
+            Title = PageHost.GetStringForLanguage("Settings.Language.RestartTitle", language),
+            Content = PageHost.GetStringForLanguage("Settings.Language.RestartMessage", language),
+            PrimaryButtonText = PageHost.GetStringForLanguage("Settings.Language.RestartNow", language),
+            CloseButtonText = PageHost.GetStringForLanguage("Settings.Language.RestartLater", language),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = XamlRoot
         };
@@ -199,9 +207,9 @@ public sealed partial class SettingsPage : Page
         };
 
         return ShowOperationDialogAsync(
-            LocalizationService.GetForLanguage("Settings.Language.RestartFailed.Title", language),
-            LocalizationService.GetForLanguage(messageKey, language),
-            LocalizationService.GetForLanguage("Common.Ok", language));
+            PageHost.GetStringForLanguage("Settings.Language.RestartFailed.Title", language),
+            PageHost.GetStringForLanguage(messageKey, language),
+            PageHost.GetStringForLanguage("Common.Ok", language));
     }
 
     private void SelectLanguage(string language)
@@ -226,12 +234,10 @@ public sealed partial class SettingsPage : Page
 
     private async void OnAutoStartToggled(object sender, RoutedEventArgs e)
     {
-        if (_updatingUi)
+        if (!_updatingUi)
         {
-            return;
+            await SaveSettingsAsync();
         }
-
-        await SaveSettingsAsync();
     }
 
     private async void OnTrayToggled(object sender, RoutedEventArgs e)
@@ -241,12 +247,21 @@ public sealed partial class SettingsPage : Page
             return;
         }
 
+        UpdateLaunchToTrayEnabledState();
         await SaveSettingsAsync();
+    }
+
+    private async void OnLaunchToTrayToggled(object sender, RoutedEventArgs e)
+    {
+        if (!_updatingUi)
+        {
+            await SaveSettingsAsync();
+        }
     }
 
     private async Task SaveSettingsAsync()
     {
-        var previousAutoStart = _settingsService.Current.AutoStart;
+        var previousAutoStart = PageHost.SettingsService.Current.AutoStart;
         var autoStartChanged = AutoStartToggle.IsOn != previousAutoStart;
         var startupStateChanged = false;
 
@@ -267,8 +282,8 @@ public sealed partial class SettingsPage : Page
                 {
                     RestoreSettingsToggles();
                     await ShowOperationDialogAsync(
-                        LocalizationService.Get("Settings.PageTitle"),
-                        LocalizationService.Format("App.Status.StartupSettingFailed", ex.Message));
+                        PageHost.GetString("Settings.PageTitle"),
+                        PageHost.FormatString("App.Status.StartupSettingFailed", ex.Message));
                     return;
                 }
             }
@@ -277,11 +292,12 @@ public sealed partial class SettingsPage : Page
             {
                 AutoStart = effectiveAutoStart,
                 TrayEnabled = trayEnabled,
-                Language = _settingsService.Current.Language,
-                UltimatePerformancePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid
+                LaunchToTray = LaunchToTrayToggle.IsOn,
+                Language = PageHost.SettingsService.Current.Language,
+                UltimatePerformancePlanGuid = PageHost.SettingsService.Current.UltimatePerformancePlanGuid
             };
 
-            await _settingsService.SaveAsync(settings);
+            await PageHost.SettingsService.SaveAsync(settings);
         }
         catch (Exception ex)
         {
@@ -289,7 +305,7 @@ public sealed partial class SettingsPage : Page
             {
                 try
                 {
-                    _ = await _startupService.SetEnabledAsync(previousAutoStart);
+                    _ = await PageHost.StartupTaskService.SetEnabledAsync(previousAutoStart);
                 }
                 catch
                 {
@@ -299,8 +315,8 @@ public sealed partial class SettingsPage : Page
 
             RestoreSettingsToggles();
             await ShowOperationDialogAsync(
-                LocalizationService.Get("Settings.PageTitle"),
-                LocalizationService.Format("Settings.SaveFailed", ex.Message));
+                PageHost.GetString("Settings.PageTitle"),
+                PageHost.FormatString("Settings.SaveFailed", ex.Message));
         }
     }
 
@@ -309,8 +325,10 @@ public sealed partial class SettingsPage : Page
         _updatingUi = true;
         try
         {
-            AutoStartToggle.IsOn = _startupService.IsSupported && _settingsService.Current.AutoStart;
-            TrayToggle.IsOn = _settingsService.Current.TrayEnabled;
+            AutoStartToggle.IsOn = PageHost.StartupTaskService.IsSupported && PageHost.SettingsService.Current.AutoStart;
+            TrayToggle.IsOn = PageHost.SettingsService.Current.TrayEnabled;
+            LaunchToTrayToggle.IsOn = PageHost.SettingsService.Current.LaunchToTray;
+            UpdateLaunchToTrayEnabledState();
         }
         finally
         {
@@ -318,9 +336,14 @@ public sealed partial class SettingsPage : Page
         }
     }
 
+    private void UpdateLaunchToTrayEnabledState()
+    {
+        LaunchToTrayToggle.IsEnabled = TrayToggle.IsOn;
+    }
+
     private async Task<bool> EnsureStartupStateAsync(bool enabled)
     {
-        var effective = await _startupService.SetEnabledAsync(enabled);
+        var effective = await PageHost.StartupTaskService.SetEnabledAsync(enabled);
         if (effective != enabled)
         {
             _updatingUi = true;
@@ -338,32 +361,27 @@ public sealed partial class SettingsPage : Page
 
     private async void OnRestorePowerPlansClicked(object sender, RoutedEventArgs e)
     {
-        var confirmed = await ShowRestoreConfirmationDialogAsync();
-        if (!confirmed)
+        if (!await ShowRestoreConfirmationDialogAsync())
         {
             return;
         }
 
         try
         {
-            await _powerPlanService.RestoreDefaultSchemesAsync();
-            _settingsService.Current.UltimatePerformancePlanGuid = string.Empty;
-            await _settingsService.SaveCurrentAsync();
-
-            if (Application.Current is App app)
-            {
-                await app.RefreshTrayPlansAsync(forceRefresh: true);
-            }
+            await PageHost.PowerPlanService.RestoreDefaultSchemesAsync();
+            PageHost.SettingsService.Current.UltimatePerformancePlanGuid = string.Empty;
+            await PageHost.SettingsService.SaveCurrentAsync();
+            await PageHost.RefreshTrayPlansAsync(forceRefresh: true);
 
             await ShowOperationDialogAsync(
-                LocalizationService.Get("Settings.RestoreDialog.SuccessTitle"),
-                LocalizationService.Get("Settings.RestoreDialog.SuccessMessage"));
+                PageHost.GetString("Settings.RestoreDialog.SuccessTitle"),
+                PageHost.GetString("Settings.RestoreDialog.SuccessMessage"));
         }
         catch (Exception ex)
         {
             await ShowOperationDialogAsync(
-                LocalizationService.Get("Settings.RestoreDialog.FailedTitle"),
-                LocalizationService.Format("Settings.RestoreDialog.FailedMessage", ex.Message));
+                PageHost.GetString("Settings.RestoreDialog.FailedTitle"),
+                PageHost.FormatString("Settings.RestoreDialog.FailedMessage", ex.Message));
         }
     }
 
@@ -371,17 +389,16 @@ public sealed partial class SettingsPage : Page
     {
         var dialog = new ContentDialog
         {
-            Title = LocalizationService.Get("Settings.RestoreConfirmDialog.Title"),
-            Content = LocalizationService.Get("Settings.RestoreConfirmDialog.Message"),
-            PrimaryButtonText = LocalizationService.Get("Settings.RestoreConfirmDialog.Confirm"),
-            CloseButtonText = LocalizationService.Get("Settings.RestoreConfirmDialog.Cancel"),
+            Title = PageHost.GetString("Settings.RestoreConfirmDialog.Title"),
+            Content = PageHost.GetString("Settings.RestoreConfirmDialog.Message"),
+            PrimaryButtonText = PageHost.GetString("Settings.RestoreConfirmDialog.Confirm"),
+            CloseButtonText = PageHost.GetString("Settings.RestoreConfirmDialog.Cancel"),
             DefaultButton = ContentDialogButton.Close,
             PrimaryButtonStyle = CreateDangerButtonStyle(),
             XamlRoot = XamlRoot
         };
 
-        var result = await dialog.ShowAsync();
-        return result == ContentDialogResult.Primary;
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
     }
 
     private void OnOpenWebsiteClicked(object sender, RoutedEventArgs e)
@@ -402,8 +419,8 @@ public sealed partial class SettingsPage : Page
             dataPackage.SetText(FeedbackMail);
             Clipboard.SetContent(dataPackage);
             _ = ShowOperationDialogAsync(
-                LocalizationService.Get("Settings.FeedbackDialog.Title"),
-                LocalizationService.Get("Settings.Status.FeedbackCopied"));
+                PageHost.GetString("Settings.FeedbackDialog.Title"),
+                PageHost.GetString("Settings.Status.FeedbackCopied"));
         }
         catch
         {
@@ -413,17 +430,14 @@ public sealed partial class SettingsPage : Page
 
     private Task ShowOperationDialogAsync(string title, string message)
     {
-        return ShowOperationDialogAsync(title, message, LocalizationService.Get("Common.Ok"));
+        return ShowOperationDialogAsync(title, message, PageHost.GetString("Common.Ok"));
     }
 
     private async Task ShowOperationDialogAsync(string title, string message, string closeButtonText)
     {
         if (_operationDialog is null)
         {
-            _operationDialog = new ContentDialog
-            {
-                XamlRoot = XamlRoot
-            };
+            _operationDialog = new ContentDialog { XamlRoot = XamlRoot };
         }
 
         _operationDialog.Title = title;
@@ -451,11 +465,7 @@ public sealed partial class SettingsPage : Page
     {
         try
         {
-            var startInfo = new ProcessStartInfo(target)
-            {
-                UseShellExecute = true
-            };
-
+            var startInfo = new ProcessStartInfo(target) { UseShellExecute = true };
             if (!string.IsNullOrWhiteSpace(args))
             {
                 startInfo.Arguments = args;

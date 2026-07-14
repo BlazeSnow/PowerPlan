@@ -99,6 +99,7 @@ public sealed class SettingsService : ISettingsService
     {
         if (!_settingsStore.Contains(AutoStartKey)
             && !_settingsStore.Contains(TrayEnabledKey)
+            && !_settingsStore.Contains(LaunchToTrayKey)
             && !_settingsStore.Contains(LanguageKey)
             && !_settingsStore.Contains(UltimatePerformancePlanGuidKey))
         {
@@ -109,6 +110,7 @@ public sealed class SettingsService : ISettingsService
         {
             AutoStart = _settingsStore.GetBoolean(AutoStartKey, defaultValue: false),
             TrayEnabled = _settingsStore.GetBoolean(TrayEnabledKey, defaultValue: true),
+            LaunchToTray = _settingsStore.GetBoolean(LaunchToTrayKey, defaultValue: false),
             Language = NormalizeLanguage(_settingsStore.GetString(LanguageKey, LanguageSettings.DefaultLanguage)),
             UltimatePerformancePlanGuid = _settingsStore.GetString(UltimatePerformancePlanGuidKey, string.Empty)
         };
@@ -118,6 +120,7 @@ public sealed class SettingsService : ISettingsService
     {
         _settingsStore.SetBoolean(AutoStartKey, settings.AutoStart);
         _settingsStore.SetBoolean(TrayEnabledKey, settings.TrayEnabled);
+        _settingsStore.SetBoolean(LaunchToTrayKey, settings.LaunchToTray);
         _settingsStore.SetString(UltimatePerformancePlanGuidKey, settings.UltimatePerformancePlanGuid);
         _settingsStore.SetString(LanguageKey, NormalizeLanguage(settings.Language));
     }
@@ -129,6 +132,7 @@ public sealed class SettingsService : ISettingsService
 
     public const string AutoStartKey = "AutoStartEnabled";
     public const string TrayEnabledKey = "TrayEnabled";
+    public const string LaunchToTrayKey = "LaunchToTrayEnabled";
     public const string LanguageKey = "Language";
     public const string UltimatePerformancePlanGuidKey = "UltimatePerformancePlanGuid";
 }

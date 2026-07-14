@@ -309,6 +309,12 @@
   <data name="Settings.Tray.Desc" xml:space="preserve">
     <value>默认开启，关闭后点击窗口关闭将直接退出</value>
   </data>
+  <data name="Settings.LaunchToTray.Title" xml:space="preserve">
+    <value>启动到托盘</value>
+  </data>
+  <data name="Settings.LaunchToTray.Desc" xml:space="preserve">
+    <value>启用后，启动 PowerPlan 时仅显示系统托盘图标</value>
+  </data>
   <data name="Settings.SaveFailed" xml:space="preserve">
     <value>保存设置失败：{0}</value>
   </data>

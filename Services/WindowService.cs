@@ -1,5 +1,6 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
+using PowerPlan.Pages;
 using Microsoft.UI.Xaml.Media;
 using System.Runtime.InteropServices;
 using WinRT.Interop;

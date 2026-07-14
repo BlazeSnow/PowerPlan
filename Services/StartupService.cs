@@ -1,5 +1,4 @@
-﻿using PowerPlan.Tray.Services;
-using Windows.ApplicationModel;
+﻿using Windows.ApplicationModel;
 
 namespace PowerPlan.Services;
 

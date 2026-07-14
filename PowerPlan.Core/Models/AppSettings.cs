@@ -10,6 +10,9 @@ public sealed class AppSettings
     [JsonPropertyName("tray")]
     public bool TrayEnabled { get; set; } = true;
 
+    [JsonPropertyName("launchToTray")]
+    public bool LaunchToTray { get; set; } = false;
+
     [JsonPropertyName("language")]
     public string Language { get; set; } = "auto";
 

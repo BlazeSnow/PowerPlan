@@ -6,7 +6,7 @@ using Windows.Globalization;
 
 namespace PowerPlan;
 
-public partial class App : Application
+public partial class App : Application, IPageHost
 {
     private readonly IPowerPlanService _powerPlanService;
     private readonly StartupService _startupService = new();
@@ -51,6 +51,13 @@ public partial class App : Application
     public ISettingsService SettingsService { get; }
     public IPowerPlanService PowerPlanService => _powerPlanService;
     public StartupService StartupService => _startupService;
+    public IStartupTaskService StartupTaskService => _startupService;
+
+    public string GetString(string key) => LocalizationService.Get(key);
+
+    public string FormatString(string key, params object[] arguments) => LocalizationService.Format(key, arguments);
+
+    public string GetStringForLanguage(string key, string language) => LocalizationService.GetForLanguage(key, language);
 
     protected override async void OnLaunched(LaunchActivatedEventArgs e)
     {
@@ -63,8 +70,6 @@ public partial class App : Application
         }
 
         _packageUpdateService.Initialize();
-        var startupTaskLaunch = _activationService.IsStartupTaskLaunch;
-
         try
         {
             await SettingsService.InitializeAsync();
@@ -77,7 +82,7 @@ public partial class App : Application
         _lastKnownAutoStart = SettingsService.Current.AutoStart;
         _lastKnownTrayEnabled = SettingsService.Current.TrayEnabled;
 
-        var launchToTray = startupTaskLaunch && SettingsService.Current.TrayEnabled;
+        var launchToTray = SettingsService.Current.TrayEnabled && SettingsService.Current.LaunchToTray;
         if (!launchToTray)
         {
             var window = EnsureWindowAndShellCreated();
@@ -296,7 +301,7 @@ public partial class App : Application
             return;
         }
 
-        _shellPage = new ShellPage(navigateToHomeOnStartup: true);
+        _shellPage = new ShellPage(this, navigateToHomeOnStartup: true);
         _windowService.Configure(_shellPage);
     }
 
