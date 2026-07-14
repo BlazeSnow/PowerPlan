@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Page
-    x:Class="PowerPlan.Views.SettingsPage"
+    x:Class="PowerPlan.Pages.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
@@ -16,23 +16,21 @@
     </Page.Resources>
     <ScrollViewer Background="Transparent">
         <StackPanel Padding="24" Spacing="16">
-            <TextBlock
-                x:Name="PageTitleTextBlock"
-                Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock x:Name="PageTitleTextBlock" Style="{StaticResource TitleTextBlockStyle}" />
 
             <controls:SettingsCard x:Name="LanguageCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE8C1;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
-                <ComboBox
-                    x:Name="LanguageComboBox"
-                    SelectionChanged="OnLanguageSelectionChanged"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    MinWidth="220">
+                <ComboBox x:Name="LanguageComboBox" SelectionChanged="OnLanguageSelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="220">
                     <ComboBoxItem x:Name="AutomaticLanguageItem" Tag="auto" />
                     <ComboBoxItem Content="简体中文" Tag="zh-CN" />
+                    <ComboBoxItem Content="繁體中文" Tag="zh-HK" />
                     <ComboBoxItem Content="English" Tag="en-US" />
+                    <ComboBoxItem Content="Français" Tag="fr" />
+                    <ComboBoxItem Content="Italiano" Tag="it" />
+                    <ComboBoxItem Content="Deutsch" Tag="de" />
+                    <ComboBoxItem Content="Español" Tag="es" />
                 </ComboBox>
             </controls:SettingsCard>
 
@@ -40,86 +38,63 @@
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE7E8;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
-                <ToggleSwitch
-                    x:Name="AutoStartToggle"
-                    Toggled="OnAutoStartToggled"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center" />
+                <ToggleSwitch x:Name="AutoStartToggle" Toggled="OnAutoStartToggled" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="TrayCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE8F2;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
-                <ToggleSwitch
-                    x:Name="TrayToggle"
-                    Toggled="OnTrayToggled"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center" />
+                <ToggleSwitch x:Name="TrayToggle" Toggled="OnTrayToggled" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </controls:SettingsCard>
+
+            <controls:SettingsCard x:Name="LaunchToTrayCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE8C8;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
+                <ToggleSwitch x:Name="LaunchToTrayToggle" Toggled="OnLaunchToTrayToggled" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="PowerOptionsCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE713;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
-                <Button
-                    x:Name="OpenPowerOptionsButton"
-                    Click="OnOpenPowerOptionsClicked"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center" />
+                <Button x:Name="OpenPowerOptionsButton" Click="OnOpenPowerOptionsClicked" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="RestorePowerPlansCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE777;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
-                <Button
-                    x:Name="RestorePowerPlansButton"
-                    Click="OnRestorePowerPlansClicked"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center" />
+                <Button x:Name="RestorePowerPlansButton" Click="OnRestorePowerPlansClicked" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="WebsiteCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE774;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
-                <Button
-                    x:Name="OpenWebsiteButton"
-                    Click="OnOpenWebsiteClicked"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center" />
+                <Button x:Name="OpenWebsiteButton" Click="OnOpenWebsiteClicked" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="RepositoryCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE943;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
-                <Button
-                    x:Name="OpenRepositoryButton"
-                    Click="OnOpenRepositoryClicked"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center" />
+                <Button x:Name="OpenRepositoryButton" Click="OnOpenRepositoryClicked" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="FeedbackCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE715;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
-                <Button
-                    x:Name="SendFeedbackButton"
-                    Click="OnSendFeedbackClicked"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center" />
+                <Button x:Name="SendFeedbackButton" Click="OnSendFeedbackClicked" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="AppVersionCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE946;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
-                <TextBlock
-                    x:Name="AppVersionTextBlock"
-                    TextWrapping="WrapWholeWords" />
+                <TextBlock x:Name="AppVersionTextBlock" TextWrapping="WrapWholeWords" />
             </controls:SettingsCard>
         </StackPanel>
     </ScrollViewer>

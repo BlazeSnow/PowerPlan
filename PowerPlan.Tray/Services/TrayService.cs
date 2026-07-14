@@ -1,15 +1,16 @@
 using H.NotifyIcon;
 using H.NotifyIcon.Core;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using PowerPlan.Models;
 using System.Windows.Input;
 
-namespace PowerPlan.Services;
+namespace PowerPlan.Tray.Services;
 
 public sealed class TrayService : IDisposable
 {
-    private static readonly string AppTitleText = LocalizationService.Get("App.WindowTitle", "PowerPlan");
     private const string OpenMainWindowIcon = "\u2302 ";
     private const string PowerPlanIcon = "\u26A1 ";
     private const string RefreshPlansIcon = "\u21BB ";
@@ -26,6 +27,7 @@ public sealed class TrayService : IDisposable
     private readonly Action _showMainWindow;
     private readonly Action _exitApplication;
     private readonly Action<string, InfoBarSeverity> _log;
+    private readonly ITrayLocalizer _localizer;
     private readonly DispatcherQueue _uiDispatcherQueue;
 
     private readonly object _plansLock = new();
@@ -54,9 +56,11 @@ public sealed class TrayService : IDisposable
         Func<IReadOnlyList<PowerPlanInfo>, Task> onPlansRefreshed,
         Action showMainWindow,
         Action exitApplication,
-        Action<string, InfoBarSeverity> log)
+        Action<string, InfoBarSeverity> log,
+        ITrayLocalizer localizer)
     {
         ArgumentNullException.ThrowIfNull(uiDispatcherQueue);
+        ArgumentNullException.ThrowIfNull(localizer);
         _uiDispatcherQueue = uiDispatcherQueue;
         _getPlansAsync = getPlansAsync;
         _setActivePlanAsync = setActivePlanAsync;
@@ -68,7 +72,10 @@ public sealed class TrayService : IDisposable
         _showMainWindow = showMainWindow;
         _exitApplication = exitApplication;
         _log = log;
+        _localizer = localizer;
     }
+
+    public bool IsInitialized => _taskbarIcon is not null && !_disposed;
 
     public async Task InitializeAsync()
     {
@@ -79,7 +86,7 @@ public sealed class TrayService : IDisposable
 
         await RunOnUiThreadAsync(EnsureTaskbarIcon);
         await RefreshPlansAsync();
-        _log(LocalizationService.Get("Tray.Init"), InfoBarSeverity.Success);
+        _log(_localizer.Get("Tray.Init"), InfoBarSeverity.Success);
     }
 
     public async Task RefreshPlansAsync(bool forceRefresh = false)
@@ -139,11 +146,6 @@ public sealed class TrayService : IDisposable
         UpdateTaskbarIcon();
     }
 
-    public void ShowBalloon(string message)
-    {
-        _log(message, InfoBarSeverity.Informational);
-    }
-
     public void Dispose()
     {
         if (_disposed)
@@ -183,7 +185,7 @@ public sealed class TrayService : IDisposable
         }
         catch (Exception ex)
         {
-            _log(LocalizationService.Format("Tray.RefreshFailed", ex.Message), InfoBarSeverity.Error);
+            _log(_localizer.Format("Tray.RefreshFailed", ex.Message), InfoBarSeverity.Error);
         }
         finally
         {
@@ -255,11 +257,11 @@ public sealed class TrayService : IDisposable
         }
 
         var planText = string.IsNullOrWhiteSpace(activePlanName)
-            ? LocalizationService.Get("Tray.Tooltip.PlanUnavailable")
-            : LocalizationService.Format("Tray.Tooltip.Plan", activePlanName);
-        var startupState = LocalizationService.Get(_isStartupEnabled() ? "App.Status.On" : "App.Status.Off");
-        var startupText = LocalizationService.Format("Tray.Tooltip.AutoStart", startupState);
-        return TruncateTooltip($"{AppTitleText}\n{planText}\n{startupText}");
+            ? _localizer.Get("Tray.Tooltip.PlanUnavailable")
+            : _localizer.Format("Tray.Tooltip.Plan", activePlanName);
+        var startupState = _localizer.Get(_isStartupEnabled() ? "App.Status.On" : "App.Status.Off");
+        var startupText = _localizer.Format("Tray.Tooltip.AutoStart", startupState);
+        return TruncateTooltip($"{_localizer.Get("App.WindowTitle")}\n{planText}\n{startupText}");
     }
 
     private static string TruncateTooltip(string text)
@@ -300,13 +302,13 @@ public sealed class TrayService : IDisposable
         _contextFlyout!.Items.Clear();
         _contextFlyout.Items.Add(new MenuFlyoutItem
         {
-            Text = AppTitleText,
+            Text = _localizer.Get("App.WindowTitle"),
             IsEnabled = false,
             Width = 240
         });
         _contextFlyout.Items.Add(new MenuFlyoutItem
         {
-            Text = OpenMainWindowIcon + LocalizationService.Get("Tray.Menu.OpenMainWindow"),
+            Text = OpenMainWindowIcon + _localizer.Get("Tray.Menu.OpenMainWindow"),
             Command = new RelayCommand(_showMainWindow)
         });
         _contextFlyout.Items.Add(new MenuFlyoutSeparator());
@@ -335,7 +337,7 @@ public sealed class TrayService : IDisposable
             var ultimatePlanGuid = hiddenUltimatePlanGuid;
             _contextFlyout.Items.Add(new MenuFlyoutItem
             {
-                Text = PowerPlanIcon + LocalizationService.Get("Tray.Menu.OpenHiddenUltimate"),
+                Text = PowerPlanIcon + _localizer.Get("Tray.Menu.OpenHiddenUltimate"),
                 Command = new RelayCommand(() => _ = OnActivateHiddenUltimateAsync(ultimatePlanGuid))
             });
         }
@@ -343,20 +345,20 @@ public sealed class TrayService : IDisposable
         _contextFlyout.Items.Add(new MenuFlyoutSeparator());
         _contextFlyout.Items.Add(new MenuFlyoutItem
         {
-            Text = RefreshPlansIcon + LocalizationService.Get("Tray.Menu.RefreshPlans"),
+            Text = RefreshPlansIcon + _localizer.Get("Tray.Menu.RefreshPlans"),
             Command = new RelayCommand(OnRefreshPlansRequested)
         });
         _contextFlyout.Items.Add(new MenuFlyoutItem
         {
             Text = StartupIcon + (_isStartupEnabled()
-                ? LocalizationService.Get("Tray.Menu.DisableAutoStart")
-                : LocalizationService.Get("Tray.Menu.EnableAutoStart")),
+                ? _localizer.Get("Tray.Menu.DisableAutoStart")
+                : _localizer.Get("Tray.Menu.EnableAutoStart")),
             Command = new RelayCommand(() => _ = ToggleStartupAsync())
         });
         _contextFlyout.Items.Add(new MenuFlyoutSeparator());
         _contextFlyout.Items.Add(new MenuFlyoutItem
         {
-            Text = ExitIcon + LocalizationService.Get("Tray.Menu.Exit"),
+            Text = ExitIcon + _localizer.Get("Tray.Menu.Exit"),
             Command = new RelayCommand(RequestExit)
         });
     }
@@ -423,8 +425,8 @@ public sealed class TrayService : IDisposable
                 if (item is MenuFlyoutItem flyoutItem && flyoutItem.Text.StartsWith(StartupIcon))
                 {
                     flyoutItem.Text = StartupIcon + (startupEnabled
-                        ? LocalizationService.Get("Tray.Menu.DisableAutoStart")
-                        : LocalizationService.Get("Tray.Menu.EnableAutoStart"));
+                        ? _localizer.Get("Tray.Menu.DisableAutoStart")
+                        : _localizer.Get("Tray.Menu.EnableAutoStart"));
                     break;
                 }
             }
@@ -438,11 +440,11 @@ public sealed class TrayService : IDisposable
             await _setActivePlanAsync(planGuid);
             SetActivePlanInCache(planGuid);
             UpdateTaskbarIcon();
-            _log(LocalizationService.Format("Tray.SwitchTo", planName), InfoBarSeverity.Success);
+            _log(_localizer.Format("Tray.SwitchTo", planName), InfoBarSeverity.Success);
         }
         catch (Exception ex)
         {
-            _log(LocalizationService.Format("Tray.SwitchFailed", ex.Message), InfoBarSeverity.Error);
+            _log(_localizer.Format("Tray.SwitchFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -451,11 +453,11 @@ public sealed class TrayService : IDisposable
         try
         {
             await _activateHiddenUltimatePlanAsync(planGuid);
-            _log(LocalizationService.Get("Tray.HiddenUltimateActivated"), InfoBarSeverity.Success);
+            _log(_localizer.Get("Tray.HiddenUltimateActivated"), InfoBarSeverity.Success);
         }
         catch (Exception ex)
         {
-            _log(LocalizationService.Format("Tray.HiddenUltimateActivateFailed", ex.Message), InfoBarSeverity.Error);
+            _log(_localizer.Format("Tray.HiddenUltimateActivateFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -479,14 +481,14 @@ public sealed class TrayService : IDisposable
         }
         catch (Exception ex)
         {
-            _log(LocalizationService.Format("Tray.AutoStartToggleFailed", ex.Message), InfoBarSeverity.Error);
+            _log(_localizer.Format("Tray.AutoStartToggleFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
     private void OnRefreshPlansRequested()
     {
         _ = RefreshPlansAsync(forceRefresh: true);
-        _log(LocalizationService.Get("Tray.RefreshStarted"), InfoBarSeverity.Informational);
+        _log(_localizer.Get("Tray.RefreshStarted"), InfoBarSeverity.Informational);
     }
 
     private bool RunOnUiThread(Action action)
@@ -499,7 +501,7 @@ public sealed class TrayService : IDisposable
 
         if (!_uiDispatcherQueue.TryEnqueue(() => action()))
         {
-            _log(LocalizationService.Get("Tray.DispatcherUnavailable"), InfoBarSeverity.Error);
+            _log(_localizer.Get("Tray.DispatcherUnavailable"), InfoBarSeverity.Error);
             return false;
         }
 
@@ -530,8 +532,7 @@ public sealed class TrayService : IDisposable
 
         if (!enqueued)
         {
-            var message = LocalizationService.Get("Tray.DispatcherUnavailable");
-            completion.SetException(new InvalidOperationException(message));
+            completion.SetException(new InvalidOperationException(_localizer.Get("Tray.DispatcherUnavailable")));
         }
 
         return completion.Task;

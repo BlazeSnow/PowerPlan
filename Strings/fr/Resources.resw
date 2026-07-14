@@ -1,64 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -124,372 +65,372 @@
     <value>PowerPlan</value>
   </data>
   <data name="AppTitleBar.Subtitle" xml:space="preserve">
-    <value>快速切换 Windows 电源计划</value>
+    <value>Changer rapidement de mode de gestion d'alimentation Windows</value>
   </data>
   <data name="AppDisplayName" xml:space="preserve">
     <value>PowerPlan</value>
   </data>
   <data name="AppDescription" xml:space="preserve">
-    <value>快速切换 Windows 电源计划</value>
+    <value>Changer rapidement de mode de gestion d'alimentation Windows</value>
   </data>
   <data name="App.Status.StartupSettingFailed" xml:space="preserve">
-    <value>设置开机自启动失败：{0}</value>
+    <value>Échec de la configuration du lancement au démarrage : {0}</value>
   </data>
   <data name="App.Status.TraySwitched" xml:space="preserve">
-    <value>[托盘] 已切换电源计划：{0}</value>
+    <value>[Zone de notification] Mode d'alimentation changé : {0}</value>
   </data>
   <data name="App.Status.TrayInitFailed" xml:space="preserve">
-    <value>[托盘] 初始化失败：{0}</value>
+    <value>[Zone de notification] Échec de l'initialisation : {0}</value>
   </data>
   <data name="App.Status.TrayAutoStart" xml:space="preserve">
-    <value>[托盘] 开机自启动：{0}</value>
+    <value>[Zone de notification] Lancement au démarrage : {0}</value>
   </data>
   <data name="App.Status.TrayAutoStartFailed" xml:space="preserve">
-    <value>[托盘] 自启动设置失败：{0}</value>
+    <value>[Zone de notification] Échec de la configuration du démarrage : {0}</value>
   </data>
   <data name="App.Status.On" xml:space="preserve">
-    <value>开启</value>
+    <value>Activé</value>
   </data>
   <data name="App.Status.Off" xml:space="preserve">
-    <value>关闭</value>
+    <value>Désactivé</value>
   </data>
   <data name="Shell.Home" xml:space="preserve">
-    <value>首页</value>
+    <value>Accueil</value>
   </data>
   <data name="Shell.Settings" xml:space="preserve">
-    <value>设置</value>
+    <value>Paramètres</value>
   </data>
   <data name="Main.RefreshPlansButton" xml:space="preserve">
-    <value>刷新计划</value>
+    <value>Actualiser les modes</value>
   </data>
   <data name="Main.PlanPickerTitle" xml:space="preserve">
-    <value>选择要使用的电源计划</value>
+    <value>Choisir un mode de gestion d'alimentation</value>
   </data>
   <data name="Main.UltimateMissingTitle" xml:space="preserve">
-    <value>未发现卓越性能计划</value>
+    <value>Mode Performances ultimes introuvable</value>
   </data>
   <data name="Main.UltimateMissingMessage" xml:space="preserve">
-    <value>可点击按钮尝试创建卓越性能计划，部分设备可能会自动移除该计划</value>
+    <value>Cliquez sur le bouton pour essayer de créer le mode Performances ultimes. Certains appareils peuvent le supprimer automatiquement.</value>
   </data>
   <data name="Main.UltimateHiddenTitle" xml:space="preserve">
-    <value>检测到隐藏的卓越性能计划</value>
+    <value>Mode Performances ultimes masqué détecté</value>
   </data>
   <data name="Main.UltimateHiddenMessage" xml:space="preserve">
-    <value>当前设备可能不会在计划列表中显示该计划，可使用已保存的 UUID 直接启用</value>
+    <value>Cet appareil peut ne pas afficher ce mode dans la liste. Vous pouvez l'activer directement avec l'UUID enregistré.</value>
   </data>
   <data name="Main.CreateUltimateButton" xml:space="preserve">
-    <value>尝试创建卓越性能计划</value>
+    <value>Essayer de créer le mode Performances ultimes</value>
   </data>
   <data name="Main.ActivateUltimateButton" xml:space="preserve">
-    <value>启用隐藏的卓越性能计划</value>
+    <value>Activer le mode Performances ultimes masqué</value>
   </data>
   <data name="Main.StatusWaiting" xml:space="preserve">
-    <value>等待操作</value>
+    <value>Prêt</value>
   </data>
   <data name="Main.Status.InitSuccess" xml:space="preserve">
-    <value>初始化完成</value>
+    <value>Initialisation terminée</value>
   </data>
   <data name="Main.Status.InitFailed" xml:space="preserve">
-    <value>初始化失败：{0}</value>
+    <value>Échec de l'initialisation : {0}</value>
   </data>
   <data name="Main.Status.PlansLoaded" xml:space="preserve">
-    <value>已读取电源计划：{0} 项</value>
+    <value>Modes d'alimentation chargés : {0}</value>
   </data>
   <data name="Main.Status.RefreshFailed" xml:space="preserve">
-    <value>刷新失败：{0}</value>
+    <value>Échec de l'actualisation : {0}</value>
   </data>
   <data name="Main.Status.SwitchSuccess" xml:space="preserve">
-    <value>切换电源计划成功：{0}</value>
+    <value>Mode d'alimentation changé : {0}</value>
   </data>
   <data name="Main.Status.SwitchFailed" xml:space="preserve">
-    <value>切换失败：{0}</value>
+    <value>Échec du changement : {0}</value>
   </data>
   <data name="Main.Status.UltimateExists" xml:space="preserve">
-    <value>系统中已存在卓越性能计划</value>
+    <value>Un mode Performances ultimes existe déjà</value>
   </data>
   <data name="Main.Status.UltimateCreated" xml:space="preserve">
-    <value>已尝试创建卓越性能计划，请以当前计划列表为准</value>
+    <value>Tentative de création du mode Performances ultimes. Consultez la liste actuelle pour le résultat.</value>
   </data>
   <data name="Main.Status.UltimateActivated" xml:space="preserve">
-    <value>已通过保存的 UUID 启用卓越性能计划</value>
+    <value>Mode Performances ultimes activé avec l'UUID enregistré</value>
   </data>
   <data name="Main.Status.UltimateCreateFailed" xml:space="preserve">
-    <value>创建卓越性能计划失败：{0}</value>
+    <value>Échec de création du mode Performances ultimes : {0}</value>
   </data>
   <data name="Main.Status.UltimateActivateFailed" xml:space="preserve">
-    <value>启用隐藏的卓越性能计划失败，已清除保存的 UUID：{0}</value>
+    <value>Échec d'activation du mode Performances ultimes masqué. L'UUID enregistré a été effacé : {0}</value>
   </data>
   <data name="Main.CopyPlanButton" xml:space="preserve">
-    <value>复制计划</value>
+    <value>Copier le mode</value>
   </data>
   <data name="Main.CopyDialogTitle" xml:space="preserve">
-    <value>复制电源计划</value>
+    <value>Copier le mode d'alimentation</value>
   </data>
   <data name="Main.CopyDialogConfirm" xml:space="preserve">
-    <value>复制</value>
+    <value>Copier</value>
   </data>
   <data name="Main.CopyDialogCancel" xml:space="preserve">
-    <value>取消</value>
+    <value>Annuler</value>
   </data>
   <data name="Main.CopyDialogPlaceholder" xml:space="preserve">
-    <value>请输入新计划名称</value>
+    <value>Saisir le nom du nouveau mode</value>
   </data>
   <data name="Main.Status.CopyNameEmpty" xml:space="preserve">
-    <value>复制失败：名称不能为空</value>
+    <value>Échec de la copie : le nom ne peut pas être vide</value>
   </data>
   <data name="Main.Status.CopySuccess" xml:space="preserve">
-    <value>已复制电源计划：{0}</value>
+    <value>Mode d'alimentation copié : {0}</value>
   </data>
   <data name="Main.Status.CopyFailed" xml:space="preserve">
-    <value>复制失败：{0}</value>
+    <value>Échec de la copie : {0}</value>
   </data>
   <data name="Main.DeletePlanHint" xml:space="preserve">
-    <value>如需删除计划，请前往控制面板操作</value>
+    <value>Pour supprimer un mode, utilisez le Panneau de configuration</value>
   </data>
   <data name="Main.DefaultPlanName" xml:space="preserve">
-    <value>电源计划</value>
+    <value>Mode d'alimentation</value>
   </data>
   <data name="Main.CopySuffix" xml:space="preserve">
-    <value>副本</value>
+    <value>Copie</value>
   </data>
   <data name="Settings.PageTitle" xml:space="preserve">
-    <value>设置</value>
+    <value>Paramètres</value>
   </data>
   <data name="Settings.Tools.Title" xml:space="preserve">
-    <value>工具</value>
+    <value>Outils</value>
   </data>
   <data name="Settings.Language.Title" xml:space="preserve">
-    <value>语言</value>
+    <value>Langue</value>
   </data>
   <data name="Settings.Language.Desc" xml:space="preserve">
-    <value>选择界面显示语言</value>
+    <value>Choisir la langue d'affichage</value>
   </data>
   <data name="Settings.Language.Automatic" xml:space="preserve">
-    <value>自动</value>
+    <value>Automatique</value>
   </data>
   <data name="Settings.Language.RestartTitle" xml:space="preserve">
-    <value>语言已保存</value>
+    <value>Langue enregistrée</value>
   </data>
   <data name="Settings.Language.RestartMessage" xml:space="preserve">
-    <value>语言设置将在重启 PowerPlan 后生效。</value>
+    <value>La nouvelle langue sera appliquée après le redémarrage de PowerPlan.</value>
   </data>
   <data name="Settings.Language.RestartNow" xml:space="preserve">
-    <value>立即重启</value>
+    <value>Redémarrer maintenant</value>
   </data>
   <data name="Settings.Language.RestartLater" xml:space="preserve">
-    <value>稍后</value>
+    <value>Plus tard</value>
   </data>
   <data name="Settings.Language.RestartFailed.Title" xml:space="preserve">
-    <value>重启失败</value>
+    <value>Échec du redémarrage</value>
   </data>
   <data name="Settings.Language.RestartFailed.RestartPending" xml:space="preserve">
-    <value>PowerPlan 已在等待重启，请稍后再试。</value>
+    <value>PowerPlan attend déjà un redémarrage. Veuillez réessayer plus tard.</value>
   </data>
   <data name="Settings.Language.RestartFailed.InvalidUser" xml:space="preserve">
-    <value>PowerPlan 无法以当前用户身份重启。</value>
+    <value>PowerPlan n'a pas pu redémarrer avec l'utilisateur actuel.</value>
   </data>
   <data name="Settings.Language.RestartFailed.NotInForeground" xml:space="preserve">
-    <value>PowerPlan 必须位于前台才能重启。</value>
+    <value>PowerPlan doit être au premier plan pour redémarrer.</value>
   </data>
   <data name="Settings.Language.RestartFailed.Other" xml:space="preserve">
-    <value>PowerPlan 无法重启，请手动重新启动。</value>
+    <value>PowerPlan n'a pas pu redémarrer. Veuillez le redémarrer manuellement.</value>
   </data>
   <data name="Settings.AutoStart.Title" xml:space="preserve">
-    <value>开机自启动</value>
+    <value>Lancer au démarrage</value>
   </data>
   <data name="Settings.AutoStart.Desc" xml:space="preserve">
-    <value>默认关闭，可在登录后自动启动 PowerPlan</value>
+    <value>Désactivé par défaut. Lance PowerPlan automatiquement après la connexion.</value>
   </data>
   <data name="Settings.AutoStart.Unsupported" xml:space="preserve">
-    <value>仅 MSIX 打包安装后可用</value>
+    <value>Disponible uniquement avec un package MSIX</value>
   </data>
   <data name="Settings.Tray.Title" xml:space="preserve">
-    <value>启用托盘</value>
+    <value>Activer la zone de notification</value>
   </data>
   <data name="Settings.Tray.Desc" xml:space="preserve">
-    <value>默认开启，关闭后点击窗口关闭将直接退出</value>
+    <value>Activé par défaut. Si désactivé, fermer la fenêtre quitte l'application.</value>
   </data>
   <data name="Settings.LaunchToTray.Title" xml:space="preserve">
-    <value>启动到托盘</value>
+    <value>Démarrer dans la zone de notification</value>
   </data>
   <data name="Settings.LaunchToTray.Desc" xml:space="preserve">
-    <value>启用后，启动 PowerPlan 时仅显示系统托盘图标</value>
+    <value>Si activé, PowerPlan démarre avec uniquement son icône dans la zone de notification.</value>
   </data>
   <data name="Settings.SaveFailed" xml:space="preserve">
-    <value>保存设置失败：{0}</value>
+    <value>Échec de l'enregistrement des paramètres : {0}</value>
   </data>
   <data name="Settings.Tools.PowerOptions" xml:space="preserve">
-    <value>前往电源选项</value>
+    <value>Options d'alimentation</value>
   </data>
   <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve">
-    <value>打开 Windows 控制面板中的电源选项页面</value>
+    <value>Ouvrir les Options d'alimentation dans le Panneau de configuration</value>
   </data>
   <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve">
-    <value>恢复电源计划</value>
+    <value>Restaurer les modes d'alimentation</value>
   </data>
   <data name="Settings.Tools.RestorePowerPlansDesc" xml:space="preserve">
-    <value>将 Windows 电源计划恢复为默认状态，并清空已保存的卓越性能 UUID</value>
+    <value>Restaurer les modes d'alimentation par défaut et effacer l'UUID Performances ultimes enregistré</value>
   </data>
   <data name="Settings.Tools.Website" xml:space="preserve">
-    <value>前往软件官网</value>
+    <value>Site officiel</value>
   </data>
   <data name="Settings.Tools.WebsiteDesc" xml:space="preserve">
     <value>https://www.blazesnow.com/powerplan/</value>
   </data>
   <data name="Settings.Tools.Repository" xml:space="preserve">
-    <value>前往本软件代码仓库</value>
+    <value>Dépôt du code source</value>
   </data>
   <data name="Settings.Tools.RepositoryDesc" xml:space="preserve">
     <value>https://github.com/BlazeSnow/PowerPlan</value>
   </data>
   <data name="Settings.Tools.Feedback" xml:space="preserve">
-    <value>反馈到开发者邮箱</value>
+    <value>Contacter le développeur</value>
   </data>
   <data name="Settings.Tools.FeedbackDesc" xml:space="preserve">
-    <value>使用本软件时遇到问题，欢迎反馈</value>
+    <value>Vous avez rencontré un problème ? Vos retours sont les bienvenus.</value>
   </data>
   <data name="Settings.Tools.OpenButton" xml:space="preserve">
-    <value>打开</value>
+    <value>Ouvrir</value>
   </data>
   <data name="Settings.Tools.RestoreButton" xml:space="preserve">
-    <value>恢复</value>
+    <value>Restaurer</value>
   </data>
   <data name="Settings.Tools.FeedbackCopy" xml:space="preserve">
-    <value>复制反馈邮箱</value>
+    <value>Copier l'adresse e-mail</value>
   </data>
   <data name="Settings.AppVersion.Title" xml:space="preserve">
-    <value>软件版本</value>
+    <value>Version de l'application</value>
   </data>
   <data name="Settings.AppVersion.Desc" xml:space="preserve">
-    <value>当前安装的 PowerPlan 版本</value>
+    <value>Version actuellement installée de PowerPlan</value>
   </data>
   <data name="Settings.RestoreDialog.SuccessTitle" xml:space="preserve">
-    <value>恢复完成</value>
+    <value>Restauration terminée</value>
   </data>
   <data name="Settings.RestoreDialog.SuccessMessage" xml:space="preserve">
-    <value>已恢复默认电源计划，并清空保存的卓越性能 UUID。</value>
+    <value>Les modes d'alimentation par défaut ont été restaurés et l'UUID Performances ultimes a été effacé.</value>
   </data>
   <data name="Settings.RestoreDialog.FailedTitle" xml:space="preserve">
-    <value>恢复失败</value>
+    <value>Échec de la restauration</value>
   </data>
   <data name="Settings.RestoreDialog.FailedMessage" xml:space="preserve">
-    <value>恢复电源计划失败：{0}</value>
+    <value>Échec de la restauration des modes d'alimentation : {0}</value>
   </data>
   <data name="Settings.RestoreConfirmDialog.Title" xml:space="preserve">
-    <value>确认恢复默认电源计划</value>
+    <value>Restaurer les modes d'alimentation par défaut ?</value>
   </data>
   <data name="Settings.RestoreConfirmDialog.Message" xml:space="preserve">
-    <value>此操作会恢复 Windows 默认电源计划，并清空已保存的卓越性能 UUID。确认继续吗？</value>
+    <value>Cela va restaurer les modes d'alimentation par défaut de Windows et effacer l'UUID Performances ultimes enregistré. Voulez-vous continuer ?</value>
   </data>
   <data name="Settings.RestoreConfirmDialog.Confirm" xml:space="preserve">
-    <value>确认恢复</value>
+    <value>Restaurer</value>
   </data>
   <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve">
-    <value>取消</value>
+    <value>Annuler</value>
   </data>
   <data name="Settings.FeedbackDialog.Title" xml:space="preserve">
-    <value>复制成功</value>
+    <value>Copié</value>
   </data>
   <data name="Settings.Status.FeedbackCopied" xml:space="preserve">
-    <value>邮箱已复制到剪贴板</value>
+    <value>L'adresse e-mail a été copiée dans le presse-papiers</value>
   </data>
   <data name="Tray.Init" xml:space="preserve">
-    <value>[托盘] 已初始化，左右键托盘图标可打开菜单</value>
+    <value>[Zone de notification] Initialisé. Clic gauche ou droit sur l'icône pour ouvrir le menu.</value>
   </data>
   <data name="Tray.RefreshFailed" xml:space="preserve">
-    <value>[托盘] 刷新失败：{0}</value>
+    <value>[Zone de notification] Échec de l'actualisation : {0}</value>
   </data>
   <data name="Tray.DispatcherUnavailable" xml:space="preserve">
-    <value>[托盘] UI 线程不可用，菜单刷新失败</value>
+    <value>[Zone de notification] Thread UI indisponible, le menu n'a pas pu être actualisé</value>
   </data>
   <data name="Tray.Menu.OpenMainWindow" xml:space="preserve">
-    <value>打开主界面</value>
+    <value>Ouvrir PowerPlan</value>
   </data>
   <data name="Tray.Menu.RefreshPlans" xml:space="preserve">
-    <value>刷新计划</value>
+    <value>Actualiser les modes</value>
   </data>
   <data name="Tray.Menu.OpenHiddenUltimate" xml:space="preserve">
-    <value>隐藏的卓越性能</value>
+    <value>Performances ultimes masqué</value>
   </data>
   <data name="Tray.Menu.DisableAutoStart" xml:space="preserve">
-    <value>关闭开机自启动</value>
+    <value>Désactiver le lancement au démarrage</value>
   </data>
   <data name="Tray.Menu.EnableAutoStart" xml:space="preserve">
-    <value>开启开机自启动</value>
+    <value>Activer le lancement au démarrage</value>
   </data>
   <data name="Tray.Menu.Exit" xml:space="preserve">
-    <value>退出</value>
+    <value>Quitter</value>
   </data>
   <data name="Tray.RefreshStarted" xml:space="preserve">
-    <value>[托盘] 已开始刷新计划列表</value>
+    <value>[Zone de notification] Actualisation de la liste des modes en cours</value>
   </data>
   <data name="Tray.SwitchTo" xml:space="preserve">
-    <value>[托盘] 已切换到：{0}</value>
+    <value>[Zone de notification] Changé vers : {0}</value>
   </data>
   <data name="Tray.SwitchFailed" xml:space="preserve">
-    <value>[托盘] 切换失败：{0}</value>
+    <value>[Zone de notification] Échec du changement : {0}</value>
   </data>
   <data name="Tray.HiddenUltimateActivated" xml:space="preserve">
-    <value>[托盘] 已启用隐藏的卓越性能计划</value>
+    <value>[Zone de notification] Mode Performances ultimes masqué activé</value>
   </data>
   <data name="Tray.HiddenUltimateActivateFailed" xml:space="preserve">
-    <value>[托盘] 启用隐藏的卓越性能计划失败：{0}</value>
+    <value>[Zone de notification] Échec d'activation du mode Performances ultimes masqué : {0}</value>
   </data>
   <data name="Tray.AutoStartState" xml:space="preserve">
-    <value>[托盘] 开机自启动：{0}</value>
+    <value>[Zone de notification] Lancement au démarrage : {0}</value>
   </data>
   <data name="Tray.Tooltip.Plan" xml:space="preserve">
-    <value>电源计划：{0}</value>
+    <value>Mode d'alimentation : {0}</value>
   </data>
   <data name="Tray.Tooltip.PlanUnavailable" xml:space="preserve">
-    <value>电源计划：未读取</value>
+    <value>Mode d'alimentation : Indisponible</value>
   </data>
   <data name="Tray.Tooltip.AutoStart" xml:space="preserve">
-    <value>开机自启动：{0}</value>
+    <value>Lancement au démarrage : {0}</value>
   </data>
   <data name="Tray.AutoStartToggleFailed" xml:space="preserve">
-    <value>[托盘] 自启动切换失败：{0}</value>
+    <value>[Zone de notification] Échec du changement de lancement au démarrage : {0}</value>
   </data>
   <data name="Common.FailedKeyword" xml:space="preserve">
-    <value>失败</value>
+    <value>échec</value>
   </data>
   <data name="Common.Ok" xml:space="preserve">
-    <value>确定</value>
+    <value>OK</value>
   </data>
   <data name="PowerPlan.Error.InvalidPlanGuid" xml:space="preserve">
-    <value>电源计划 GUID 无效。</value>
+    <value>Le GUID du mode d'alimentation n'est pas valide.</value>
   </data>
   <data name="PowerPlan.Error.InvalidSourcePlanGuid" xml:space="preserve">
-    <value>源电源计划 GUID 无效。</value>
+    <value>Le GUID du mode d'alimentation source n'est pas valide.</value>
   </data>
   <data name="PowerPlan.Error.SetActiveFailed" xml:space="preserve">
-    <value>切换电源计划失败</value>
+    <value>Échec du changement de mode d'alimentation</value>
   </data>
   <data name="PowerPlan.Error.RestoreDefaultsFailed" xml:space="preserve">
-    <value>还原默认电源计划失败</value>
+    <value>Échec de la restauration des modes d'alimentation par défaut</value>
   </data>
   <data name="PowerPlan.Error.EnumerateFailed" xml:space="preserve">
-    <value>枚举电源计划失败</value>
+    <value>Échec de l'énumération des modes d'alimentation</value>
   </data>
   <data name="PowerPlan.Error.ReadActiveFailed" xml:space="preserve">
-    <value>读取当前电源计划失败</value>
+    <value>Échec de la lecture du mode d'alimentation actif</value>
   </data>
   <data name="PowerPlan.Error.DuplicateFailed" xml:space="preserve">
-    <value>复制电源计划失败</value>
+    <value>Échec de la copie du mode d'alimentation</value>
   </data>
   <data name="PowerPlan.Error.DuplicateMissingGuid" xml:space="preserve">
-    <value>复制电源计划失败：系统未返回新计划 GUID。</value>
+    <value>Échec de la copie du mode d'alimentation : Windows n'a pas retourné de GUID pour le nouveau mode.</value>
   </data>
   <data name="PowerPlan.Error.ReadNameFailed" xml:space="preserve">
-    <value>读取电源计划名称失败</value>
+    <value>Échec de la lecture du nom du mode d'alimentation</value>
   </data>
   <data name="PowerPlan.Error.EmptyName" xml:space="preserve">
-    <value>电源计划名称不能为空。</value>
+    <value>Le nom du mode d'alimentation ne peut pas être vide.</value>
   </data>
   <data name="PowerPlan.Error.WriteNameFailed" xml:space="preserve">
-    <value>写入电源计划名称失败</value>
+    <value>Échec de l'écriture du nom du mode d'alimentation</value>
   </data>
   <data name="PowerPlan.Error.Win32" xml:space="preserve">
-    <value>{0}：{1}</value>
+    <value>{0} : {1}</value>
   </data>
 </root>

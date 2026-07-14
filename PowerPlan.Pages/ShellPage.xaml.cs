@@ -1,28 +1,31 @@
-using PowerPlan.Services;
-
-namespace PowerPlan.Views;
+namespace PowerPlan.Pages;
 
 public sealed partial class ShellPage : Page
 {
-    public ShellPage(bool navigateToHomeOnStartup = true)
+    private readonly IPageHost _pageHost;
+
+    public ShellPage(IPageHost pageHost, bool navigateToHomeOnStartup = true)
     {
+        _pageHost = pageHost;
         InitializeComponent();
         ApplyLocalization();
 
         AppNavigationView.SelectedItem = HomeItem;
         if (navigateToHomeOnStartup)
         {
-            _ = ContentFrame.Navigate(typeof(MainPage));
+            _ = ContentFrame.Navigate(typeof(MainPage), _pageHost);
         }
     }
 
+    public TitleBar AppTitleBarElement => AppTitleBar;
+
     private void ApplyLocalization()
     {
-        HomeItem.Content = LocalizationService.Get("Shell.Home");
-        SettingsItem.Content = LocalizationService.Get("Shell.Settings");
+        AppTitleBar.Title = _pageHost.GetString("AppTitleBar.Title");
+        AppTitleBar.Subtitle = _pageHost.GetString("AppTitleBar.Subtitle");
+        HomeItem.Content = _pageHost.GetString("Shell.Home");
+        SettingsItem.Content = _pageHost.GetString("Shell.Settings");
     }
-
-    public TitleBar AppTitleBarElement => AppTitleBar;
 
     private void OnTitleBarPaneToggleRequested(TitleBar sender, object args)
     {
@@ -39,7 +42,7 @@ public sealed partial class ShellPage : Page
         var target = tag == "settings" ? typeof(SettingsPage) : typeof(MainPage);
         if (ContentFrame.CurrentSourcePageType != target)
         {
-            _ = ContentFrame.Navigate(target);
+            _ = ContentFrame.Navigate(target, _pageHost);
         }
     }
 
@@ -48,7 +51,7 @@ public sealed partial class ShellPage : Page
         if (ContentFrame.CurrentSourcePageType != typeof(MainPage))
         {
             AppNavigationView.SelectedItem = HomeItem;
-            if (!ContentFrame.Navigate(typeof(MainPage)))
+            if (!ContentFrame.Navigate(typeof(MainPage), _pageHost))
             {
                 throw new InvalidOperationException("Failed to navigate to MainPage.");
             }

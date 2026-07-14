@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App.WindowTitle" xml:space="preserve"><value>PowerPlan</value></data>
+  <data name="AppTitleBar.Title" xml:space="preserve"><value>PowerPlan</value></data>
+  <data name="AppTitleBar.Subtitle" xml:space="preserve"><value>Cambia rapidamente le combinazioni di risparmio energia di Windows</value></data>
+  <data name="AppDisplayName" xml:space="preserve"><value>PowerPlan</value></data>
+  <data name="AppDescription" xml:space="preserve"><value>Cambia rapidamente le combinazioni di risparmio energia di Windows</value></data>
+  <data name="App.Status.StartupSettingFailed" xml:space="preserve"><value>Impossibile configurare l'avvio automatico: {0}</value></data>
+  <data name="App.Status.TraySwitched" xml:space="preserve"><value>[Area di notifica] Combinazione cambiata: {0}</value></data>
+  <data name="App.Status.TrayInitFailed" xml:space="preserve"><value>[Area di notifica] Inizializzazione fallita: {0}</value></data>
+  <data name="App.Status.TrayAutoStart" xml:space="preserve"><value>[Area di notifica] Avvio automatico: {0}</value></data>
+  <data name="App.Status.TrayAutoStartFailed" xml:space="preserve"><value>[Area di notifica] Configurazione avvio automatico fallita: {0}</value></data>
+  <data name="App.Status.On" xml:space="preserve"><value>Attivato</value></data>
+  <data name="App.Status.Off" xml:space="preserve"><value>Disattivato</value></data>
+  <data name="Shell.Home" xml:space="preserve"><value>Home</value></data>
+  <data name="Shell.Settings" xml:space="preserve"><value>Impostazioni</value></data>
+  <data name="Main.RefreshPlansButton" xml:space="preserve"><value>Aggiorna combinazioni</value></data>
+  <data name="Main.PlanPickerTitle" xml:space="preserve"><value>Scegli una combinazione di risparmio energia</value></data>
+  <data name="Main.UltimateMissingTitle" xml:space="preserve"><value>Combinazione Prestazioni elevate non trovata</value></data>
+  <data name="Main.UltimateMissingMessage" xml:space="preserve"><value>Fai clic sul pulsante per provare a creare la combinazione Prestazioni elevate. Alcuni dispositivi potrebbero rimuoverla automaticamente.</value></data>
+  <data name="Main.UltimateHiddenTitle" xml:space="preserve"><value>Rilevata combinazione Prestazioni elevate nascosta</value></data>
+  <data name="Main.UltimateHiddenMessage" xml:space="preserve"><value>Questo dispositivo potrebbe non mostrare la combinazione nell'elenco. Puoi attivarla direttamente usando l'UUID salvato.</value></data>
+  <data name="Main.CreateUltimateButton" xml:space="preserve"><value>Prova a creare la combinazione Prestazioni elevate</value></data>
+  <data name="Main.ActivateUltimateButton" xml:space="preserve"><value>Attiva la combinazione Prestazioni elevate nascosta</value></data>
+  <data name="Main.StatusWaiting" xml:space="preserve"><value>Pronto</value></data>
+  <data name="Main.Status.InitSuccess" xml:space="preserve"><value>Inizializzazione completata</value></data>
+  <data name="Main.Status.InitFailed" xml:space="preserve"><value>Inizializzazione fallita: {0}</value></data>
+  <data name="Main.Status.PlansLoaded" xml:space="preserve"><value>Combinazioni caricate: {0}</value></data>
+  <data name="Main.Status.RefreshFailed" xml:space="preserve"><value>Aggiornamento fallito: {0}</value></data>
+  <data name="Main.Status.SwitchSuccess" xml:space="preserve"><value>Combinazione cambiata: {0}</value></data>
+  <data name="Main.Status.SwitchFailed" xml:space="preserve"><value>Cambio fallito: {0}</value></data>
+  <data name="Main.Status.UltimateExists" xml:space="preserve"><value>Esiste già una combinazione Prestazioni elevate</value></data>
+  <data name="Main.Status.UltimateCreated" xml:space="preserve"><value>Tentativo di creare la combinazione Prestazioni elevate. Controlla l'elenco attuale per il risultato.</value></data>
+  <data name="Main.Status.UltimateActivated" xml:space="preserve"><value>Combinazione Prestazioni elevate attivata con l'UUID salvato</value></data>
+  <data name="Main.Status.UltimateCreateFailed" xml:space="preserve"><value>Creazione della combinazione Prestazioni elevate fallita: {0}</value></data>
+  <data name="Main.Status.UltimateActivateFailed" xml:space="preserve"><value>Attivazione della combinazione Prestazioni elevate nascosta fallita. UUID salvato cancellato: {0}</value></data>
+  <data name="Main.CopyPlanButton" xml:space="preserve"><value>Copia combinazione</value></data>
+  <data name="Main.CopyDialogTitle" xml:space="preserve"><value>Copia combinazione di risparmio energia</value></data>
+  <data name="Main.CopyDialogConfirm" xml:space="preserve"><value>Copia</value></data>
+  <data name="Main.CopyDialogCancel" xml:space="preserve"><value>Annulla</value></data>
+  <data name="Main.CopyDialogPlaceholder" xml:space="preserve"><value>Inserisci il nome della nuova combinazione</value></data>
+  <data name="Main.Status.CopyNameEmpty" xml:space="preserve"><value>Copia fallita: il nome non può essere vuoto</value></data>
+  <data name="Main.Status.CopySuccess" xml:space="preserve"><value>Combinazione copiata: {0}</value></data>
+  <data name="Main.Status.CopyFailed" xml:space="preserve"><value>Copia fallita: {0}</value></data>
+  <data name="Main.DeletePlanHint" xml:space="preserve"><value>Per eliminare una combinazione, usa il Pannello di controllo</value></data>
+  <data name="Main.DefaultPlanName" xml:space="preserve"><value>Combinazione di risparmio energia</value></data>
+  <data name="Main.CopySuffix" xml:space="preserve"><value>Copia</value></data>
+  <data name="Settings.PageTitle" xml:space="preserve"><value>Impostazioni</value></data>
+  <data name="Settings.Tools.Title" xml:space="preserve"><value>Strumenti</value></data>
+  <data name="Settings.Language.Title" xml:space="preserve"><value>Lingua</value></data>
+  <data name="Settings.Language.Desc" xml:space="preserve"><value>Scegli la lingua dell'interfaccia</value></data>
+  <data name="Settings.Language.Automatic" xml:space="preserve"><value>Automatico</value></data>
+  <data name="Settings.Language.RestartTitle" xml:space="preserve"><value>Lingua salvata</value></data>
+  <data name="Settings.Language.RestartMessage" xml:space="preserve"><value>La nuova lingua sarà applicata dopo il riavvio di PowerPlan.</value></data>
+  <data name="Settings.Language.RestartNow" xml:space="preserve"><value>Riavvia ora</value></data>
+  <data name="Settings.Language.RestartLater" xml:space="preserve"><value>Più tardi</value></data>
+  <data name="Settings.Language.RestartFailed.Title" xml:space="preserve"><value>Riavvio fallito</value></data>
+  <data name="Settings.Language.RestartFailed.RestartPending" xml:space="preserve"><value>PowerPlan è già in attesa di riavvio. Riprova più tardi.</value></data>
+  <data name="Settings.Language.RestartFailed.InvalidUser" xml:space="preserve"><value>PowerPlan non può riavviarsi con l'utente corrente.</value></data>
+  <data name="Settings.Language.RestartFailed.NotInForeground" xml:space="preserve"><value>PowerPlan deve essere in primo piano per riavviarsi.</value></data>
+  <data name="Settings.Language.RestartFailed.Other" xml:space="preserve"><value>PowerPlan non può riavviarsi. Riavvia manualmente.</value></data>
+  <data name="Settings.AutoStart.Title" xml:space="preserve"><value>Avvia all'accesso</value></data>
+  <data name="Settings.AutoStart.Desc" xml:space="preserve"><value>Disattivato per impostazione predefinita. Avvia PowerPlan automaticamente dopo l'accesso.</value></data>
+  <data name="Settings.AutoStart.Unsupported" xml:space="preserve"><value>Disponibile solo con pacchetto MSIX</value></data>
+  <data name="Settings.Tray.Title" xml:space="preserve"><value>Attiva area di notifica</value></data>
+  <data name="Settings.Tray.Desc" xml:space="preserve"><value>Attivato per impostazione predefinita. Se disattivato, chiudere la finestra esce dall'app.</value></data>
+  <data name="Settings.LaunchToTray.Title" xml:space="preserve"><value>Avvia nell'area di notifica</value></data>
+  <data name="Settings.LaunchToTray.Desc" xml:space="preserve"><value>Se attivato, PowerPlan si avvia mostrando solo l'icona nell'area di notifica.</value></data>
+  <data name="Settings.SaveFailed" xml:space="preserve"><value>Salvataggio impostazioni fallito: {0}</value></data>
+  <data name="Settings.Tools.PowerOptions" xml:space="preserve"><value>Opzioni risparmio energia</value></data>
+  <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve"><value>Apri Opzioni risparmio energia nel Pannello di controllo</value></data>
+  <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve"><value>Ripristina combinazioni</value></data>
+  <data name="Settings.Tools.RestorePowerPlansDesc" xml:space="preserve"><value>Ripristina le combinazioni predefinite di Windows e cancella l'UUID Prestazioni elevate salvato</value></data>
+  <data name="Settings.Tools.Website" xml:space="preserve"><value>Sito ufficiale</value></data>
+  <data name="Settings.Tools.WebsiteDesc" xml:space="preserve"><value>https://www.blazesnow.com/powerplan/</value></data>
+  <data name="Settings.Tools.Repository" xml:space="preserve"><value>Repository del codice sorgente</value></data>
+  <data name="Settings.Tools.RepositoryDesc" xml:space="preserve"><value>https://github.com/BlazeSnow/PowerPlan</value></data>
+  <data name="Settings.Tools.Feedback" xml:space="preserve"><value>Contatta lo sviluppatore</value></data>
+  <data name="Settings.Tools.FeedbackDesc" xml:space="preserve"><value>Hai riscontrato un problema? I feedback sono benvenuti.</value></data>
+  <data name="Settings.Tools.OpenButton" xml:space="preserve"><value>Apri</value></data>
+  <data name="Settings.Tools.RestoreButton" xml:space="preserve"><value>Ripristina</value></data>
+  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve"><value>Copia indirizzo email</value></data>
+  <data name="Settings.AppVersion.Title" xml:space="preserve"><value>Versione app</value></data>
+  <data name="Settings.AppVersion.Desc" xml:space="preserve"><value>Versione attualmente installata di PowerPlan</value></data>
+  <data name="Settings.RestoreDialog.SuccessTitle" xml:space="preserve"><value>Ripristino completato</value></data>
+  <data name="Settings.RestoreDialog.SuccessMessage" xml:space="preserve"><value>Le combinazioni predefinite sono state ripristinate e l'UUID Prestazioni elevate è stato cancellato.</value></data>
+  <data name="Settings.RestoreDialog.FailedTitle" xml:space="preserve"><value>Ripristino fallito</value></data>
+  <data name="Settings.RestoreDialog.FailedMessage" xml:space="preserve"><value>Ripristino combinazioni fallito: {0}</value></data>
+  <data name="Settings.RestoreConfirmDialog.Title" xml:space="preserve"><value>Ripristinare le combinazioni predefinite?</value></data>
+  <data name="Settings.RestoreConfirmDialog.Message" xml:space="preserve"><value>Questa operazione ripristinerà le combinazioni predefinite di Windows e cancellerà l'UUID Prestazioni elevate salvato. Continuare?</value></data>
+  <data name="Settings.RestoreConfirmDialog.Confirm" xml:space="preserve"><value>Ripristina</value></data>
+  <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve"><value>Annulla</value></data>
+  <data name="Settings.FeedbackDialog.Title" xml:space="preserve"><value>Copiato</value></data>
+  <data name="Settings.Status.FeedbackCopied" xml:space="preserve"><value>L'indirizzo email è stato copiato negli appunti</value></data>
+  <data name="Tray.Init" xml:space="preserve"><value>[Area di notifica] Inizializzato. Clic sinistro o destro sull'icona per aprire il menu.</value></data>
+  <data name="Tray.RefreshFailed" xml:space="preserve"><value>[Area di notifica] Aggiornamento fallito: {0}</value></data>
+  <data name="Tray.DispatcherUnavailable" xml:space="preserve"><value>[Area di notifica] Thread UI non disponibile, aggiornamento menu fallito</value></data>
+  <data name="Tray.Menu.OpenMainWindow" xml:space="preserve"><value>Apri PowerPlan</value></data>
+  <data name="Tray.Menu.RefreshPlans" xml:space="preserve"><value>Aggiorna combinazioni</value></data>
+  <data name="Tray.Menu.OpenHiddenUltimate" xml:space="preserve"><value>Prestazioni elevate nascosta</value></data>
+  <data name="Tray.Menu.DisableAutoStart" xml:space="preserve"><value>Disattiva avvio automatico</value></data>
+  <data name="Tray.Menu.EnableAutoStart" xml:space="preserve"><value>Attiva avvio automatico</value></data>
+  <data name="Tray.Menu.Exit" xml:space="preserve"><value>Esci</value></data>
+  <data name="Tray.RefreshStarted" xml:space="preserve"><value>[Area di notifica] Aggiornamento elenco combinazioni in corso</value></data>
+  <data name="Tray.SwitchTo" xml:space="preserve"><value>[Area di notifica] Cambiato a: {0}</value></data>
+  <data name="Tray.SwitchFailed" xml:space="preserve"><value>[Area di notifica] Cambio fallito: {0}</value></data>
+  <data name="Tray.HiddenUltimateActivated" xml:space="preserve"><value>[Area di notifica] Combinazione Prestazioni elevate nascosta attivata</value></data>
+  <data name="Tray.HiddenUltimateActivateFailed" xml:space="preserve"><value>[Area di notifica] Attivazione Prestazioni elevate nascosta fallita: {0}</value></data>
+  <data name="Tray.AutoStartState" xml:space="preserve"><value>[Area di notifica] Avvio automatico: {0}</value></data>
+  <data name="Tray.Tooltip.Plan" xml:space="preserve"><value>Combinazione: {0}</value></data>
+  <data name="Tray.Tooltip.PlanUnavailable" xml:space="preserve"><value>Combinazione: Non disponibile</value></data>
+  <data name="Tray.Tooltip.AutoStart" xml:space="preserve"><value>Avvio automatico: {0}</value></data>
+  <data name="Tray.AutoStartToggleFailed" xml:space="preserve"><value>[Area di notifica] Cambio avvio automatico fallito: {0}</value></data>
+  <data name="Common.FailedKeyword" xml:space="preserve"><value>fallito</value></data>
+  <data name="Common.Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="PowerPlan.Error.InvalidPlanGuid" xml:space="preserve"><value>Il GUID della combinazione non è valido.</value></data>
+  <data name="PowerPlan.Error.InvalidSourcePlanGuid" xml:space="preserve"><value>Il GUID della combinazione di origine non è valido.</value></data>
+  <data name="PowerPlan.Error.SetActiveFailed" xml:space="preserve"><value>Cambio combinazione fallito</value></data>
+  <data name="PowerPlan.Error.RestoreDefaultsFailed" xml:space="preserve"><value>Ripristino combinazioni predefinite fallito</value></data>
+  <data name="PowerPlan.Error.EnumerateFailed" xml:space="preserve"><value>Enumerazione combinazioni fallita</value></data>
+  <data name="PowerPlan.Error.ReadActiveFailed" xml:space="preserve"><value>Lettura combinazione attiva fallita</value></data>
+  <data name="PowerPlan.Error.DuplicateFailed" xml:space="preserve"><value>Copia combinazione fallita</value></data>
+  <data name="PowerPlan.Error.DuplicateMissingGuid" xml:space="preserve"><value>Copia combinazione fallita: Windows non ha restituito un GUID per la nuova combinazione.</value></data>
+  <data name="PowerPlan.Error.ReadNameFailed" xml:space="preserve"><value>Lettura nome combinazione fallita</value></data>
+  <data name="PowerPlan.Error.EmptyName" xml:space="preserve"><value>Il nome della combinazione non può essere vuoto.</value></data>
+  <data name="PowerPlan.Error.WriteNameFailed" xml:space="preserve"><value>Scrittura nome combinazione fallita</value></data>
+  <data name="PowerPlan.Error.Win32" xml:space="preserve"><value>{0}: {1}</value></data>
+</root>

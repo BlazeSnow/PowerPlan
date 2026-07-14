@@ -1,11 +1,10 @@
-﻿using Microsoft.UI.Dispatching;
+using Microsoft.UI.Dispatching;
 using PowerPlan.Models;
-using PowerPlan.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace PowerPlan.Views;
+namespace PowerPlan.Pages;
 
 public sealed partial class MainPage : Page
 {
@@ -13,9 +12,8 @@ public sealed partial class MainPage : Page
     private static readonly TimeSpan StatusDisplayDuration = TimeSpan.FromSeconds(5);
     private const string HiddenUltimateIconGlyph = "\uE890";
     private const string MissingUltimateIconGlyph = "\uE945";
-    private readonly PowerPlanService _powerPlanService;
-    private readonly SettingsService _settingsService;
     private readonly SemaphoreSlim _refreshSemaphore = new(1, 1);
+    private IPageHost? _pageHost;
     private DispatcherQueueTimer? _statusDismissTimer;
     private bool _isUpdatingSelection;
     private bool _hasLoadedPlans;
@@ -28,14 +26,21 @@ public sealed partial class MainPage : Page
     public MainPage()
     {
         InitializeComponent();
-        var app = (App)Application.Current;
-        _powerPlanService = app.PowerPlanService;
-        _settingsService = app.SettingsService;
-        ApplyLocalization();
-
+        DataContext = this;
         Loaded += MainPage_Loaded;
         Unloaded += MainPage_Unloaded;
     }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        _pageHost = e.Parameter as IPageHost
+            ?? throw new InvalidOperationException("MainPage requires an IPageHost navigation parameter.");
+        ApplyLocalization();
+    }
+
+    private IPageHost PageHost => _pageHost
+        ?? throw new InvalidOperationException("MainPage has not been initialized with an IPageHost.");
 
     private void MainPage_Unloaded(object sender, RoutedEventArgs e)
     {
@@ -54,22 +59,22 @@ public sealed partial class MainPage : Page
         {
             await RefreshPlansAsync();
             _hasLoadedPlans = true;
-            SetStatus(LocalizationService.Get("Main.Status.InitSuccess"), InfoBarSeverity.Success);
+            SetStatus(PageHost.GetString("Main.Status.InitSuccess"), InfoBarSeverity.Success);
         }
         catch (Exception ex)
         {
-            SetStatus(LocalizationService.Format("Main.Status.InitFailed", ex.Message), InfoBarSeverity.Error);
+            SetStatus(PageHost.FormatString("Main.Status.InitFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
     private void ApplyLocalization()
     {
-        UltimateCard.Header = LocalizationService.Get("Main.UltimateMissingTitle");
-        UltimateCard.Description = LocalizationService.Get("Main.UltimateMissingMessage");
-        RefreshPlansButton.Content = LocalizationService.Get("Main.RefreshPlansButton");
-        PlanPickerTitleText.Text = LocalizationService.Get("Main.PlanPickerTitle");
-        CreateUltimateButton.Content = LocalizationService.Get("Main.CreateUltimateButton");
-        DeletePlanHintText.Text = LocalizationService.Get("Main.DeletePlanHint");
+        UltimateCard.Header = PageHost.GetString("Main.UltimateMissingTitle");
+        UltimateCard.Description = PageHost.GetString("Main.UltimateMissingMessage");
+        RefreshPlansButton.Content = PageHost.GetString("Main.RefreshPlansButton");
+        PlanPickerTitleText.Text = PageHost.GetString("Main.PlanPickerTitle");
+        CreateUltimateButton.Content = PageHost.GetString("Main.CreateUltimateButton");
+        DeletePlanHintText.Text = PageHost.GetString("Main.DeletePlanHint");
     }
 
     private Task RefreshPlansAsync(bool updateStatus = true, bool forceRefresh = false)
@@ -82,17 +87,13 @@ public sealed partial class MainPage : Page
         await _refreshSemaphore.WaitAsync();
         try
         {
-            var plans = await _powerPlanService.GetPlansAsync(forceRefresh);
+            var plans = await PageHost.PowerPlanService.GetPlansAsync(forceRefresh);
             ApplyPlansToView(plans);
-
-            if (Application.Current is App app)
-            {
-                app.UpdateTrayPlans(plans);
-            }
+            PageHost.UpdateTrayPlans(plans);
 
             if (updateStatus)
             {
-                SetStatus(LocalizationService.Format("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
+                SetStatus(PageHost.FormatString("Main.Status.PlansLoaded", plans.Count), InfoBarSeverity.Success);
             }
         }
         finally
@@ -156,7 +157,7 @@ public sealed partial class MainPage : Page
         }
         catch (Exception ex)
         {
-            SetStatus(LocalizationService.Format("Main.Status.RefreshFailed", ex.Message), InfoBarSeverity.Error);
+            SetStatus(PageHost.FormatString("Main.Status.RefreshFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -173,14 +174,14 @@ public sealed partial class MainPage : Page
             var inputBox = new TextBox
             {
                 Text = BuildCopyPlanName(targetPlan?.Name),
-                PlaceholderText = LocalizationService.Get("Main.CopyDialogPlaceholder")
+                PlaceholderText = PageHost.GetString("Main.CopyDialogPlaceholder")
             };
 
             var dialog = new ContentDialog
             {
-                Title = LocalizationService.Get("Main.CopyDialogTitle"),
-                PrimaryButtonText = LocalizationService.Get("Main.CopyDialogConfirm"),
-                CloseButtonText = LocalizationService.Get("Main.CopyDialogCancel"),
+                Title = PageHost.GetString("Main.CopyDialogTitle"),
+                PrimaryButtonText = PageHost.GetString("Main.CopyDialogConfirm"),
+                CloseButtonText = PageHost.GetString("Main.CopyDialogCancel"),
                 DefaultButton = ContentDialogButton.Primary,
                 Content = inputBox,
                 XamlRoot = XamlRoot
@@ -195,17 +196,17 @@ public sealed partial class MainPage : Page
             var newName = inputBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(newName))
             {
-                SetStatus(LocalizationService.Get("Main.Status.CopyNameEmpty"), InfoBarSeverity.Error);
+                SetStatus(PageHost.GetString("Main.Status.CopyNameEmpty"), InfoBarSeverity.Error);
                 return;
             }
 
-            await _powerPlanService.CopyPlanAsync(planGuid, newName);
+            await PageHost.PowerPlanService.CopyPlanAsync(planGuid, newName);
             await RefreshPlansAsync(false);
-            SetStatus(LocalizationService.Format("Main.Status.CopySuccess", newName), InfoBarSeverity.Success);
+            SetStatus(PageHost.FormatString("Main.Status.CopySuccess", newName), InfoBarSeverity.Success);
         }
         catch (Exception ex)
         {
-            SetStatus(LocalizationService.Format("Main.Status.CopyFailed", ex.Message), InfoBarSeverity.Error);
+            SetStatus(PageHost.FormatString("Main.Status.CopyFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -228,17 +229,14 @@ public sealed partial class MainPage : Page
 
         try
         {
-            await _powerPlanService.SetActivePlanAsync(selectedPlan.Guid);
-            SetStatus(LocalizationService.Format("Main.Status.SwitchSuccess", selectedPlan.Guid), InfoBarSeverity.Success);
+            await PageHost.PowerPlanService.SetActivePlanAsync(selectedPlan.Guid);
+            SetStatus(PageHost.FormatString("Main.Status.SwitchSuccess", selectedPlan.Guid), InfoBarSeverity.Success);
             ApplyActivePlan(selectedPlan.Guid);
-            if (Application.Current is App app)
-            {
-                app.UpdateTrayPlans(BuildPlanSnapshot());
-            }
+            PageHost.UpdateTrayPlans(BuildPlanSnapshot());
         }
         catch (Exception ex)
         {
-            SetStatus(LocalizationService.Format("Main.Status.SwitchFailed", ex.Message), InfoBarSeverity.Error);
+            SetStatus(PageHost.FormatString("Main.Status.SwitchFailed", ex.Message), InfoBarSeverity.Error);
             var activePlan = Plans.FirstOrDefault(x => x.IsActive);
             if (activePlan is not null)
             {
@@ -280,31 +278,31 @@ public sealed partial class MainPage : Page
 
         try
         {
-            var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
+            var savedUltimatePlanGuid = PageHost.SettingsService.Current.UltimatePerformancePlanGuid;
             if (!string.IsNullOrWhiteSpace(savedUltimatePlanGuid))
             {
                 isActivatingSavedUltimate = true;
-                await _powerPlanService.SetActivePlanAsync(savedUltimatePlanGuid);
+                await PageHost.PowerPlanService.SetActivePlanAsync(savedUltimatePlanGuid);
                 await RefreshPlansAsync(false);
-                SetStatus(LocalizationService.Get("Main.Status.UltimateActivated"), InfoBarSeverity.Success);
+                SetStatus(PageHost.GetString("Main.Status.UltimateActivated"), InfoBarSeverity.Success);
                 return;
             }
 
-            var createdGuid = await _powerPlanService.CreateUltimatePerformancePlanAsync();
-            _settingsService.Current.UltimatePerformancePlanGuid = createdGuid;
-            await _settingsService.SaveCurrentAsync();
+            var createdGuid = await PageHost.PowerPlanService.CreateUltimatePerformancePlanAsync();
+            PageHost.SettingsService.Current.UltimatePerformancePlanGuid = createdGuid;
+            await PageHost.SettingsService.SaveCurrentAsync();
 
             await RefreshPlansAsync(false);
-            SetStatus(LocalizationService.Get("Main.Status.UltimateCreated"), InfoBarSeverity.Success);
+            SetStatus(PageHost.GetString("Main.Status.UltimateCreated"), InfoBarSeverity.Success);
         }
         catch (Exception ex)
         {
             if (isActivatingSavedUltimate)
             {
-                _settingsService.Current.UltimatePerformancePlanGuid = string.Empty;
+                PageHost.SettingsService.Current.UltimatePerformancePlanGuid = string.Empty;
                 try
                 {
-                    await _settingsService.SaveCurrentAsync();
+                    await PageHost.SettingsService.SaveCurrentAsync();
                 }
                 catch
                 {
@@ -312,11 +310,11 @@ public sealed partial class MainPage : Page
                 }
 
                 await RefreshPlansAsync(false);
-                SetStatus(LocalizationService.Format("Main.Status.UltimateActivateFailed", ex.Message), InfoBarSeverity.Error);
+                SetStatus(PageHost.FormatString("Main.Status.UltimateActivateFailed", ex.Message), InfoBarSeverity.Error);
                 return;
             }
 
-            SetStatus(LocalizationService.Format("Main.Status.UltimateCreateFailed", ex.Message), InfoBarSeverity.Error);
+            SetStatus(PageHost.FormatString("Main.Status.UltimateCreateFailed", ex.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -337,7 +335,7 @@ public sealed partial class MainPage : Page
             var plan = plans[i];
             if (!existingPlans.TryGetValue(plan.Guid, out var existing))
             {
-                Plans.Insert(i, new PowerPlanItemViewModel(plan));
+                Plans.Insert(i, new PowerPlanItemViewModel(plan, PageHost.GetString("Main.CopyPlanButton")));
                 continue;
             }
 
@@ -352,7 +350,7 @@ public sealed partial class MainPage : Page
 
     private bool IsVisibleUltimatePerformancePlan(PowerPlanInfo plan, string? savedUltimatePlanGuid)
     {
-        return _powerPlanService.IsUltimatePerformancePlan(plan)
+        return PageHost.PowerPlanService.IsUltimatePerformancePlan(plan)
             || (!string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
                 && string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
     }
@@ -389,12 +387,12 @@ public sealed partial class MainPage : Page
         return true;
     }
 
-    private static string BuildCopyPlanName(string? planName)
+    private string BuildCopyPlanName(string? planName)
     {
         var baseName = string.IsNullOrWhiteSpace(planName)
-            ? LocalizationService.Get("Main.DefaultPlanName")
+            ? PageHost.GetString("Main.DefaultPlanName")
             : planName.Trim();
-        var suffix = LocalizationService.Get("Main.CopySuffix");
+        var suffix = PageHost.GetString("Main.CopySuffix");
         return $"{baseName} - {suffix}";
     }
 
@@ -414,7 +412,7 @@ public sealed partial class MainPage : Page
     {
         SynchronizePlans(plans);
 
-        var savedUltimatePlanGuid = _settingsService.Current.UltimatePerformancePlanGuid;
+        var savedUltimatePlanGuid = PageHost.SettingsService.Current.UltimatePerformancePlanGuid;
         var hasUltimate = plans.Any(plan => IsVisibleUltimatePerformancePlan(plan, savedUltimatePlanGuid));
         var hasHiddenUltimate = !string.IsNullOrWhiteSpace(savedUltimatePlanGuid)
             && !plans.Any(plan => string.Equals(plan.Guid, savedUltimatePlanGuid, StringComparison.OrdinalIgnoreCase));
@@ -425,9 +423,9 @@ public sealed partial class MainPage : Page
         if (!hasUltimate)
         {
             UltimateCardIcon.Glyph = hasHiddenUltimate ? HiddenUltimateIconGlyph : MissingUltimateIconGlyph;
-            UltimateCard.Header = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenTitle" : "Main.UltimateMissingTitle");
-            UltimateCard.Description = LocalizationService.Get(hasHiddenUltimate ? "Main.UltimateHiddenMessage" : "Main.UltimateMissingMessage");
-            CreateUltimateButton.Content = LocalizationService.Get(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
+            UltimateCard.Header = PageHost.GetString(hasHiddenUltimate ? "Main.UltimateHiddenTitle" : "Main.UltimateMissingTitle");
+            UltimateCard.Description = PageHost.GetString(hasHiddenUltimate ? "Main.UltimateHiddenMessage" : "Main.UltimateMissingMessage");
+            CreateUltimateButton.Content = PageHost.GetString(hasHiddenUltimate ? "Main.ActivateUltimateButton" : "Main.CreateUltimateButton");
         }
 
         SelectPlan(Plans.FirstOrDefault(x => x.IsActive));
@@ -436,18 +434,20 @@ public sealed partial class MainPage : Page
 
 public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
 {
-    private static readonly string CopyPlanButtonTextValue = LocalizationService.Get("Main.CopyPlanButton");
+    private readonly string _copyButtonText;
     private string _name;
     private bool _isActive;
 
-    public PowerPlanItemViewModel(PowerPlanInfo model)
+    public PowerPlanItemViewModel(PowerPlanInfo model, string copyButtonText)
     {
         Guid = model.Guid;
         _name = model.Name;
         _isActive = model.IsActive;
+        _copyButtonText = copyButtonText;
     }
 
     public string Guid { get; }
+
     public string Name
     {
         get => _name;
@@ -463,7 +463,7 @@ public sealed class PowerPlanItemViewModel : INotifyPropertyChanged
         }
     }
 
-    public string CopyButtonText => CopyPlanButtonTextValue;
+    public string CopyButtonText => _copyButtonText;
 
     public bool IsActive
     {

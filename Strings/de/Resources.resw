@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App.WindowTitle" xml:space="preserve"><value>PowerPlan</value></data>
+  <data name="AppTitleBar.Title" xml:space="preserve"><value>PowerPlan</value></data>
+  <data name="AppTitleBar.Subtitle" xml:space="preserve"><value>Windows-Energiesparpläne schnell wechseln</value></data>
+  <data name="AppDisplayName" xml:space="preserve"><value>PowerPlan</value></data>
+  <data name="AppDescription" xml:space="preserve"><value>Windows-Energiesparpläne schnell wechseln</value></data>
+  <data name="App.Status.StartupSettingFailed" xml:space="preserve"><value>Fehler beim Konfigurieren des Autostarts: {0}</value></data>
+  <data name="App.Status.TraySwitched" xml:space="preserve"><value>[Infobereich] Energiesparplan gewechselt: {0}</value></data>
+  <data name="App.Status.TrayInitFailed" xml:space="preserve"><value>[Infobereich] Initialisierung fehlgeschlagen: {0}</value></data>
+  <data name="App.Status.TrayAutoStart" xml:space="preserve"><value>[Infobereich] Autostart: {0}</value></data>
+  <data name="App.Status.TrayAutoStartFailed" xml:space="preserve"><value>[Infobereich] Autostart-Konfiguration fehlgeschlagen: {0}</value></data>
+  <data name="App.Status.On" xml:space="preserve"><value>Ein</value></data>
+  <data name="App.Status.Off" xml:space="preserve"><value>Aus</value></data>
+  <data name="Shell.Home" xml:space="preserve"><value>Startseite</value></data>
+  <data name="Shell.Settings" xml:space="preserve"><value>Einstellungen</value></data>
+  <data name="Main.RefreshPlansButton" xml:space="preserve"><value>Pläne aktualisieren</value></data>
+  <data name="Main.PlanPickerTitle" xml:space="preserve"><value>Energiesparplan auswählen</value></data>
+  <data name="Main.UltimateMissingTitle" xml:space="preserve"><value>Höchstleistungsplan nicht gefunden</value></data>
+  <data name="Main.UltimateMissingMessage" xml:space="preserve"><value>Klicken Sie auf die Schaltfläche, um zu versuchen, den Höchstleistungsplan zu erstellen. Einige Geräte entfernen ihn möglicherweise automatisch.</value></data>
+  <data name="Main.UltimateHiddenTitle" xml:space="preserve"><value>Versteckter Höchstleistungsplan erkannt</value></data>
+  <data name="Main.UltimateHiddenMessage" xml:space="preserve"><value>Dieses Gerät zeigt den Plan möglicherweise nicht in der Liste an. Sie können ihn direkt mit der gespeicherten UUID aktivieren.</value></data>
+  <data name="Main.CreateUltimateButton" xml:space="preserve"><value>Höchstleistungsplan erstellen</value></data>
+  <data name="Main.ActivateUltimateButton" xml:space="preserve"><value>Versteckten Höchstleistungsplan aktivieren</value></data>
+  <data name="Main.StatusWaiting" xml:space="preserve"><value>Bereit</value></data>
+  <data name="Main.Status.InitSuccess" xml:space="preserve"><value>Initialisierung abgeschlossen</value></data>
+  <data name="Main.Status.InitFailed" xml:space="preserve"><value>Initialisierung fehlgeschlagen: {0}</value></data>
+  <data name="Main.Status.PlansLoaded" xml:space="preserve"><value>Energiesparpläne geladen: {0}</value></data>
+  <data name="Main.Status.RefreshFailed" xml:space="preserve"><value>Aktualisierung fehlgeschlagen: {0}</value></data>
+  <data name="Main.Status.SwitchSuccess" xml:space="preserve"><value>Energiesparplan gewechselt: {0}</value></data>
+  <data name="Main.Status.SwitchFailed" xml:space="preserve"><value>Wechsel fehlgeschlagen: {0}</value></data>
+  <data name="Main.Status.UltimateExists" xml:space="preserve"><value>Ein Höchstleistungsplan ist bereits vorhanden</value></data>
+  <data name="Main.Status.UltimateCreated" xml:space="preserve"><value>Höchstleistungsplan wurde erstellt. Überprüfen Sie die aktuelle Liste für das Ergebnis.</value></data>
+  <data name="Main.Status.UltimateActivated" xml:space="preserve"><value>Höchstleistungsplan mit gespeicherter UUID aktiviert</value></data>
+  <data name="Main.Status.UltimateCreateFailed" xml:space="preserve"><value>Erstellen des Höchstleistungsplans fehlgeschlagen: {0}</value></data>
+  <data name="Main.Status.UltimateActivateFailed" xml:space="preserve"><value>Aktivierung des versteckten Höchstleistungsplans fehlgeschlagen. Gespeicherte UUID gelöscht: {0}</value></data>
+  <data name="Main.CopyPlanButton" xml:space="preserve"><value>Plan kopieren</value></data>
+  <data name="Main.CopyDialogTitle" xml:space="preserve"><value>Energiesparplan kopieren</value></data>
+  <data name="Main.CopyDialogConfirm" xml:space="preserve"><value>Kopieren</value></data>
+  <data name="Main.CopyDialogCancel" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="Main.CopyDialogPlaceholder" xml:space="preserve"><value>Namen für neuen Plan eingeben</value></data>
+  <data name="Main.Status.CopyNameEmpty" xml:space="preserve"><value>Kopieren fehlgeschlagen: Name darf nicht leer sein</value></data>
+  <data name="Main.Status.CopySuccess" xml:space="preserve"><value>Energiesparplan kopiert: {0}</value></data>
+  <data name="Main.Status.CopyFailed" xml:space="preserve"><value>Kopieren fehlgeschlagen: {0}</value></data>
+  <data name="Main.DeletePlanHint" xml:space="preserve"><value>Um einen Plan zu löschen, verwenden Sie die Systemsteuerung</value></data>
+  <data name="Main.DefaultPlanName" xml:space="preserve"><value>Energiesparplan</value></data>
+  <data name="Main.CopySuffix" xml:space="preserve"><value>Kopie</value></data>
+  <data name="Settings.PageTitle" xml:space="preserve"><value>Einstellungen</value></data>
+  <data name="Settings.Tools.Title" xml:space="preserve"><value>Werkzeuge</value></data>
+  <data name="Settings.Language.Title" xml:space="preserve"><value>Sprache</value></data>
+  <data name="Settings.Language.Desc" xml:space="preserve"><value>Anzeigesprache auswählen</value></data>
+  <data name="Settings.Language.Automatic" xml:space="preserve"><value>Automatisch</value></data>
+  <data name="Settings.Language.RestartTitle" xml:space="preserve"><value>Sprache gespeichert</value></data>
+  <data name="Settings.Language.RestartMessage" xml:space="preserve"><value>Die neue Sprache wird nach dem Neustart von PowerPlan übernommen.</value></data>
+  <data name="Settings.Language.RestartNow" xml:space="preserve"><value>Jetzt neu starten</value></data>
+  <data name="Settings.Language.RestartLater" xml:space="preserve"><value>Später</value></data>
+  <data name="Settings.Language.RestartFailed.Title" xml:space="preserve"><value>Neustart fehlgeschlagen</value></data>
+  <data name="Settings.Language.RestartFailed.RestartPending" xml:space="preserve"><value>PowerPlan wartet bereits auf einen Neustart. Bitte versuchen Sie es später erneut.</value></data>
+  <data name="Settings.Language.RestartFailed.InvalidUser" xml:space="preserve"><value>PowerPlan konnte mit dem aktuellen Benutzer nicht neu gestartet werden.</value></data>
+  <data name="Settings.Language.RestartFailed.NotInForeground" xml:space="preserve"><value>PowerPlan muss im Vordergrund sein, um neu gestartet zu werden.</value></data>
+  <data name="Settings.Language.RestartFailed.Other" xml:space="preserve"><value>PowerPlan konnte nicht neu gestartet werden. Bitte starten Sie es manuell.</value></data>
+  <data name="Settings.AutoStart.Title" xml:space="preserve"><value>Beim Anmelden starten</value></data>
+  <data name="Settings.AutoStart.Desc" xml:space="preserve"><value>Standardmäßig deaktiviert. Startet PowerPlan automatisch nach der Anmeldung.</value></data>
+  <data name="Settings.AutoStart.Unsupported" xml:space="preserve"><value>Nur als MSIX-Paket verfügbar</value></data>
+  <data name="Settings.Tray.Title" xml:space="preserve"><value>Infobereich aktivieren</value></data>
+  <data name="Settings.Tray.Desc" xml:space="preserve"><value>Standardmäßig aktiviert. Wenn deaktiviert, beendet das Schließen des Fensters die App.</value></data>
+  <data name="Settings.LaunchToTray.Title" xml:space="preserve"><value>In Infobereich starten</value></data>
+  <data name="Settings.LaunchToTray.Desc" xml:space="preserve"><value>Wenn aktiviert, startet PowerPlan nur mit dem Infobereich-Symbol.</value></data>
+  <data name="Settings.SaveFailed" xml:space="preserve"><value>Fehler beim Speichern der Einstellungen: {0}</value></data>
+  <data name="Settings.Tools.PowerOptions" xml:space="preserve"><value>Energieoptionen</value></data>
+  <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve"><value>Energieoptionen in der Systemsteuerung öffnen</value></data>
+  <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve"><value>Energiesparpläne wiederherstellen</value></data>
+  <data name="Settings.Tools.RestorePowerPlansDesc" xml:space="preserve"><value>Standard-Energiesparpläne von Windows wiederherstellen und gespeicherte Höchstleistungs-UUID löschen</value></data>
+  <data name="Settings.Tools.Website" xml:space="preserve"><value>Offizielle Website</value></data>
+  <data name="Settings.Tools.WebsiteDesc" xml:space="preserve"><value>https://www.blazesnow.com/powerplan/</value></data>
+  <data name="Settings.Tools.Repository" xml:space="preserve"><value>Quellcode-Repository</value></data>
+  <data name="Settings.Tools.RepositoryDesc" xml:space="preserve"><value>https://github.com/BlazeSnow/PowerPlan</value></data>
+  <data name="Settings.Tools.Feedback" xml:space="preserve"><value>Entwickler kontaktieren</value></data>
+  <data name="Settings.Tools.FeedbackDesc" xml:space="preserve"><value>Problem gefunden? Feedback ist willkommen.</value></data>
+  <data name="Settings.Tools.OpenButton" xml:space="preserve"><value>Öffnen</value></data>
+  <data name="Settings.Tools.RestoreButton" xml:space="preserve"><value>Wiederherstellen</value></data>
+  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve"><value>E-Mail-Adresse kopieren</value></data>
+  <data name="Settings.AppVersion.Title" xml:space="preserve"><value>App-Version</value></data>
+  <data name="Settings.AppVersion.Desc" xml:space="preserve"><value>Aktuell installierte Version von PowerPlan</value></data>
+  <data name="Settings.RestoreDialog.SuccessTitle" xml:space="preserve"><value>Wiederherstellung abgeschlossen</value></data>
+  <data name="Settings.RestoreDialog.SuccessMessage" xml:space="preserve"><value>Die Standard-Energiesparpläne wurden wiederhergestellt und die Höchstleistungs-UUID wurde gelöscht.</value></data>
+  <data name="Settings.RestoreDialog.FailedTitle" xml:space="preserve"><value>Wiederherstellung fehlgeschlagen</value></data>
+  <data name="Settings.RestoreDialog.FailedMessage" xml:space="preserve"><value>Wiederherstellung der Energiesparpläne fehlgeschlagen: {0}</value></data>
+  <data name="Settings.RestoreConfirmDialog.Title" xml:space="preserve"><value>Standard-Energiesparpläne wiederherstellen?</value></data>
+  <data name="Settings.RestoreConfirmDialog.Message" xml:space="preserve"><value>Dies stellt die Standard-Energiesparpläne von Windows wieder her und löscht die gespeicherte Höchstleistungs-UUID. Möchten Sie fortfahren?</value></data>
+  <data name="Settings.RestoreConfirmDialog.Confirm" xml:space="preserve"><value>Wiederherstellen</value></data>
+  <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="Settings.FeedbackDialog.Title" xml:space="preserve"><value>Kopiert</value></data>
+  <data name="Settings.Status.FeedbackCopied" xml:space="preserve"><value>Die E-Mail-Adresse wurde in die Zwischenablage kopiert</value></data>
+  <data name="Tray.Init" xml:space="preserve"><value>[Infobereich] Initialisiert. Links- oder Rechtsklick auf das Symbol zum Öffnen des Menüs.</value></data>
+  <data name="Tray.RefreshFailed" xml:space="preserve"><value>[Infobereich] Aktualisierung fehlgeschlagen: {0}</value></data>
+  <data name="Tray.DispatcherUnavailable" xml:space="preserve"><value>[Infobereich] UI-Thread nicht verfügbar, Menü konnte nicht aktualisiert werden</value></data>
+  <data name="Tray.Menu.OpenMainWindow" xml:space="preserve"><value>PowerPlan öffnen</value></data>
+  <data name="Tray.Menu.RefreshPlans" xml:space="preserve"><value>Pläne aktualisieren</value></data>
+  <data name="Tray.Menu.OpenHiddenUltimate" xml:space="preserve"><value>Versteckter Höchstleistungsplan</value></data>
+  <data name="Tray.Menu.DisableAutoStart" xml:space="preserve"><value>Autostart deaktivieren</value></data>
+  <data name="Tray.Menu.EnableAutoStart" xml:space="preserve"><value>Autostart aktivieren</value></data>
+  <data name="Tray.Menu.Exit" xml:space="preserve"><value>Beenden</value></data>
+  <data name="Tray.RefreshStarted" xml:space="preserve"><value>[Infobereich] Planliste wird aktualisiert</value></data>
+  <data name="Tray.SwitchTo" xml:space="preserve"><value>[Infobereich] Gewechselt zu: {0}</value></data>
+  <data name="Tray.SwitchFailed" xml:space="preserve"><value>[Infobereich] Wechsel fehlgeschlagen: {0}</value></data>
+  <data name="Tray.HiddenUltimateActivated" xml:space="preserve"><value>[Infobereich] Versteckter Höchstleistungsplan aktiviert</value></data>
+  <data name="Tray.HiddenUltimateActivateFailed" xml:space="preserve"><value>[Infobereich] Aktivierung des versteckten Höchstleistungsplans fehlgeschlagen: {0}</value></data>
+  <data name="Tray.AutoStartState" xml:space="preserve"><value>[Infobereich] Autostart: {0}</value></data>
+  <data name="Tray.Tooltip.Plan" xml:space="preserve"><value>Energiesparplan: {0}</value></data>
+  <data name="Tray.Tooltip.PlanUnavailable" xml:space="preserve"><value>Energiesparplan: Nicht verfügbar</value></data>
+  <data name="Tray.Tooltip.AutoStart" xml:space="preserve"><value>Autostart: {0}</value></data>
+  <data name="Tray.AutoStartToggleFailed" xml:space="preserve"><value>[Infobereich] Änderung des Autostarts fehlgeschlagen: {0}</value></data>
+  <data name="Common.FailedKeyword" xml:space="preserve"><value>fehlgeschlagen</value></data>
+  <data name="Common.Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="PowerPlan.Error.InvalidPlanGuid" xml:space="preserve"><value>Die GUID des Energiesparplans ist ungültig.</value></data>
+  <data name="PowerPlan.Error.InvalidSourcePlanGuid" xml:space="preserve"><value>Die GUID des Quell-Energiesparplans ist ungültig.</value></data>
+  <data name="PowerPlan.Error.SetActiveFailed" xml:space="preserve"><value>Wechsel des Energiesparplans fehlgeschlagen</value></data>
+  <data name="PowerPlan.Error.RestoreDefaultsFailed" xml:space="preserve"><value>Wiederherstellung der Standardpläne fehlgeschlagen</value></data>
+  <data name="PowerPlan.Error.EnumerateFailed" xml:space="preserve"><value>Auflistung der Energiesparpläne fehlgeschlagen</value></data>
+  <data name="PowerPlan.Error.ReadActiveFailed" xml:space="preserve"><value>Lesen des aktiven Energiesparplans fehlgeschlagen</value></data>
+  <data name="PowerPlan.Error.DuplicateFailed" xml:space="preserve"><value>Kopieren des Energiesparplans fehlgeschlagen</value></data>
+  <data name="PowerPlan.Error.DuplicateMissingGuid" xml:space="preserve"><value>Kopieren des Energiesparplans fehlgeschlagen: Windows hat keine GUID für den neuen Plan zurückgegeben.</value></data>
+  <data name="PowerPlan.Error.ReadNameFailed" xml:space="preserve"><value>Lesen des Plannamens fehlgeschlagen</value></data>
+  <data name="PowerPlan.Error.EmptyName" xml:space="preserve"><value>Der Name des Energiesparplans darf nicht leer sein.</value></data>
+  <data name="PowerPlan.Error.WriteNameFailed" xml:space="preserve"><value>Schreiben des Plannamens fehlgeschlagen</value></data>
+  <data name="PowerPlan.Error.Win32" xml:space="preserve"><value>{0}: {1}</value></data>
+</root>

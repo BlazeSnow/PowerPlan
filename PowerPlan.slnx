@@ -4,6 +4,9 @@
         <Platform Name="x64" />
         <Platform Name="x86" />
     </Configurations>
+    <Project Path="PowerPlan.Core\PowerPlan.Core.csproj" />
+    <Project Path="PowerPlan.Pages\PowerPlan.Pages.csproj" />
+    <Project Path="PowerPlan.Tray\PowerPlan.Tray.csproj" />
     <Project Path="PowerPlan.csproj">
         <Platform Solution="*|x64" Project="x64" />
         <Platform Solution="*|x86" Project="x86" />
