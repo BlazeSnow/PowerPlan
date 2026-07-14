@@ -1,5 +1,3 @@
-using PowerPlan.Services;
-
 namespace PowerPlan.Pages;
 
 public sealed partial class ShellPage : Page
