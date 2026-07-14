@@ -222,7 +222,8 @@ public sealed partial class SettingsPage : Page
             LanguageComboBox.SelectedIndex = normalized switch
             {
                 LanguageSettings.ChineseLanguage => 1,
-                LanguageSettings.EnglishLanguage => 2,
+                LanguageSettings.TraditionalChineseLanguage => 2,
+                LanguageSettings.EnglishLanguage => 3,
                 _ => 0
             };
         }

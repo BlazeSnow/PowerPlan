@@ -4,6 +4,7 @@ public static class LanguageSettings
 {
     public const string AutoLanguage = "auto";
     public const string ChineseLanguage = "zh-CN";
+    public const string TraditionalChineseLanguage = "zh-HK";
     public const string EnglishLanguage = "en-US";
     public const string DefaultLanguage = AutoLanguage;
 
@@ -12,6 +13,11 @@ public static class LanguageSettings
         if (string.Equals(language, ChineseLanguage, StringComparison.OrdinalIgnoreCase))
         {
             return ChineseLanguage;
+        }
+
+        if (string.Equals(language, TraditionalChineseLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            return TraditionalChineseLanguage;
         }
 
         if (string.Equals(language, EnglishLanguage, StringComparison.OrdinalIgnoreCase))
@@ -25,9 +31,22 @@ public static class LanguageSettings
     public static string Resolve(string? language, string? preferredLanguage)
     {
         var mode = Normalize(language);
-        return mode != AutoLanguage
-            ? mode
-            : IsSimplifiedChinese(preferredLanguage) ? ChineseLanguage : EnglishLanguage;
+        if (mode != AutoLanguage)
+        {
+            return mode;
+        }
+
+        if (IsSimplifiedChinese(preferredLanguage))
+        {
+            return ChineseLanguage;
+        }
+
+        if (IsTraditionalChinese(preferredLanguage))
+        {
+            return TraditionalChineseLanguage;
+        }
+
+        return EnglishLanguage;
     }
 
     public static bool IsSimplifiedChinese(string? language)
@@ -43,5 +62,22 @@ public static class LanguageSettings
             || language.StartsWith($"{ChineseLanguage}-", StringComparison.OrdinalIgnoreCase)
             || language.Equals("zh-SG", StringComparison.OrdinalIgnoreCase)
             || language.StartsWith("zh-SG-", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsTraditionalChinese(string? language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+        {
+            return false;
+        }
+
+        return language.Equals("zh-Hant", StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("zh-Hant-", StringComparison.OrdinalIgnoreCase)
+            || language.Equals(TraditionalChineseLanguage, StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith($"{TraditionalChineseLanguage}-", StringComparison.OrdinalIgnoreCase)
+            || language.Equals("zh-TW", StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("zh-TW-", StringComparison.OrdinalIgnoreCase)
+            || language.Equals("zh-MO", StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("zh-MO-", StringComparison.OrdinalIgnoreCase);
     }
 }
