@@ -23,6 +23,8 @@ public sealed partial class ShellPage : Page
 
     private void ApplyLocalization()
     {
+        AppTitleBar.Title = _pageHost.GetString("AppTitleBar.Title");
+        AppTitleBar.Subtitle = _pageHost.GetString("AppTitleBar.Subtitle");
         HomeItem.Content = _pageHost.GetString("Shell.Home");
         SettingsItem.Content = _pageHost.GetString("Shell.Settings");
     }
