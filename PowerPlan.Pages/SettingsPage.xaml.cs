@@ -225,6 +225,9 @@ public sealed partial class SettingsPage : Page
                 LanguageSettings.TraditionalChineseLanguage => 2,
                 LanguageSettings.EnglishLanguage => 3,
                 LanguageSettings.FrenchLanguage => 4,
+                LanguageSettings.ItalianLanguage => 5,
+                LanguageSettings.GermanLanguage => 6,
+                LanguageSettings.SpanishLanguage => 7,
                 _ => 0
             };
         }

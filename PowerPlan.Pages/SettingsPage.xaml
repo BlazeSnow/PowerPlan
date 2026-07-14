@@ -28,6 +28,9 @@
                     <ComboBoxItem Content="繁體中文" Tag="zh-HK" />
                     <ComboBoxItem Content="English" Tag="en-US" />
                     <ComboBoxItem Content="Français" Tag="fr" />
+                    <ComboBoxItem Content="Italiano" Tag="it" />
+                    <ComboBoxItem Content="Deutsch" Tag="de" />
+                    <ComboBoxItem Content="Español" Tag="es" />
                 </ComboBox>
             </controls:SettingsCard>
 

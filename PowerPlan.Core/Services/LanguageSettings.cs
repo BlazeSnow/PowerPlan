@@ -7,6 +7,9 @@ public static class LanguageSettings
     public const string TraditionalChineseLanguage = "zh-HK";
     public const string EnglishLanguage = "en-US";
     public const string FrenchLanguage = "fr";
+    public const string ItalianLanguage = "it";
+    public const string GermanLanguage = "de";
+    public const string SpanishLanguage = "es";
     public const string DefaultLanguage = AutoLanguage;
 
     public static string Normalize(string? language)
@@ -29,6 +32,21 @@ public static class LanguageSettings
         if (string.Equals(language, FrenchLanguage, StringComparison.OrdinalIgnoreCase))
         {
             return FrenchLanguage;
+        }
+
+        if (string.Equals(language, ItalianLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            return ItalianLanguage;
+        }
+
+        if (string.Equals(language, GermanLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            return GermanLanguage;
+        }
+
+        if (string.Equals(language, SpanishLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            return SpanishLanguage;
         }
 
         return AutoLanguage;
@@ -55,6 +73,21 @@ public static class LanguageSettings
         if (IsFrench(preferredLanguage))
         {
             return FrenchLanguage;
+        }
+
+        if (IsItalian(preferredLanguage))
+        {
+            return ItalianLanguage;
+        }
+
+        if (IsGerman(preferredLanguage))
+        {
+            return GermanLanguage;
+        }
+
+        if (IsSpanish(preferredLanguage))
+        {
+            return SpanishLanguage;
         }
 
         return EnglishLanguage;
@@ -101,5 +134,38 @@ public static class LanguageSettings
 
         return language.Equals(FrenchLanguage, StringComparison.OrdinalIgnoreCase)
             || language.StartsWith("fr-", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsItalian(string? language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+        {
+            return false;
+        }
+
+        return language.Equals(ItalianLanguage, StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("it-", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsGerman(string? language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+        {
+            return false;
+        }
+
+        return language.Equals(GermanLanguage, StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("de-", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsSpanish(string? language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+        {
+            return false;
+        }
+
+        return language.Equals(SpanishLanguage, StringComparison.OrdinalIgnoreCase)
+            || language.StartsWith("es-", StringComparison.OrdinalIgnoreCase);
     }
 }
