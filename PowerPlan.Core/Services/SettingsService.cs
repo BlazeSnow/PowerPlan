@@ -106,12 +106,19 @@ public sealed class SettingsService : ISettingsService
             return null;
         }
 
+        var storedLanguage = _settingsStore.GetString(LanguageKey, LanguageSettings.DefaultLanguage);
+        var language = NormalizeLanguage(storedLanguage);
+        if (!string.Equals(storedLanguage, language, StringComparison.Ordinal))
+        {
+            _settingsStore.SetString(LanguageKey, language);
+        }
+
         return new AppSettings
         {
             AutoStart = _settingsStore.GetBoolean(AutoStartKey, defaultValue: false),
             TrayEnabled = _settingsStore.GetBoolean(TrayEnabledKey, defaultValue: true),
             LaunchToTray = _settingsStore.GetBoolean(LaunchToTrayKey, defaultValue: false),
-            Language = NormalizeLanguage(_settingsStore.GetString(LanguageKey, LanguageSettings.DefaultLanguage)),
+            Language = language,
             UltimatePerformancePlanGuid = _settingsStore.GetString(UltimatePerformancePlanGuidKey, string.Empty)
         };
     }
