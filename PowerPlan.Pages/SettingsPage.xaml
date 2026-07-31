@@ -24,8 +24,8 @@
                 </controls:SettingsCard.HeaderIcon>
                 <ComboBox x:Name="LanguageComboBox" SelectionChanged="OnLanguageSelectionChanged" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="220">
                     <ComboBoxItem x:Name="AutomaticLanguageItem" Tag="auto" />
-                    <ComboBoxItem Content="简体中文" Tag="zh-CN" />
-                    <ComboBoxItem Content="繁體中文" Tag="zh-HK" />
+                    <ComboBoxItem Content="简体中文" Tag="zh-Hans" />
+                    <ComboBoxItem Content="繁體中文" Tag="zh-Hant" />
                     <ComboBoxItem Content="English" Tag="en-US" />
                     <ComboBoxItem Content="Français" Tag="fr" />
                     <ComboBoxItem Content="Italiano" Tag="it" />
@@ -81,13 +81,6 @@
                     <FontIcon Glyph="&#xE943;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
                 <Button x:Name="OpenRepositoryButton" Click="OnOpenRepositoryClicked" HorizontalAlignment="Right" VerticalAlignment="Center" />
-            </controls:SettingsCard>
-
-            <controls:SettingsCard x:Name="FeedbackCard">
-                <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE715;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
-                </controls:SettingsCard.HeaderIcon>
-                <Button x:Name="SendFeedbackButton" Click="OnSendFeedbackClicked" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </controls:SettingsCard>
 
             <controls:SettingsCard x:Name="AppVersionCard">

@@ -283,20 +283,11 @@
   <data name="Settings.Tools.RepositoryDesc" xml:space="preserve">
     <value>https://github.com/BlazeSnow/PowerPlan</value>
   </data>
-  <data name="Settings.Tools.Feedback" xml:space="preserve">
-    <value>Contacter le développeur</value>
-  </data>
-  <data name="Settings.Tools.FeedbackDesc" xml:space="preserve">
-    <value>Vous avez rencontré un problème ? Vos retours sont les bienvenus.</value>
-  </data>
   <data name="Settings.Tools.OpenButton" xml:space="preserve">
     <value>Ouvrir</value>
   </data>
   <data name="Settings.Tools.RestoreButton" xml:space="preserve">
     <value>Restaurer</value>
-  </data>
-  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve">
-    <value>Copier l'adresse e-mail</value>
   </data>
   <data name="Settings.AppVersion.Title" xml:space="preserve">
     <value>Version de l'application</value>
@@ -327,12 +318,6 @@
   </data>
   <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve">
     <value>Annuler</value>
-  </data>
-  <data name="Settings.FeedbackDialog.Title" xml:space="preserve">
-    <value>Copié</value>
-  </data>
-  <data name="Settings.Status.FeedbackCopied" xml:space="preserve">
-    <value>L'adresse e-mail a été copiée dans le presse-papiers</value>
   </data>
   <data name="Tray.Init" xml:space="preserve">
     <value>[Zone de notification] Initialisé. Clic gauche ou droit sur l'icône pour ouvrir le menu.</value>

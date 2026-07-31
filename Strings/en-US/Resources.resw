@@ -114,11 +114,8 @@
     <data name="Settings.Tools.WebsiteDesc" xml:space="preserve"><value>https://www.blazesnow.com/powerplan/</value></data>
     <data name="Settings.Tools.Repository" xml:space="preserve"><value>Source code repository</value></data>
     <data name="Settings.Tools.RepositoryDesc" xml:space="preserve"><value>https://github.com/BlazeSnow/PowerPlan</value></data>
-    <data name="Settings.Tools.Feedback" xml:space="preserve"><value>Contact the developer</value></data>
-    <data name="Settings.Tools.FeedbackDesc" xml:space="preserve"><value>Found a problem while using the app? Feedback is welcome.</value></data>
     <data name="Settings.Tools.OpenButton" xml:space="preserve"><value>Open</value></data>
     <data name="Settings.Tools.RestoreButton" xml:space="preserve"><value>Restore</value></data>
-    <data name="Settings.Tools.FeedbackCopy" xml:space="preserve"><value>Copy email address</value></data>
     <data name="Settings.AppVersion.Title" xml:space="preserve"><value>App version</value></data>
     <data name="Settings.AppVersion.Desc" xml:space="preserve"><value>Currently installed version of PowerPlan</value></data>
     <data name="Settings.RestoreDialog.SuccessTitle" xml:space="preserve"><value>Restore complete</value></data>
@@ -129,8 +126,6 @@
     <data name="Settings.RestoreConfirmDialog.Message" xml:space="preserve"><value>This will restore the default Windows power plans and clear the saved Ultimate Performance UUID. Do you want to continue?</value></data>
     <data name="Settings.RestoreConfirmDialog.Confirm" xml:space="preserve"><value>Restore</value></data>
     <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve"><value>Cancel</value></data>
-    <data name="Settings.FeedbackDialog.Title" xml:space="preserve"><value>Copied</value></data>
-    <data name="Settings.Status.FeedbackCopied" xml:space="preserve"><value>The email address was copied to the clipboard</value></data>
     <data name="Tray.Init" xml:space="preserve"><value>[Tray] Initialized. Left-click or right-click the tray icon to open the menu.</value></data>
     <data name="Tray.RefreshFailed" xml:space="preserve"><value>[Tray] Refresh failed: {0}</value></data>
     <data name="Tray.DispatcherUnavailable" xml:space="preserve"><value>[Tray] The UI thread is unavailable; the menu could not be refreshed</value></data>

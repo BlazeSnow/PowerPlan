@@ -8,11 +8,12 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>PowerPlan.Tray</RootNamespace>
+        <Platforms>x86;x64;ARM64</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\PowerPlan.Core\PowerPlan.Core.csproj" />
         <PackageReference Include="H.NotifyIcon.WinUI" Version="2.4.1" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
     </ItemGroup>
 </Project>

@@ -91,8 +91,7 @@
 4. 电源计划（按钮）：打开控制面板的电源选项
 5. 恢复电源计划（按钮）：恢复电源计划到默认状态`powercfg -restoredefaultschemes`
 6. 开发者官网（按钮）：<https://www.blazesnow.com>
-7. 反馈邮箱（复制按钮）：<powerplan@blazesnow.com>
-8. 软件版本号：显示当前安装包版本，不硬编码版本号
+7. 软件版本号：显示当前安装包版本，不硬编码版本号
 
 ### 持久化设置
 
