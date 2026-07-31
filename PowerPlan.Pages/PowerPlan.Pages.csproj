@@ -9,6 +9,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>PowerPlan.Pages</RootNamespace>
         <AssemblyName>PowerPlan.Pages</AssemblyName>
+        <Platforms>x86;x64;ARM64</Platforms>
     </PropertyGroup>
 
     <ItemGroup>

@@ -8,6 +8,7 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>PowerPlan.Tray</RootNamespace>
+        <Platforms>x86;x64;ARM64</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
