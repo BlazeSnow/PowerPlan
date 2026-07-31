@@ -3,13 +3,11 @@ using PowerPlan.Services;
 using System.Diagnostics;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Core;
-using Windows.ApplicationModel.DataTransfer;
 
 namespace PowerPlan.Pages;
 
 public sealed partial class SettingsPage : Page
 {
-    private const string FeedbackMail = "powerplan@blazesnow.com";
     private const string OfficialWebsiteUrl = "https://www.blazesnow.com/powerplan/";
     private const string RepositoryUrl = "https://github.com/BlazeSnow/PowerPlan";
 
@@ -67,10 +65,6 @@ public sealed partial class SettingsPage : Page
         RepositoryCard.Header = PageHost.GetString("Settings.Tools.Repository");
         RepositoryCard.Description = PageHost.GetString("Settings.Tools.RepositoryDesc");
         OpenRepositoryButton.Content = PageHost.GetString("Settings.Tools.OpenButton");
-
-        FeedbackCard.Header = PageHost.GetString("Settings.Tools.Feedback");
-        FeedbackCard.Description = PageHost.GetString("Settings.Tools.FeedbackDesc");
-        SendFeedbackButton.Content = PageHost.GetString("Settings.Tools.FeedbackCopy");
 
         AppVersionCard.Header = PageHost.GetString("Settings.AppVersion.Title");
         AppVersionCard.Description = PageHost.GetString("Settings.AppVersion.Desc");
@@ -414,23 +408,6 @@ public sealed partial class SettingsPage : Page
     private void OnOpenRepositoryClicked(object sender, RoutedEventArgs e)
     {
         OpenExternal(RepositoryUrl);
-    }
-
-    private void OnSendFeedbackClicked(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            var dataPackage = new DataPackage();
-            dataPackage.SetText(FeedbackMail);
-            Clipboard.SetContent(dataPackage);
-            _ = ShowOperationDialogAsync(
-                PageHost.GetString("Settings.FeedbackDialog.Title"),
-                PageHost.GetString("Settings.Status.FeedbackCopied"));
-        }
-        catch
-        {
-            // Keep page silent when clipboard is unavailable.
-        }
     }
 
     private Task ShowOperationDialogAsync(string title, string message)

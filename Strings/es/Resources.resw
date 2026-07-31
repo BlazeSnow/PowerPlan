@@ -133,11 +133,8 @@
   <data name="Settings.Tools.WebsiteDesc" xml:space="preserve"><value>https://www.blazesnow.com/powerplan/</value></data>
   <data name="Settings.Tools.Repository" xml:space="preserve"><value>Repositorio de código</value></data>
   <data name="Settings.Tools.RepositoryDesc" xml:space="preserve"><value>https://github.com/BlazeSnow/PowerPlan</value></data>
-  <data name="Settings.Tools.Feedback" xml:space="preserve"><value>Contactar al desarrollador</value></data>
-  <data name="Settings.Tools.FeedbackDesc" xml:space="preserve"><value>¿Encontró un problema? Sus comentarios son bienvenidos.</value></data>
   <data name="Settings.Tools.OpenButton" xml:space="preserve"><value>Abrir</value></data>
   <data name="Settings.Tools.RestoreButton" xml:space="preserve"><value>Restaurar</value></data>
-  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve"><value>Copiar correo electrónico</value></data>
   <data name="Settings.AppVersion.Title" xml:space="preserve"><value>Versión de la app</value></data>
   <data name="Settings.AppVersion.Desc" xml:space="preserve"><value>Versión instalada actualmente de PowerPlan</value></data>
   <data name="Settings.RestoreDialog.SuccessTitle" xml:space="preserve"><value>Restauración completada</value></data>
@@ -148,8 +145,6 @@
   <data name="Settings.RestoreConfirmDialog.Message" xml:space="preserve"><value>Esto restaurará los planes de energía predeterminados de Windows y borrará el UUID de máximo rendimiento guardado. ¿Desea continuar?</value></data>
   <data name="Settings.RestoreConfirmDialog.Confirm" xml:space="preserve"><value>Restaurar</value></data>
   <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve"><value>Cancelar</value></data>
-  <data name="Settings.FeedbackDialog.Title" xml:space="preserve"><value>Copiado</value></data>
-  <data name="Settings.Status.FeedbackCopied" xml:space="preserve"><value>El correo electrónico se copió al portapapeles</value></data>
   <data name="Tray.Init" xml:space="preserve"><value>[Bandeja] Inicializado. Clic izquierdo o derecho en el icono para abrir el menú.</value></data>
   <data name="Tray.RefreshFailed" xml:space="preserve"><value>[Bandeja] Error de actualización: {0}</value></data>
   <data name="Tray.DispatcherUnavailable" xml:space="preserve"><value>[Bandeja] Hilo de UI no disponible, no se pudo actualizar el menú</value></data>

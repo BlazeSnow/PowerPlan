@@ -133,11 +133,8 @@
   <data name="Settings.Tools.WebsiteDesc" xml:space="preserve"><value>https://www.blazesnow.com/powerplan/</value></data>
   <data name="Settings.Tools.Repository" xml:space="preserve"><value>Quellcode-Repository</value></data>
   <data name="Settings.Tools.RepositoryDesc" xml:space="preserve"><value>https://github.com/BlazeSnow/PowerPlan</value></data>
-  <data name="Settings.Tools.Feedback" xml:space="preserve"><value>Entwickler kontaktieren</value></data>
-  <data name="Settings.Tools.FeedbackDesc" xml:space="preserve"><value>Problem gefunden? Feedback ist willkommen.</value></data>
   <data name="Settings.Tools.OpenButton" xml:space="preserve"><value>Öffnen</value></data>
   <data name="Settings.Tools.RestoreButton" xml:space="preserve"><value>Wiederherstellen</value></data>
-  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve"><value>E-Mail-Adresse kopieren</value></data>
   <data name="Settings.AppVersion.Title" xml:space="preserve"><value>App-Version</value></data>
   <data name="Settings.AppVersion.Desc" xml:space="preserve"><value>Aktuell installierte Version von PowerPlan</value></data>
   <data name="Settings.RestoreDialog.SuccessTitle" xml:space="preserve"><value>Wiederherstellung abgeschlossen</value></data>
@@ -148,8 +145,6 @@
   <data name="Settings.RestoreConfirmDialog.Message" xml:space="preserve"><value>Dies stellt die Standard-Energiesparpläne von Windows wieder her und löscht die gespeicherte Höchstleistungs-UUID. Möchten Sie fortfahren?</value></data>
   <data name="Settings.RestoreConfirmDialog.Confirm" xml:space="preserve"><value>Wiederherstellen</value></data>
   <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve"><value>Abbrechen</value></data>
-  <data name="Settings.FeedbackDialog.Title" xml:space="preserve"><value>Kopiert</value></data>
-  <data name="Settings.Status.FeedbackCopied" xml:space="preserve"><value>Die E-Mail-Adresse wurde in die Zwischenablage kopiert</value></data>
   <data name="Tray.Init" xml:space="preserve"><value>[Infobereich] Initialisiert. Links- oder Rechtsklick auf das Symbol zum Öffnen des Menüs.</value></data>
   <data name="Tray.RefreshFailed" xml:space="preserve"><value>[Infobereich] Aktualisierung fehlgeschlagen: {0}</value></data>
   <data name="Tray.DispatcherUnavailable" xml:space="preserve"><value>[Infobereich] UI-Thread nicht verfügbar, Menü konnte nicht aktualisiert werden</value></data>

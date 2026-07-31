@@ -283,20 +283,11 @@
   <data name="Settings.Tools.RepositoryDesc" xml:space="preserve">
     <value>https://github.com/BlazeSnow/PowerPlan</value>
   </data>
-  <data name="Settings.Tools.Feedback" xml:space="preserve">
-    <value>意見反映到開發者電郵</value>
-  </data>
-  <data name="Settings.Tools.FeedbackDesc" xml:space="preserve">
-    <value>使用本軟件時遇到問題，歡迎反映</value>
-  </data>
   <data name="Settings.Tools.OpenButton" xml:space="preserve">
     <value>開啟</value>
   </data>
   <data name="Settings.Tools.RestoreButton" xml:space="preserve">
     <value>復原</value>
-  </data>
-  <data name="Settings.Tools.FeedbackCopy" xml:space="preserve">
-    <value>複製意見反映電郵地址</value>
   </data>
   <data name="Settings.AppVersion.Title" xml:space="preserve">
     <value>軟件版本</value>
@@ -327,12 +318,6 @@
   </data>
   <data name="Settings.RestoreConfirmDialog.Cancel" xml:space="preserve">
     <value>取消</value>
-  </data>
-  <data name="Settings.FeedbackDialog.Title" xml:space="preserve">
-    <value>複製成功</value>
-  </data>
-  <data name="Settings.Status.FeedbackCopied" xml:space="preserve">
-    <value>電郵地址已複製到剪貼簿</value>
   </data>
   <data name="Tray.Init" xml:space="preserve">
     <value>[系統匣] 已初始化，左右鍵系統匣圖示可開啟選單</value>
