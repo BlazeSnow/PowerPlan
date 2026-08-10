@@ -53,19 +53,18 @@
 
 ## 托盘
 
-1. 使用`H.NotifyIcon.WinUI`实现托盘，带icon；当前验证版本为`2.4.1`。
-2. 托盘菜单仅使用稳定的`ContextMenuMode.PopupMenu`模式。
-3. 禁止使用`SecondWindow`模式。当前`H.NotifyIcon.WinUI 2.4.1`下，该模式在动态菜单场景可能出现空菜单、项目不同步和原生访问冲突。
-4. 禁止通过`ActiveWindow`、`TrayPopup`或手工Win32菜单/句柄混用替代当前菜单承载。
-5. 性能计划列表、当前计划勾选状态和开机自启动开关等动态菜单内容，必须通过`PopupMenu`模式和当前库版本已支持的公开API更新。
-6. 当前电源计划使用菜单项勾选状态标识。
+1. 使用自写 Win32 `Shell_NotifyIconW` 实现托盘，图标使用应用 `Assets\\powerplan.ico`。
+2. 托盘必须使用专用的不可见顶级 HWND 作为通知区回调宿主；不可依赖主 WinUI 窗口，因为静默启动时主窗口不存在，关闭主窗口后也会被隐藏。
+3. 使用稳定的通知区图标 GUID，并在 `NIM_ADD` 后设置 `NOTIFYICON_VERSION_4`。
+4. 必须处理 `TaskbarCreated`，以便 Explorer 重启后重新添加图标并恢复协议版本。
+5. 左右键均弹出原生菜单。菜单通过 `CreatePopupMenu`/`TrackPopupMenuEx` 临时构建和显示，结束后必须销毁 `HMENU`。
+6. 电源计划列表、当前计划勾选状态和开机自启动开关等动态内容，每次打开菜单时均由当前快照生成；当前计划使用菜单勾选标识。
 7. 其他菜单项的图标拼入菜单文本，不使用会挤压文本的菜单图标槽。
 8. 软件开机自启动的开关，用户可点击控制开关。
-9. 软件的退出，用户可点击退出。
-10. 托盘退出需避开`PopupMenu`命令回调同步退出，先延后回到UI线程后再执行退出逻辑。
-11. 托盘主题交由系统和库的默认行为处理；禁止重新引入`SetPreferredAppMode`、`DwmSetWindowAttribute`、硬编码标题栏颜色或`RequestedTheme`强制值。
-12. 每次动态菜单更新后，必须验证菜单可正常弹出、全部项目可见、命令可执行、当前计划勾选正确，且重复打开不会出现空菜单或重复项目。
-13. 若未来升级`H.NotifyIcon`、WinUI或Windows App SDK，必须重新验证`PopupMenu`、动态菜单刷新、系统浅深主题、静默启动、重复打开菜单和退出流程；只有确认上游稳定修复后，才可单独评估是否放宽对`SecondWindow`、`ActiveWindow`和`TrayPopup`的限制。
+9. 软件的退出，用户可点击退出；必须先关闭并销毁原生菜单，再回到 UI 线程执行退出逻辑。
+10. 托盘主题交由系统原生菜单行为处理；禁止重新引入 `SetPreferredAppMode`、`DwmSetWindowAttribute`、硬编码标题栏颜色或 `RequestedTheme` 强制值。
+11. 每次动态菜单更新后，必须验证菜单可正常弹出、全部项目可见、命令可执行、当前计划勾选正确，且重复打开不会出现空菜单或重复项目。
+12. 修改 WinUI、Windows App SDK 或原生托盘实现后，必须重新验证动态菜单刷新、系统浅深主题、静默启动、重复打开菜单、Explorer 重启恢复和退出流程。
 
 ### 开机自启动静默启动
 
