@@ -12,6 +12,8 @@ internal sealed class TrayNativeHost : IDisposable
     private static readonly Dictionary<nint, TrayNativeHost> WindowInstances = new();
     private static readonly WindowProcedureDelegate WindowProcedure = StaticWindowProcedure;
 
+    private readonly TrayMenuTheme _menuTheme = new();
+
     private nint _trayWindow;
     private nint _trayIcon;
     private uint _taskbarCreatedMessage;
@@ -33,6 +35,7 @@ internal sealed class TrayNativeHost : IDisposable
         }
 
         _tooltipText = tooltipText;
+        _menuTheme.Initialize();
         try
         {
             CreateTrayWindow();
@@ -89,6 +92,7 @@ internal sealed class TrayNativeHost : IDisposable
 
         _taskbarCreatedMessage = 0;
         _tooltipText = string.Empty;
+        _menuTheme.Dispose();
     }
 
     private void CreateTrayWindow()
@@ -209,6 +213,11 @@ internal sealed class TrayNativeHost : IDisposable
 
     private nint ProcessWindowMessage(nint window, uint message, nint wParam, nint lParam)
     {
+        if (message == WmSettingChange)
+        {
+            _menuTheme.Refresh();
+        }
+
         if (message == _taskbarCreatedMessage)
         {
             RestoreTrayIconAfterExplorerRestart();
@@ -309,6 +318,7 @@ internal sealed class TrayNativeHost : IDisposable
     private delegate nint WindowProcedureDelegate(nint window, uint message, nint wParam, nint lParam);
 
     private const uint ErrorClassAlreadyExists = 1410;
+    private const uint WmSettingChange = 0x001A;
     private const uint WmContextMenu = 0x007B;
     private const uint WmLeftButtonUp = 0x0202;
     private const uint WmRightButtonUp = 0x0205;
