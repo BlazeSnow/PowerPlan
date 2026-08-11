@@ -129,6 +129,112 @@ public sealed class SettingsServiceTests
         Assert.Equal(LanguageSettings.EnglishLanguage, service.ResolveLanguage(LanguageSettings.AutoLanguage));
     }
 
+    [Fact]
+    public async Task LoadAsync_SavesDefaultsWhenStorageIsAvailable()
+    {
+        var settingsStore = new InMemorySettingsStore();
+        var service = CreateService(settingsStore, new FakeLegacySettingsStore());
+
+        var settings = await service.LoadAsync();
+
+        Assert.Equal(new[]
+        {
+            SettingsService.AutoStartKey,
+            SettingsService.TrayEnabledKey,
+            SettingsService.LaunchToTrayKey
+        }, settingsStore.BooleanWriteKeys);
+        Assert.Contains(SettingsService.LanguageKey, settingsStore.StringWriteKeys);
+        Assert.Contains(SettingsService.UltimatePerformancePlanGuidKey, settingsStore.StringWriteKeys);
+        Assert.Equal(LanguageSettings.AutoLanguage, settingsStore.GetString(SettingsService.LanguageKey, string.Empty));
+        var reloaded = await service.LoadAsync();
+        Assert.Equal(settings.AutoStart, reloaded.AutoStart);
+        Assert.Equal(settings.TrayEnabled, reloaded.TrayEnabled);
+        Assert.Equal(settings.LaunchToTray, reloaded.LaunchToTray);
+    }
+
+    [Fact]
+    public async Task LoadAsync_DoesNotRewriteCanonicalStoredLanguage()
+    {
+        var settingsStore = new InMemorySettingsStore();
+        settingsStore.SetString(SettingsService.LanguageKey, LanguageSettings.FrenchLanguage);
+        settingsStore.StringWriteKeys.Clear();
+        var service = CreateService(settingsStore, new FakeLegacySettingsStore());
+
+        _ = await service.LoadAsync();
+
+        Assert.DoesNotContain(SettingsService.LanguageKey, settingsStore.StringWriteKeys);
+    }
+
+    [Fact]
+    public async Task LoadAsync_PropagatesMigrationSaveFailureWithoutMarkingMigrated()
+    {
+        var settingsStore = new InMemorySettingsStore { ThrowOnWrite = true };
+        var legacyStore = new FakeLegacySettingsStore
+        {
+            PrimarySettings = new AppSettings { Language = LanguageSettings.FrenchLanguage }
+        };
+        var service = CreateService(settingsStore, legacyStore);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.LoadAsync());
+
+        Assert.Equal(0, legacyStore.PrimaryMigratedCount);
+    }
+
+    [Fact]
+    public async Task InitializeAsync_UpdatesCurrentSettings()
+    {
+        var settingsStore = new InMemorySettingsStore();
+        settingsStore.SetBoolean(SettingsService.AutoStartKey, true);
+        var service = CreateService(settingsStore, new FakeLegacySettingsStore());
+
+        await service.InitializeAsync();
+
+        Assert.True(service.Current.AutoStart);
+    }
+
+    [Fact]
+    public async Task SaveCurrentAsync_SavesCurrentInstanceAndRaisesEvent()
+    {
+        var settingsStore = new InMemorySettingsStore();
+        var service = CreateService(settingsStore, new FakeLegacySettingsStore());
+        service.Current.Language = LanguageSettings.ItalianLanguage;
+        AppSettings? changedSettings = null;
+        service.SettingsChanged += (_, settings) => changedSettings = settings;
+
+        await service.SaveCurrentAsync();
+
+        Assert.Same(service.Current, changedSettings);
+        Assert.Equal(LanguageSettings.ItalianLanguage, service.Current.Language);
+        Assert.Equal(LanguageSettings.ItalianLanguage, settingsStore.GetString(SettingsService.LanguageKey, string.Empty));
+    }
+
+    [Fact]
+    public void ResolveLanguage_UsesPreferredLanguage()
+    {
+        var service = new SettingsService(
+            new InMemorySettingsStore(),
+            new FakeLegacySettingsStore(),
+            new FakeLanguagePreferenceProvider { PreferredLanguage = "fr-CA" });
+
+        Assert.Equal(LanguageSettings.FrenchLanguage, service.ResolveLanguage(LanguageSettings.AutoLanguage));
+    }
+
+    [Fact]
+    public async Task LoadAsync_UsesDefaultsWhenOnlyUltimateGuidSentinelExists()
+    {
+        var settingsStore = new InMemorySettingsStore();
+        settingsStore.SetString(SettingsService.UltimatePerformancePlanGuidKey, "saved-guid");
+        var service = CreateService(settingsStore, new FakeLegacySettingsStore());
+
+        var settings = await service.LoadAsync();
+
+        Assert.False(settings.AutoStart);
+        Assert.True(settings.TrayEnabled);
+        Assert.False(settings.LaunchToTray);
+        Assert.Equal("saved-guid", settings.UltimatePerformancePlanGuid);
+    }
+
+
     private static SettingsService CreateService(InMemorySettingsStore settingsStore, FakeLegacySettingsStore legacyStore)
     {
         return new SettingsService(settingsStore, legacyStore, new FakeLanguagePreferenceProvider { PreferredLanguage = "en-US" });

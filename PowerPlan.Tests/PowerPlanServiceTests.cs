@@ -183,6 +183,141 @@ public sealed class PowerPlanServiceTests
         Assert.True(isUltimate);
     }
 
+    [Fact]
+    public async Task GetPlansAsync_UsesFormatterForEnumerationFailures()
+    {
+        var nativeApi = CreateNativeApi(Guid.NewGuid());
+        nativeApi.EnumerateResult = 5;
+        var errors = new FakePowerPlanErrorFormatter();
+        var service = new PowerPlanService(nativeApi, errors);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.GetPlansAsync());
+
+        Assert.Equal("PowerPlan.Error.EnumerateFailed:5", exception.Message);
+        Assert.Equal([(5u, "PowerPlan.Error.EnumerateFailed")], errors.Win32Errors);
+    }
+
+    [Fact]
+    public async Task GetPlansAsync_UsesFormatterForFriendlyNameFailures()
+    {
+        var nativeApi = CreateNativeApi(Guid.NewGuid());
+        nativeApi.ReadFriendlyNameResult = 5;
+        var errors = new FakePowerPlanErrorFormatter();
+        var service = new PowerPlanService(nativeApi, errors);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.GetPlansAsync());
+
+        Assert.Equal("PowerPlan.Error.ReadNameFailed:5", exception.Message);
+        Assert.Equal([(5u, "PowerPlan.Error.ReadNameFailed")], errors.Win32Errors);
+    }
+
+    [Fact]
+    public async Task SetActivePlanAsync_UsesFormatterForNativeFailure()
+    {
+        var nativeApi = new FakePowerSchemeNativeApi { SetActiveSchemeResult = 5 };
+        var errors = new FakePowerPlanErrorFormatter();
+        var service = new PowerPlanService(nativeApi, errors);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.SetActivePlanAsync(Guid.NewGuid().ToString("D")));
+
+        Assert.Equal("PowerPlan.Error.SetActiveFailed:5", exception.Message);
+        Assert.Equal([(5u, "PowerPlan.Error.SetActiveFailed")], errors.Win32Errors);
+    }
+
+    [Fact]
+    public async Task CopyPlanAsync_UsesFormatterForInvalidSourceGuid()
+    {
+        var errors = new FakePowerPlanErrorFormatter();
+        var nativeApi = new FakePowerSchemeNativeApi();
+        var service = new PowerPlanService(nativeApi, errors);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.CopyPlanAsync("not-a-guid", "Copy"));
+
+        Assert.Equal("PowerPlan.Error.InvalidSourcePlanGuid", exception.Message);
+        Assert.Null(nativeApi.DuplicateSchemeArgument);
+        Assert.Equal(["PowerPlan.Error.InvalidSourcePlanGuid"], errors.InvalidGuidErrorKeys);
+    }
+
+    [Fact]
+    public async Task CopyPlanAsync_UsesFormatterForDuplicateFailure()
+    {
+        var nativeApi = new FakePowerSchemeNativeApi
+        {
+            DuplicateSchemeResult = new PowerSchemeDuplicateResult(5, Guid.NewGuid())
+        };
+        var errors = new FakePowerPlanErrorFormatter();
+        var service = new PowerPlanService(nativeApi, errors);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.CopyPlanAsync(Guid.NewGuid().ToString("D"), "Copy"));
+
+        Assert.Equal("PowerPlan.Error.DuplicateFailed:5", exception.Message);
+        Assert.Equal([(5u, "PowerPlan.Error.DuplicateFailed")], errors.Win32Errors);
+    }
+
+    [Fact]
+    public async Task CopyPlanAsync_UsesFormatterForFriendlyNameWriteFailure()
+    {
+        var nativeApi = new FakePowerSchemeNativeApi
+        {
+            WriteFriendlyNameResult = 5
+        };
+        var errors = new FakePowerPlanErrorFormatter();
+        var service = new PowerPlanService(nativeApi, errors);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.CopyPlanAsync(Guid.NewGuid().ToString("D"), "Copy"));
+
+        Assert.Equal("PowerPlan.Error.WriteNameFailed:5", exception.Message);
+        Assert.Equal([(5u, "PowerPlan.Error.WriteNameFailed")], errors.Win32Errors);
+    }
+
+    [Fact]
+    public async Task RestoreDefaultSchemesAsync_UsesFormatterForNativeFailure()
+    {
+        var nativeApi = new FakePowerSchemeNativeApi { RestoreDefaultSchemesResult = 5 };
+        var errors = new FakePowerPlanErrorFormatter();
+        var service = new PowerPlanService(nativeApi, errors);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.RestoreDefaultSchemesAsync());
+
+        Assert.Equal("PowerPlan.Error.RestoreDefaultsFailed:5", exception.Message);
+        Assert.Equal([(5u, "PowerPlan.Error.RestoreDefaultsFailed")], errors.Win32Errors);
+    }
+
+    [Fact]
+    public async Task GetPlansAsync_ConcurrentNormalRequestsShareFetchTask()
+    {
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var nativeApi = CreateNativeApi(Guid.NewGuid());
+        nativeApi.FirstReadStarted = started;
+        nativeApi.FirstReadRelease = release;
+        var service = new PowerPlanService(nativeApi, new FakePowerPlanErrorFormatter());
+
+        var first = service.GetPlansAsync();
+        await started.Task;
+        var second = service.GetPlansAsync();
+        release.SetResult();
+        await Task.WhenAll(first, second);
+
+        Assert.Equal(1, nativeApi.GetActiveSchemeCallCount);
+    }
+
+    [Fact]
+    public void IsUltimatePerformancePlan_ReturnsFalseForOtherPlan()
+    {
+        var service = new PowerPlanService(new FakePowerSchemeNativeApi(), new FakePowerPlanErrorFormatter());
+
+        Assert.False(service.IsUltimatePerformancePlan(new()
+        {
+            Guid = Guid.NewGuid().ToString("D"),
+            Name = "Balanced",
+            IsActive = false
+        }));
+    }
     private static FakePowerSchemeNativeApi CreateNativeApi(params Guid[] schemes)
     {
         var nativeApi = new FakePowerSchemeNativeApi

@@ -9,6 +9,10 @@ internal sealed class InMemorySettingsStore : ISettingsStore
 
     public bool ThrowOnWrite { get; set; }
 
+    public List<string> BooleanWriteKeys { get; } = [];
+
+    public List<string> StringWriteKeys { get; } = [];
+
     public bool Contains(string key) => _values.ContainsKey(key);
 
     public bool GetBoolean(string key, bool defaultValue)
@@ -28,12 +32,14 @@ internal sealed class InMemorySettingsStore : ISettingsStore
     public void SetBoolean(string key, bool value)
     {
         ThrowIfWriteBlocked();
+        BooleanWriteKeys.Add(key);
         _values[key] = value;
     }
 
     public void SetString(string key, string value)
     {
         ThrowIfWriteBlocked();
+        StringWriteKeys.Add(key);
         _values[key] = value;
     }
 
@@ -104,6 +110,12 @@ internal sealed class FakePowerSchemeNativeApi : IPowerSchemeNativeApi
 
     public Dictionary<Guid, string> FriendlyNames { get; } = [];
 
+    public TaskCompletionSource? FirstReadStarted { get; set; }
+
+    public TaskCompletionSource? FirstReadRelease { get; set; }
+
+    private int _readGateEntered;
+
     public int GetActiveSchemeCallCount { get; private set; }
 
     public int EnumerateSchemeCallCount { get; private set; }
@@ -121,6 +133,12 @@ internal sealed class FakePowerSchemeNativeApi : IPowerSchemeNativeApi
     public uint GetActiveScheme(out Guid schemeGuid)
     {
         GetActiveSchemeCallCount++;
+        if (Interlocked.Exchange(ref _readGateEntered, 1) == 0 && FirstReadStarted is not null && FirstReadRelease is not null)
+        {
+            FirstReadStarted.TrySetResult();
+            FirstReadRelease.Task.GetAwaiter().GetResult();
+        }
+
         schemeGuid = ActiveScheme;
         return GetActiveSchemeResult;
     }
