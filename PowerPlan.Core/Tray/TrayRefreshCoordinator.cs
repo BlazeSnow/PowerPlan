@@ -25,15 +25,21 @@ public sealed class TrayRefreshCoordinator
                         _pendingForceRefresh = false;
                     }
 
-                    _refreshTask = RefreshCoreAsync(nextForceRefresh, refreshCoreAsync);
+                    var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                    refreshTask = completion.Task;
+                    _refreshTask = refreshTask;
                     _refreshTaskForceRefresh = nextForceRefresh;
+                    _ = CompleteRefreshAsync(nextForceRefresh, refreshCoreAsync, completion);
                 }
                 else if (nextForceRefresh && !_refreshTaskForceRefresh)
                 {
                     _pendingForceRefresh = true;
+                    refreshTask = _refreshTask;
                 }
-
-                refreshTask = _refreshTask;
+                else
+                {
+                    refreshTask = _refreshTask;
+                }
             }
 
             await refreshTask;
@@ -50,11 +56,19 @@ public sealed class TrayRefreshCoordinator
         }
     }
 
-    private async Task RefreshCoreAsync(bool forceRefresh, Func<bool, Task> refreshCoreAsync)
+    private async Task CompleteRefreshAsync(
+        bool forceRefresh,
+        Func<bool, Task> refreshCoreAsync,
+        TaskCompletionSource completion)
     {
         try
         {
             await refreshCoreAsync(forceRefresh);
+            completion.SetResult();
+        }
+        catch (Exception ex)
+        {
+            completion.SetException(ex);
         }
         finally
         {

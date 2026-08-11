@@ -1,3 +1,5 @@
+using PowerPlan.Tray;
+
 namespace PowerPlan.Tests.TestDoubles;
 
 internal sealed class FakeTrayTextProvider : ITrayTextProvider
