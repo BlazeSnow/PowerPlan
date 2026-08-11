@@ -1,6 +1,5 @@
 using PowerPlan.Models;
 using PowerPlan.Services;
-using PowerPlan.Tray;
 
 namespace PowerPlan.Tests.TestDoubles;
 

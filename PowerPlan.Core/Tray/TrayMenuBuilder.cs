@@ -1,5 +1,3 @@
-using PowerPlan.Models;
-
 namespace PowerPlan.Tray;
 
 public sealed class TrayMenuBuilder(ITrayTextProvider textProvider)

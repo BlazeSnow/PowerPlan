@@ -1,7 +1,6 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using PowerPlan.Models;
-using PowerPlan.Tray;
 
 namespace PowerPlan.Tray.Services;
 

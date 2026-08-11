@@ -1,4 +1,3 @@
-using PowerPlan.Tray;
 using System.Runtime.InteropServices;
 
 namespace PowerPlan.Tray.Services;
