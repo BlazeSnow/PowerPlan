@@ -3,6 +3,7 @@ AppPackages/
 bin/
 BundleArtifacts/
 obj/
+TestResults/
 *.user
 .agents/
 .zcode/
