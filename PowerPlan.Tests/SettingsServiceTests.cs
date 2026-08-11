@@ -235,6 +235,22 @@ public sealed class SettingsServiceTests
     }
 
 
+    [Fact]
+    public async Task SaveAsync_DoesNotUpdateCurrentOrRaiseEventWhenWriteFails()
+    {
+        var settingsStore = new InMemorySettingsStore();
+        var service = CreateService(settingsStore, new FakeLegacySettingsStore());
+        var original = new AppSettings { Language = LanguageSettings.FrenchLanguage };
+        await service.SaveAsync(original);
+        var eventCount = 0;
+        service.SettingsChanged += (_, _) => eventCount++;
+        settingsStore.ThrowOnWrite = true;
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SaveAsync(new AppSettings { Language = LanguageSettings.GermanLanguage }));
+
+        Assert.Same(original, service.Current);
+        Assert.Equal(0, eventCount);
+    }
     private static SettingsService CreateService(InMemorySettingsStore settingsStore, FakeLegacySettingsStore legacyStore)
     {
         return new SettingsService(settingsStore, legacyStore, new FakeLanguagePreferenceProvider { PreferredLanguage = "en-US" });

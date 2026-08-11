@@ -1,6 +1,7 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using PowerPlan.Models;
+using PowerPlan.Tray;
 
 namespace PowerPlan.Tray.Services;
 
@@ -20,13 +21,10 @@ public sealed class TrayService : IDisposable
     private readonly DispatcherQueue _uiDispatcherQueue;
     private readonly TrayNativeHost _nativeHost = new();
     private readonly TrayMenuPresenter _menuPresenter;
+    private readonly TrayRefreshCoordinator _refreshCoordinator = new();
 
     private readonly object _plansLock = new();
-    private readonly object _refreshTaskLock = new();
-    private IReadOnlyList<PowerPlanInfo> _cachedPlans = Array.Empty<PowerPlanInfo>();
-    private Task? _refreshPlansTask;
-    private bool _refreshPlansTaskForceRefresh;
-    private bool _pendingForceRefresh;
+    private TrayPlansSnapshot _plansSnapshot = new(Array.Empty<PowerPlanInfo>());
     private bool _disposed;
 
     public TrayService(
@@ -57,7 +55,7 @@ public sealed class TrayService : IDisposable
         _exitApplication = exitApplication;
         _log = log;
         _localizer = localizer;
-        _menuPresenter = new TrayMenuPresenter(localizer);
+        _menuPresenter = new TrayMenuPresenter(new TrayMenuBuilder(localizer));
         _nativeHost.MenuRequested += OnMenuRequested;
         _nativeHost.RestoreFailed += OnNativeHostRestoreFailed;
     }
@@ -76,53 +74,16 @@ public sealed class TrayService : IDisposable
         _log(_localizer.Get("Tray.Init"), InfoBarSeverity.Success);
     }
 
-    public async Task RefreshPlansAsync(bool forceRefresh = false)
+    public Task RefreshPlansAsync(bool forceRefresh = false)
     {
-        var nextForceRefresh = forceRefresh;
-        while (true)
-        {
-            Task refreshTask;
-
-            lock (_refreshTaskLock)
-            {
-                if (_refreshPlansTask is null)
-                {
-                    if (nextForceRefresh)
-                    {
-                        _pendingForceRefresh = false;
-                    }
-
-                    _refreshPlansTask = RefreshPlansCoreAsync(nextForceRefresh);
-                    _refreshPlansTaskForceRefresh = nextForceRefresh;
-                }
-                else if (nextForceRefresh && !_refreshPlansTaskForceRefresh)
-                {
-                    _pendingForceRefresh = true;
-                }
-
-                refreshTask = _refreshPlansTask
-                    ?? throw new InvalidOperationException("Refresh task was not created.");
-            }
-
-            await refreshTask;
-
-            lock (_refreshTaskLock)
-            {
-                if (!forceRefresh || !_pendingForceRefresh)
-                {
-                    return;
-                }
-
-                nextForceRefresh = true;
-            }
-        }
+        return _refreshCoordinator.RefreshAsync(forceRefresh, RefreshPlansCoreAsync);
     }
 
     public void UpdatePlansSnapshot(IReadOnlyList<PowerPlanInfo> plans)
     {
         lock (_plansLock)
         {
-            _cachedPlans = plans.ToArray();
+            _plansSnapshot = _plansSnapshot.Replace(plans);
         }
 
         UpdateTrayTooltip();
@@ -158,14 +119,6 @@ public sealed class TrayService : IDisposable
         {
             _log(_localizer.Format("Tray.RefreshFailed", ex.Message), InfoBarSeverity.Error);
         }
-        finally
-        {
-            lock (_refreshTaskLock)
-            {
-                _refreshPlansTask = null;
-                _refreshPlansTaskForceRefresh = false;
-            }
-        }
     }
 
     private void UpdateTrayTooltip()
@@ -181,26 +134,10 @@ public sealed class TrayService : IDisposable
 
     private string BuildTooltipText()
     {
-        string? activePlanName;
         lock (_plansLock)
         {
-            activePlanName = _cachedPlans.FirstOrDefault(plan => plan.IsActive)?.Name;
+            return TrayTooltipFormatter.Format(_plansSnapshot.Plans, _isStartupEnabled(), _localizer);
         }
-
-        var planText = string.IsNullOrWhiteSpace(activePlanName)
-            ? _localizer.Get("Tray.Tooltip.PlanUnavailable")
-            : _localizer.Format("Tray.Tooltip.Plan", activePlanName);
-        var startupState = _localizer.Get(_isStartupEnabled() ? "App.Status.On" : "App.Status.Off");
-        var startupText = _localizer.Format("Tray.Tooltip.AutoStart", startupState);
-        return TruncateTooltip($"{_localizer.Get("App.WindowTitle")}\n{planText}\n{startupText}");
-    }
-
-    private static string TruncateTooltip(string text)
-    {
-        const int maxTooltipLength = 127;
-        return text.Length <= maxTooltipLength
-            ? text
-            : text[..maxTooltipLength];
     }
 
     private void OnMenuRequested(nint window, nint packedPosition)
@@ -210,22 +147,17 @@ public sealed class TrayService : IDisposable
             return;
         }
 
-        var command = _menuPresenter.Show(window, packedPosition, CreateMenuContext());
+        TrayMenuContext context;
+        lock (_plansLock)
+        {
+            context = _plansSnapshot.CreateMenuContext(_getHiddenUltimatePlanGuid(), _isStartupEnabled());
+        }
+
+        var command = _menuPresenter.Show(window, packedPosition, context);
         if (command is not null)
         {
             DispatchMenuCommand(command.Value);
         }
-    }
-
-    private TrayMenuContext CreateMenuContext()
-    {
-        IReadOnlyList<PowerPlanInfo> plans;
-        lock (_plansLock)
-        {
-            plans = _cachedPlans.ToArray();
-        }
-
-        return new TrayMenuContext(plans, _getHiddenUltimatePlanGuid(), _isStartupEnabled());
     }
 
     private void OnNativeHostRestoreFailed(Exception exception)
@@ -308,9 +240,7 @@ public sealed class TrayService : IDisposable
     {
         lock (_plansLock)
         {
-            _cachedPlans = _cachedPlans
-                .Select(plan => plan with { IsActive = string.Equals(plan.Guid, activePlanGuid, StringComparison.OrdinalIgnoreCase) })
-                .ToArray();
+            _plansSnapshot = _plansSnapshot.WithActivePlan(activePlanGuid);
         }
     }
 

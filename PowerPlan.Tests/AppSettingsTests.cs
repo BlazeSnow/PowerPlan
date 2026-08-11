@@ -40,6 +40,22 @@ public sealed class AppSettingsTests
     }
 
     [Fact]
+    public void JsonContract_DeserializesLegacySettingsWithoutDataLoss()
+    {
+        const string json = """
+            {"startup":true,"tray":false,"launchToTray":true,"language":"zh-HK","UltimatePerformance":"saved-guid"}
+            """;
+
+        var settings = JsonSerializer.Deserialize<AppSettings>(json);
+
+        Assert.NotNull(settings);
+        Assert.True(settings.AutoStart);
+        Assert.False(settings.TrayEnabled);
+        Assert.True(settings.LaunchToTray);
+        Assert.Equal("zh-HK", settings.Language);
+        Assert.Equal("saved-guid", settings.UltimatePerformancePlanGuid);
+    }
+    [Fact]
     public void JsonContract_UsesConfiguredPropertyNames()
     {
         var properties = typeof(AppSettings)

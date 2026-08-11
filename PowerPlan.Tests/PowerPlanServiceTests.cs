@@ -318,6 +318,49 @@ public sealed class PowerPlanServiceTests
             IsActive = false
         }));
     }
+    [Fact]
+    public async Task GetPlansAsync_AllowsRetryAfterReadFailure()
+    {
+        var nativeApi = CreateNativeApi(Guid.NewGuid());
+        nativeApi.GetActiveSchemeResult = 5;
+        var service = new PowerPlanService(nativeApi, new FakePowerPlanErrorFormatter());
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.GetPlansAsync());
+        nativeApi.GetActiveSchemeResult = 0;
+        var plans = await service.GetPlansAsync();
+
+        Assert.Single(plans);
+        Assert.Equal(2, nativeApi.GetActiveSchemeCallCount);
+    }
+
+    [Theory]
+    [InlineData("copy")]
+    [InlineData("ultimate")]
+    [InlineData("restore")]
+    public async Task SuccessfulPlanChanges_InvalidateCachedPlans(string operation)
+    {
+        var sourceGuid = Guid.NewGuid();
+        var nativeApi = CreateNativeApi(sourceGuid);
+        var service = new PowerPlanService(nativeApi, new FakePowerPlanErrorFormatter());
+        _ = await service.GetPlansAsync();
+
+        switch (operation)
+        {
+            case "copy":
+                await service.CopyPlanAsync(sourceGuid.ToString("D"), "Copy");
+                break;
+            case "ultimate":
+                await service.CreateUltimatePerformancePlanAsync();
+                break;
+            case "restore":
+                await service.RestoreDefaultSchemesAsync();
+                break;
+        }
+
+        _ = await service.GetPlansAsync();
+
+        Assert.Equal(2, nativeApi.GetActiveSchemeCallCount);
+    }
     private static FakePowerSchemeNativeApi CreateNativeApi(params Guid[] schemes)
     {
         var nativeApi = new FakePowerSchemeNativeApi

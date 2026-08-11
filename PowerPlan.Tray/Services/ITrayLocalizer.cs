@@ -1,8 +1,7 @@
+using PowerPlan.Tray;
+
 namespace PowerPlan.Tray.Services;
 
-public interface ITrayLocalizer
+public interface ITrayLocalizer : ITrayTextProvider
 {
-    string Get(string key);
-
-    string Format(string key, params object[] arguments);
 }
