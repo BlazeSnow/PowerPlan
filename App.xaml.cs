@@ -262,9 +262,9 @@ public partial class App : Application, IPageHost
             return;
         }
 
+        _windowService.Hide();
         window.Content = null;
         _shellPage = null;
-        _windowService.Hide();
     }
 
     private void ExitApplication()
