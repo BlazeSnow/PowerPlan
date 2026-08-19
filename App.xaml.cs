@@ -263,6 +263,7 @@ public partial class App : Application, IPageHost
         }
 
         _windowService.Hide();
+        window.SetTitleBar(null);
         window.Content = null;
         _shellPage = null;
     }
@@ -316,6 +317,11 @@ public partial class App : Application, IPageHost
 
     private async Task RefreshMainPageAfterShowAsync(MainPage page)
     {
+        if (!ReferenceEquals(page, GetVisibleMainPage()))
+        {
+            return;
+        }
+
         if (!_pendingMainPageRefresh)
         {
             return;

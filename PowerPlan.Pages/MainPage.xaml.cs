@@ -16,6 +16,7 @@ public sealed partial class MainPage : Page
     private IPageHost? _pageHost;
     private DispatcherQueueTimer? _statusDismissTimer;
     private bool _isUpdatingSelection;
+    private bool _isLoaded;
     private bool _hasLoadedPlans;
     private DateTimeOffset _lastStatusAt;
     private string _lastStatusMessage = string.Empty;
@@ -44,12 +45,26 @@ public sealed partial class MainPage : Page
 
     private void MainPage_Unloaded(object sender, RoutedEventArgs e)
     {
-        _statusDismissTimer?.Stop();
+        _isLoaded = false;
+        DisposeStatusDismissTimer();
         StatusInfoBar.IsOpen = false;
+    }
+
+    private void DisposeStatusDismissTimer()
+    {
+        if (_statusDismissTimer is null)
+        {
+            return;
+        }
+
+        _statusDismissTimer.Stop();
+        _statusDismissTimer.Tick -= OnStatusDismissTimerTick;
+        _statusDismissTimer = null;
     }
 
     private async void MainPage_Loaded(object sender, RoutedEventArgs e)
     {
+        _isLoaded = true;
         if (_hasLoadedPlans)
         {
             return;
@@ -58,12 +73,20 @@ public sealed partial class MainPage : Page
         try
         {
             await RefreshPlansAsync();
+            if (!_isLoaded)
+            {
+                return;
+            }
+
             _hasLoadedPlans = true;
             SetStatus(PageHost.GetString("Main.Status.InitSuccess"), InfoBarSeverity.Success);
         }
         catch (Exception ex)
         {
-            SetStatus(PageHost.FormatString("Main.Status.InitFailed", ex.Message), InfoBarSeverity.Error);
+            if (_isLoaded)
+            {
+                SetStatus(PageHost.FormatString("Main.Status.InitFailed", ex.Message), InfoBarSeverity.Error);
+            }
         }
     }
 
@@ -88,6 +111,11 @@ public sealed partial class MainPage : Page
         try
         {
             var plans = await PageHost.PowerPlanService.GetPlansAsync(forceRefresh);
+            if (!_isLoaded)
+            {
+                return;
+            }
+
             ApplyPlansToView(plans);
             PageHost.UpdateTrayPlans(plans);
 
