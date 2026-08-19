@@ -15,6 +15,6 @@
     <ItemGroup>
         <ProjectReference Include="..\PowerPlan.Core\PowerPlan.Core.csproj" />
         <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
     </ItemGroup>
 </Project>
