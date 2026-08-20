@@ -19,6 +19,11 @@
         <Platform Solution="*|x86" Project="x86" />
         <Platform Solution="*|ARM64" Project="ARM64" />
     </Project>
+    <Project Path="PowerPlan.Tests\PowerPlan.Tests.csproj">
+        <Platform Solution="*|x64" Project="AnyCPU" />
+        <Platform Solution="*|x86" Project="AnyCPU" />
+        <Platform Solution="*|ARM64" Project="AnyCPU" />
+    </Project>
     <Project Path="PowerPlan.csproj">
         <Platform Solution="*|x64" Project="x64" />
         <Platform Solution="*|x86" Project="x86" />

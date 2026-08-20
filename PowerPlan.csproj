@@ -39,6 +39,7 @@
         <Compile Remove="PowerPlan.Core\**\*.cs" />
         <Compile Remove="PowerPlan.Tray\**\*.cs" />
         <Compile Remove="PowerPlan.Pages\**\*.cs" />
+        <Compile Remove="PowerPlan.Tests\**\*.cs" />
         <Page Remove="PowerPlan.Pages\**\*.xaml" />
         <EmbeddedResource Remove="PowerPlan.Core\**\*" />
         <EmbeddedResource Remove="PowerPlan.Tray\**\*" />
@@ -46,6 +47,7 @@
         <None Remove="PowerPlan.Core\**\*" />
         <None Remove="PowerPlan.Tray\**\*" />
         <None Remove="PowerPlan.Pages\**\*" />
+        <None Remove="PowerPlan.Tests\**\*" />
         <ProjectReference Include="PowerPlan.Core\PowerPlan.Core.csproj" />
         <ProjectReference Include="PowerPlan.Pages\PowerPlan.Pages.csproj" />
         <ProjectReference Include="PowerPlan.Tray\PowerPlan.Tray.csproj" />
@@ -59,7 +61,7 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2526" />
 
         <Manifest Include="$(ApplicationManifest)" />
