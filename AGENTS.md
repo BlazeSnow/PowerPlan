@@ -23,8 +23,8 @@ dotnet run --project PowerPlan.csproj
 
 | 主题 | 要点 | 详情 |
 | --- | --- | --- |
-| 电源计划 | 通过 `powercfg` 读取与切换；卓越性能计划仅按 GUID（系统模板 GUID 或本程序保存的 UUID）识别，不按名称判断 | [DEVELOPMENT.md「电源计划」](./DEVELOPMENT.md#电源计划) |
-| 主页面 | 解锁区（修改电源计划需管理员权限）、表格区、状态 | [DEVELOPMENT.md「主页面」](./DEVELOPMENT.md#主页面) |
+| 电源计划 | 通过 `powrprof.dll` 原生API读取与切换；卓越性能计划仅按 GUID（系统模板 GUID 或本程序保存的 UUID）识别，不按名称判断 | [DEVELOPMENT.md「电源计划」](./DEVELOPMENT.md#电源计划) |
+| 主页面 | 电源计划列表（单选切换）、卓越性能计划卡片、状态；切换计划无需管理员权限 | [DEVELOPMENT.md「主页面」](./DEVELOPMENT.md#主页面) |
 | 托盘 | 自写 Win32 `Shell_NotifyIconW`，专用不可见 HWND 宿主；菜单深浅色跟随系统；禁止 `ForceDark`/`ForceLight` 等方案 | [DEVELOPMENT.md「托盘」](./DEVELOPMENT.md#托盘) |
 | 设置页面 | 仿 Windows 11 设置；持久化到 `LocalSettings`，旧 `settings.json` 一次性迁移 | [DEVELOPMENT.md「设置页面」](./DEVELOPMENT.md#设置页面) |
 | 界面与语言 | WinUI 3 原生侧边栏与 `TitleBar`；默认简体中文 | [DEVELOPMENT.md「侧边栏」](./DEVELOPMENT.md#侧边栏) |
