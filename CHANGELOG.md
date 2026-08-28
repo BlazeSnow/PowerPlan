@@ -11,6 +11,7 @@
 7. 更新 WindowsAppSDK 2.3.1 -> 2.4.0
 8. 更新 Microsoft.Windows.SDK.BuildTools 10.0.28000.2526 -> 10.0.28000.2705
 9. 拆分开发文档为 AGENTS.md 与 DEVELOPMENT.md
+10. 将打开电源选项的入口从设置页移至主页
 
 ## v2026.7.31.0
 
