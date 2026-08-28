@@ -137,7 +137,7 @@
 
             <controls:SettingsCard x:Name="PowerOptionsCard">
                 <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE7E8;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                    <FontIcon Glyph="&#xEC4A;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
                 </controls:SettingsCard.HeaderIcon>
                 <Button x:Name="OpenPowerOptionsButton" Click="OnOpenPowerOptionsClicked" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </controls:SettingsCard>
