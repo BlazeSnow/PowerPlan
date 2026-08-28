@@ -1,7 +1,6 @@
-# AI编程指导文件
+# 开发指南
 
-1. 默认禁止对本文件进行修改；只有用户明确授权时才可修订
-2. 所有文件都以UTF-8格式存储
+PowerPlan 的详细开发指南。基本约定与内容速览见 [AGENTS.md](./AGENTS.md)。本文档允许修改，应随开发进度同步更新。
 
 ## 程序目的
 
@@ -9,7 +8,7 @@
 
 ## 程序架构
 
-1. 程序使用winui 3架构
+1. 程序使用WinUI 3架构
 2. 最终发布至Microsoft store
 
 ## 电源计划
@@ -53,7 +52,7 @@
 
 ## 托盘
 
-1. 使用自写 Win32 `Shell_NotifyIconW` 实现托盘，图标使用应用 `Assets\\powerplan.ico`。
+1. 使用自写 Win32 `Shell_NotifyIconW` 实现托盘，图标使用应用 `Assets\powerplan.ico`。
 2. 托盘必须使用专用的不可见顶级 HWND 作为通知区回调宿主；不可依赖主 WinUI 窗口，因为静默启动时主窗口不存在，关闭主窗口后也会被隐藏。
 3. 使用稳定的通知区图标 GUID，并在 `NIM_ADD` 后设置 `NOTIFYICON_VERSION_4`。
 4. 必须处理 `TaskbarCreated`，以便 Explorer 重启后重新添加图标并恢复协议版本。
@@ -76,10 +75,12 @@
 
 1. 正常启动应用，开启"开机自启"和"托盘"设置，关闭应用
 2. 设置环境变量`POWERPLAN_SIMULATE_STARTUP=1`后启动应用，模拟登录触发：
-   ```
+
+   ```powershell
    $env:POWERPLAN_SIMULATE_STARTUP = "1"
    dotnet run --project PowerPlan.csproj
    ```
+
 3. 预期：窗口不弹出，图标直接进入托盘
 4. 真实链路验证：登出再登入即可，不需要重启电脑
 
