@@ -258,7 +258,7 @@ public sealed partial class MainPage : Page
         try
         {
             await PageHost.PowerPlanService.SetActivePlanAsync(selectedPlan.Guid);
-            SetStatus(PageHost.FormatString("Main.Status.SwitchSuccess", selectedPlan.Guid), InfoBarSeverity.Success);
+            SetStatus(PageHost.FormatString("Main.Status.SwitchSuccess", selectedPlan.Name), InfoBarSeverity.Success);
             ApplyActivePlan(selectedPlan.Guid);
             PageHost.UpdateTrayPlans(BuildPlanSnapshot());
         }
