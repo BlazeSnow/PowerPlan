@@ -87,7 +87,7 @@ public sealed class PowerPlanServiceTests
     }
 
     [Fact]
-    public async Task CopyPlanAsync_RejectsBlankNameAfterDuplication()
+    public async Task CopyPlanAsync_RejectsBlankNameWithoutDuplication()
     {
         var sourceGuid = Guid.NewGuid();
         var nativeApi = new FakePowerSchemeNativeApi();
@@ -97,7 +97,7 @@ public sealed class PowerPlanServiceTests
             () => service.CopyPlanAsync(sourceGuid.ToString("D"), "   "));
 
         Assert.Equal("EmptyName", exception.Message);
-        Assert.Equal(sourceGuid, nativeApi.DuplicateSchemeArgument);
+        Assert.Null(nativeApi.DuplicateSchemeArgument);
         Assert.Null(nativeApi.WriteFriendlyNameArgument);
     }
 
