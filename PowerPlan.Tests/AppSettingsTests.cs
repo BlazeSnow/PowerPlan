@@ -56,6 +56,29 @@ public sealed class AppSettingsTests
         Assert.Equal("saved-guid", settings.UltimatePerformancePlanGuid);
     }
     [Fact]
+    public void JsonContract_RoundTripsAllValues()
+    {
+        var original = new AppSettings
+        {
+            AutoStart = true,
+            TrayEnabled = false,
+            LaunchToTray = true,
+            Language = "zh-Hant",
+            UltimatePerformancePlanGuid = "saved-guid"
+        };
+
+        var json = JsonSerializer.Serialize(original);
+        var restored = JsonSerializer.Deserialize<AppSettings>(json);
+
+        Assert.NotNull(restored);
+        Assert.True(restored.AutoStart);
+        Assert.False(restored.TrayEnabled);
+        Assert.True(restored.LaunchToTray);
+        Assert.Equal("zh-Hant", restored.Language);
+        Assert.Equal("saved-guid", restored.UltimatePerformancePlanGuid);
+    }
+
+    [Fact]
     public void JsonContract_UsesConfiguredPropertyNames()
     {
         var properties = typeof(AppSettings)
