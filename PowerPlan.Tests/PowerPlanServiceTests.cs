@@ -307,6 +307,36 @@ public sealed class PowerPlanServiceTests
     }
 
     [Fact]
+    public async Task GetPlansAsync_ForceRefreshDiscardsStaleInFlightRead()
+    {
+        var planGuid = Guid.NewGuid();
+        var nativeApi = CreateNativeApi(planGuid);
+        nativeApi.FriendlyNames[planGuid] = "Before";
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        nativeApi.FirstReadStarted = started;
+        nativeApi.FirstReadRelease = release;
+        var service = new PowerPlanService(nativeApi, new FakePowerPlanErrorFormatter());
+
+        var stale = service.GetPlansAsync();
+        await started.Task;
+
+        nativeApi.FriendlyNames[planGuid] = "After";
+        var fresh = await service.GetPlansAsync(forceRefresh: true);
+        Assert.Equal("After", fresh.Single().Name);
+        Assert.Equal(2, nativeApi.GetActiveSchemeCallCount);
+
+        nativeApi.FriendlyNames[planGuid] = "Stale";
+        release.SetResult();
+        var staleResult = await stale;
+        Assert.Equal("Stale", staleResult.Single().Name);
+
+        var cached = await service.GetPlansAsync();
+        Assert.Equal("After", cached.Single().Name);
+        Assert.Equal(2, nativeApi.GetActiveSchemeCallCount);
+    }
+
+    [Fact]
     public void IsUltimatePerformancePlan_ReturnsFalseForOtherPlan()
     {
         var service = new PowerPlanService(new FakePowerSchemeNativeApi(), new FakePowerPlanErrorFormatter());
