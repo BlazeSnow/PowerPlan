@@ -259,10 +259,10 @@
   <data name="Settings.SaveFailed" xml:space="preserve">
     <value>儲存設定失敗：{0}</value>
   </data>
-  <data name="Settings.Tools.PowerOptions" xml:space="preserve">
+  <data name="Main.PowerOptions" xml:space="preserve">
     <value>前往電源選項</value>
   </data>
-  <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve">
+  <data name="Main.PowerOptionsDesc" xml:space="preserve">
     <value>開啟 Windows 控制台中的電源選項頁面</value>
   </data>
   <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve">

@@ -125,8 +125,8 @@
   <data name="Settings.LaunchToTray.Title" xml:space="preserve"><value>Iniciar en la bandeja</value></data>
   <data name="Settings.LaunchToTray.Desc" xml:space="preserve"><value>Si se activa, PowerPlan se inicia solo con el icono en la bandeja del sistema.</value></data>
   <data name="Settings.SaveFailed" xml:space="preserve"><value>Error al guardar la configuración: {0}</value></data>
-  <data name="Settings.Tools.PowerOptions" xml:space="preserve"><value>Opciones de energía</value></data>
-  <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve"><value>Abrir Opciones de energía en el Panel de control</value></data>
+  <data name="Main.PowerOptions" xml:space="preserve"><value>Opciones de energía</value></data>
+  <data name="Main.PowerOptionsDesc" xml:space="preserve"><value>Abrir Opciones de energía en el Panel de control</value></data>
   <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve"><value>Restaurar planes de energía</value></data>
   <data name="Settings.Tools.RestorePowerPlansDesc" xml:space="preserve"><value>Restaurar los planes de energía predeterminados y borrar el UUID de máximo rendimiento guardado</value></data>
   <data name="Settings.Tools.Website" xml:space="preserve"><value>Sitio web oficial</value></data>

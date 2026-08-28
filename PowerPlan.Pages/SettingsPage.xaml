@@ -55,13 +55,6 @@
                 <ToggleSwitch x:Name="LaunchToTrayToggle" Toggled="OnLaunchToTrayToggled" HorizontalAlignment="Right" VerticalAlignment="Center" />
             </controls:SettingsCard>
 
-            <controls:SettingsCard x:Name="PowerOptionsCard">
-                <controls:SettingsCard.HeaderIcon>
-                    <FontIcon Glyph="&#xE713;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
-                </controls:SettingsCard.HeaderIcon>
-                <Button x:Name="OpenPowerOptionsButton" Click="OnOpenPowerOptionsClicked" HorizontalAlignment="Right" VerticalAlignment="Center" />
-            </controls:SettingsCard>
-
             <controls:SettingsCard x:Name="RestorePowerPlansCard">
                 <controls:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE777;" Style="{StaticResource SettingsCardHeaderIconStyle}" />

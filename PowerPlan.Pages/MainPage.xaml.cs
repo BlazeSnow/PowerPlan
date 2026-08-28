@@ -2,6 +2,7 @@ using Microsoft.UI.Dispatching;
 using PowerPlan.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace PowerPlan.Pages;
@@ -98,6 +99,9 @@ public sealed partial class MainPage : Page
         PlanPickerTitleText.Text = PageHost.GetString("Main.PlanPickerTitle");
         CreateUltimateButton.Content = PageHost.GetString("Main.CreateUltimateButton");
         DeletePlanHintText.Text = PageHost.GetString("Main.DeletePlanHint");
+        PowerOptionsCard.Header = PageHost.GetString("Main.PowerOptions");
+        PowerOptionsCard.Description = PageHost.GetString("Main.PowerOptionsDesc");
+        OpenPowerOptionsButton.Content = PageHost.GetString("Settings.Tools.OpenButton");
     }
 
     private Task RefreshPlansAsync(bool updateStatus = true, bool forceRefresh = false)
@@ -297,6 +301,29 @@ public sealed partial class MainPage : Page
         finally
         {
             _isUpdatingSelection = false;
+        }
+    }
+
+    private void OnOpenPowerOptionsClicked(object sender, RoutedEventArgs e)
+    {
+        OpenExternal("control.exe", "/name Microsoft.PowerOptions");
+    }
+
+    private static void OpenExternal(string target, string? args = null)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo(target) { UseShellExecute = true };
+            if (!string.IsNullOrWhiteSpace(args))
+            {
+                startInfo.Arguments = args;
+            }
+
+            _ = Process.Start(startInfo);
+        }
+        catch
+        {
+            // Keep page silent when external process launch fails.
         }
     }
 
