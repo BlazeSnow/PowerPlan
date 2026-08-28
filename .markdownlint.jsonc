@@ -1,0 +1,6 @@
+{
+  // MD013/line-length：中文文本按语义断行，固定行长（80）不适用
+  "MD013": false,
+  // MD033/no-inline-html：README 使用内联 HTML 嵌入 Microsoft Store 徽章
+  "MD033": false
+}
