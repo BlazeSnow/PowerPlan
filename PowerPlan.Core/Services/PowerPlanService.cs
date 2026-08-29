@@ -65,13 +65,13 @@ public sealed class PowerPlanService : IPowerPlanService
     public Task<string> CopyPlanAsync(string sourcePlanGuid, string newName)
     {
         var sourceGuid = ParsePowerSchemeGuid(sourcePlanGuid, "PowerPlan.Error.InvalidSourcePlanGuid");
-        var newPlanGuid = DuplicatePowerScheme(sourceGuid);
         var trimmedName = newName.Trim();
         if (string.IsNullOrWhiteSpace(trimmedName))
         {
             throw _errorFormatter.CreateEmptyNameException();
         }
 
+        var newPlanGuid = DuplicatePowerScheme(sourceGuid);
         ThrowIfFailed(_nativeApi.WriteFriendlyName(newPlanGuid, trimmedName), "PowerPlan.Error.WriteNameFailed");
         InvalidatePlansCache();
         return Task.FromResult(newPlanGuid.ToString("D"));

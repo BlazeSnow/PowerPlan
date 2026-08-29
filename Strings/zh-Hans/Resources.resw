@@ -318,10 +318,10 @@
   <data name="Settings.SaveFailed" xml:space="preserve">
     <value>保存设置失败：{0}</value>
   </data>
-  <data name="Settings.Tools.PowerOptions" xml:space="preserve">
+  <data name="Main.PowerOptions" xml:space="preserve">
     <value>前往电源选项</value>
   </data>
-  <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve">
+  <data name="Main.PowerOptionsDesc" xml:space="preserve">
     <value>打开 Windows 控制面板中的电源选项页面</value>
   </data>
   <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve">

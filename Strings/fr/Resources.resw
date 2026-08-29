@@ -259,10 +259,10 @@
   <data name="Settings.SaveFailed" xml:space="preserve">
     <value>Échec de l'enregistrement des paramètres : {0}</value>
   </data>
-  <data name="Settings.Tools.PowerOptions" xml:space="preserve">
+  <data name="Main.PowerOptions" xml:space="preserve">
     <value>Options d'alimentation</value>
   </data>
-  <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve">
+  <data name="Main.PowerOptionsDesc" xml:space="preserve">
     <value>Ouvrir les Options d'alimentation dans le Panneau de configuration</value>
   </data>
   <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve">

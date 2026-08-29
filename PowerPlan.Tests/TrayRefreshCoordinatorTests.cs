@@ -88,6 +88,57 @@ public sealed class TrayRefreshCoordinatorTests
     }
 
     [Fact]
+    public async Task RefreshAsync_PropagatesFailureToAllWaiters()
+    {
+        var coordinator = new TrayRefreshCoordinator();
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var calls = 0;
+
+        Task RefreshCoreAsync(bool forceRefresh)
+        {
+            calls++;
+            started.TrySetResult();
+            return release.Task;
+        }
+
+        var first = coordinator.RefreshAsync(false, RefreshCoreAsync);
+        await started.Task;
+        var second = coordinator.RefreshAsync(false, RefreshCoreAsync);
+        var third = coordinator.RefreshAsync(false, RefreshCoreAsync);
+        release.SetException(new InvalidOperationException("refresh failed"));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => first);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => second);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => third);
+        Assert.Equal(1, calls);
+    }
+
+    [Fact]
+    public async Task RefreshAsync_ForceRequestDuringForceRefreshDoesNotQueueAnotherRefresh()
+    {
+        var coordinator = new TrayRefreshCoordinator();
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var calls = new List<bool>();
+
+        Task RefreshCoreAsync(bool forceRefresh)
+        {
+            calls.Add(forceRefresh);
+            started.TrySetResult();
+            return release.Task;
+        }
+
+        var first = coordinator.RefreshAsync(true, RefreshCoreAsync);
+        await started.Task;
+        var second = coordinator.RefreshAsync(true, RefreshCoreAsync);
+        release.SetResult();
+        await Task.WhenAll(first, second);
+
+        Assert.Equal([true], calls);
+    }
+
+    [Fact]
     public async Task RefreshAsync_AllowsRetryAfterFailure()
     {
         var coordinator = new TrayRefreshCoordinator();

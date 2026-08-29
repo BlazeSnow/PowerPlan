@@ -50,10 +50,6 @@ public sealed partial class SettingsPage : Page
         LaunchToTrayCard.Header = PageHost.GetString("Settings.LaunchToTray.Title");
         LaunchToTrayCard.Description = PageHost.GetString("Settings.LaunchToTray.Desc");
 
-        PowerOptionsCard.Header = PageHost.GetString("Settings.Tools.PowerOptions");
-        PowerOptionsCard.Description = PageHost.GetString("Settings.Tools.PowerOptionsDesc");
-        OpenPowerOptionsButton.Content = PageHost.GetString("Settings.Tools.OpenButton");
-
         RestorePowerPlansCard.Header = PageHost.GetString("Settings.Tools.RestorePowerPlans");
         RestorePowerPlansCard.Description = PageHost.GetString("Settings.Tools.RestorePowerPlansDesc");
         RestorePowerPlansButton.Content = PageHost.GetString("Settings.Tools.RestoreButton");
@@ -351,11 +347,6 @@ public sealed partial class SettingsPage : Page
         }
 
         return effective;
-    }
-
-    private void OnOpenPowerOptionsClicked(object sender, RoutedEventArgs e)
-    {
-        OpenExternal("control.exe", "/name Microsoft.PowerOptions");
     }
 
     private async void OnRestorePowerPlansClicked(object sender, RoutedEventArgs e)

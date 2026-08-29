@@ -87,7 +87,7 @@ public sealed class PowerPlanServiceTests
     }
 
     [Fact]
-    public async Task CopyPlanAsync_RejectsBlankNameAfterDuplication()
+    public async Task CopyPlanAsync_RejectsBlankNameWithoutDuplication()
     {
         var sourceGuid = Guid.NewGuid();
         var nativeApi = new FakePowerSchemeNativeApi();
@@ -97,7 +97,7 @@ public sealed class PowerPlanServiceTests
             () => service.CopyPlanAsync(sourceGuid.ToString("D"), "   "));
 
         Assert.Equal("EmptyName", exception.Message);
-        Assert.Equal(sourceGuid, nativeApi.DuplicateSchemeArgument);
+        Assert.Null(nativeApi.DuplicateSchemeArgument);
         Assert.Null(nativeApi.WriteFriendlyNameArgument);
     }
 
@@ -304,6 +304,36 @@ public sealed class PowerPlanServiceTests
         await Task.WhenAll(first, second);
 
         Assert.Equal(1, nativeApi.GetActiveSchemeCallCount);
+    }
+
+    [Fact]
+    public async Task GetPlansAsync_ForceRefreshDiscardsStaleInFlightRead()
+    {
+        var planGuid = Guid.NewGuid();
+        var nativeApi = CreateNativeApi(planGuid);
+        nativeApi.FriendlyNames[planGuid] = "Before";
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        nativeApi.FirstReadStarted = started;
+        nativeApi.FirstReadRelease = release;
+        var service = new PowerPlanService(nativeApi, new FakePowerPlanErrorFormatter());
+
+        var stale = service.GetPlansAsync();
+        await started.Task;
+
+        nativeApi.FriendlyNames[planGuid] = "After";
+        var fresh = await service.GetPlansAsync(forceRefresh: true);
+        Assert.Equal("After", fresh.Single().Name);
+        Assert.Equal(2, nativeApi.GetActiveSchemeCallCount);
+
+        nativeApi.FriendlyNames[planGuid] = "Stale";
+        release.SetResult();
+        var staleResult = await stale;
+        Assert.Equal("Stale", staleResult.Single().Name);
+
+        var cached = await service.GetPlansAsync();
+        Assert.Equal("After", cached.Single().Name);
+        Assert.Equal(2, nativeApi.GetActiveSchemeCallCount);
     }
 
     [Fact]

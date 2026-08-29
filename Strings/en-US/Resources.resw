@@ -106,8 +106,8 @@
     <data name="Settings.LaunchToTray.Title" xml:space="preserve"><value>Launch to system tray</value></data>
     <data name="Settings.LaunchToTray.Desc" xml:space="preserve"><value>When enabled, PowerPlan starts with only its system tray icon visible.</value></data>
     <data name="Settings.SaveFailed" xml:space="preserve"><value>Failed to save settings: {0}</value></data>
-    <data name="Settings.Tools.PowerOptions" xml:space="preserve"><value>Power Options</value></data>
-    <data name="Settings.Tools.PowerOptionsDesc" xml:space="preserve"><value>Open Power Options in Windows Control Panel</value></data>
+    <data name="Main.PowerOptions" xml:space="preserve"><value>Power Options</value></data>
+    <data name="Main.PowerOptionsDesc" xml:space="preserve"><value>Open Power Options in Windows Control Panel</value></data>
     <data name="Settings.Tools.RestorePowerPlans" xml:space="preserve"><value>Restore power plans</value></data>
     <data name="Settings.Tools.RestorePowerPlansDesc" xml:space="preserve"><value>Restore the default Windows power plans and clear the saved Ultimate Performance UUID</value></data>
     <data name="Settings.Tools.Website" xml:space="preserve"><value>Official website</value></data>

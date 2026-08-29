@@ -135,6 +135,13 @@
                 </StackPanel>
             </Border>
 
+            <controls:SettingsCard x:Name="PowerOptionsCard">
+                <controls:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE9E9;" Style="{StaticResource SettingsCardHeaderIconStyle}" />
+                </controls:SettingsCard.HeaderIcon>
+                <Button x:Name="OpenPowerOptionsButton" Click="OnOpenPowerOptionsClicked" HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </controls:SettingsCard>
+
             </StackPanel>
         </ScrollViewer>
 
