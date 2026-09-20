@@ -1,5 +1,7 @@
 # PowerPlan
 
+简体中文 | [English](README.en.md) | [Deutsch](README.de.md) | [Español](README.es.md) | [Français](README.fr.md) | [Italiano](README.it.md) | [繁體中文](README.zh-Hant.md)
+
 ## 程序介绍
 
 本程序针对 Windows 系统的电源计划，帮助用户快速切换电源计划。
