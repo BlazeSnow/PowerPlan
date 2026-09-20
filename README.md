@@ -2,7 +2,7 @@
 
 ## 程序介绍
 
-本程序针对Windows系统的电源计划，帮助用户快速切换电源计划。
+本程序针对 Windows 系统的电源计划，帮助用户快速切换电源计划。
 
 ## 如何下载
 
@@ -20,6 +20,8 @@
 
 ## 仓库信息
 
+> 由 v2026.9.19.0 起，PowerPlan 使用 Rust 重写，接替原有的 WinUI 版。
+
 - Rust版：<https://github.com/BlazeSnow/PowerPlan.Rust>
 - WinUI版：<https://github.com/BlazeSnow/PowerPlan.WinUI>
 
@@ -27,4 +29,4 @@
 
 Copyright © 2026 BlazeSnow.
 
-以GNU Affero General Public License v3.0的条款发布。
+以GNU Affero General Public License v3.0 的条款发布。
