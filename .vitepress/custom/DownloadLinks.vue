@@ -27,20 +27,31 @@ const props = defineProps<{
 
 const { lang } = useData()
 
+//各语言对应的徽章素材后缀与替代文本（来源 get.microsoft.com，与各语言 README 一致），未知语言回退到英文徽章
+const localeArt: Record<string, { suffix: string; alt: string }> = {
+    'zh-CN': { suffix: '', alt: '从 Microsoft 获取' },
+    'en-US': { suffix: '.en', alt: 'Get it from Microsoft' },
+    'de-DE': { suffix: '.de', alt: 'Von Microsoft herunterladen' },
+    'es-ES': { suffix: '.es', alt: 'Consíguelo en Microsoft' },
+    'fr-FR': { suffix: '.fr', alt: 'Obtenir de Microsoft' },
+    'it-IT': { suffix: '.it', alt: 'Scarica da Microsoft' },
+    'zh-Hant': { suffix: '.zh-hant', alt: '從 Microsoft 取得' }
+}
+
 const presetLinks = computed<DownloadLink[]>(() => {
     const items: DownloadLink[] = []
     if (props.microsoftStore) {
         const href = /^https?:\/\//i.test(props.microsoftStore)
             ? props.microsoftStore
             : `https://apps.microsoft.com/detail/${props.microsoftStore}`
-        //按界面语言选择徽章素材：中文用原版，英文用 .en 版
-        const suffix = lang.value.startsWith('zh') ? '' : '.en'
+        //按界面语言选择徽章素材
+        const art = localeArt[lang.value] ?? { suffix: '.en', alt: 'Get it from Microsoft' }
         items.push({
             label: 'Microsoft Store',
             href,
-            image: `/downloadlink/dark${suffix}.svg`,
-            imageDark: `/downloadlink/light${suffix}.svg`,
-            alt: lang.value.startsWith('zh') ? '从 Microsoft 获取' : 'Get it from Microsoft'
+            image: `/downloadlink/dark${art.suffix}.svg`,
+            imageDark: `/downloadlink/light${art.suffix}.svg`,
+            alt: art.alt
         })
     }
     return items
