@@ -64,6 +64,29 @@ export const shared = defineConfig({
                                 }
                             }
                         }
+                    },
+                    'zh-hant': {
+                        translations: {
+                            button: {
+                                buttonText: '搜尋文件',
+                                buttonAriaLabel: '搜尋文件',
+                            },
+                            modal: {
+                                displayDetails: '顯示文章的詳細內容',
+                                resetButtonTitle: '清除內容',
+                                backButtonTitle: '返回',
+                                noResultsText: '沒有找到',
+                                footer: {
+                                    selectText: '選擇',
+                                    selectKeyAriaLabel: '選擇',
+                                    navigateText: '切換',
+                                    navigateUpKeyAriaLabel: '向上',
+                                    navigateDownKeyAriaLabel: '向下',
+                                    closeText: '關閉',
+                                    closeKeyAriaLabel: '關閉',
+                                }
+                            }
+                        }
                     }
                 }
             }
