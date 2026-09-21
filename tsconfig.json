@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "esModuleInterop": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "jsx": "preserve",
+        "lib": ["ESNext", "DOM", "DOM.Iterable"],
+        //引入 vitepress 客户端类型（含 vite/client 的 *.css 等资源模块声明）
+        "types": ["vitepress/client"],
+        "noEmit": true
+    },
+    "include": [
+        ".vitepress/**/*.ts",
+        ".vitepress/**/*.d.ts",
+        ".vitepress/**/*.vue"
+    ],
+    "exclude": [
+        "node_modules",
+        ".vitepress/cache",
+        ".vitepress/dist"
+    ]
+}

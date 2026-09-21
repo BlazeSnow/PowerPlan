@@ -1,0 +1,19 @@
+{
+    "name": "powerplan",
+    "version": "2026.9.19.0",
+    "author": {
+        "name": "BlazeSnow",
+        "url": "https://github.com/BlazeSnow/"
+    },
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "docs:dev": "vitepress dev",
+        "docs:build": "vitepress build",
+        "docs:preview": "vitepress preview"
+    },
+    "devDependencies": {
+        "vitepress": "^1.6.4",
+        "vue": "^3.5.43"
+    }
+}
