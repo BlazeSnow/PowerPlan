@@ -15,10 +15,10 @@ export const shared = defineConfig({
     },
     //头文件配置
     head: [
-        //网页logo（将应用图标 logo.ico 放入 public 目录后取消注释）
-        // ['link',
-        //     { rel: 'icon', href: '/logo.ico' }
-        // ]
+        //网页logo
+        ['link',
+            { rel: 'icon', href: '/icon.ico' }
+        ]
     ],
     //markdown配置
     markdown: {
@@ -27,8 +27,8 @@ export const shared = defineConfig({
     },
     //主题配置
     themeConfig: {
-        //左上角logo（将应用图标 logo.ico 放入 public 目录后取消注释）
-        // logo: '/logo.ico',
+        //左上角logo
+        logo: '/icon.ico',
         //右边的小目录
         aside: true,
         //右边的小目录层级
