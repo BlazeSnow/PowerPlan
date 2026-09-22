@@ -14,7 +14,7 @@ hero:
 
 ## Captures d'écran
 
-![Capture d'écran de la page d'accueil de l'application](/asset/home.png)
+<ThemeImage light="/asset/home.png" dark="/asset/home.dark.png" alt="Capture d'écran de la page d'accueil de l'application" />
 
 ## Informations sur le dépôt
 

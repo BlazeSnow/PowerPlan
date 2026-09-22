@@ -14,7 +14,7 @@ hero:
 
 ## Screenshots
 
-![Screenshot of the app home page](/asset/home.png)
+<ThemeImage light="/asset/home.png" dark="/asset/home.dark.png" alt="Screenshot of the app home page" />
 
 ## Repository
 

@@ -14,7 +14,7 @@ hero:
 
 ## 软件截图
 
-![软件主页截图](/asset/home.png)
+<ThemeImage light="/asset/home.png" dark="/asset/home.dark.png" alt="软件主页截图" />
 
 ## 仓库信息
 

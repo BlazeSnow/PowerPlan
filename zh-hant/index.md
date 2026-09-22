@@ -14,7 +14,7 @@ hero:
 
 ## 軟體截圖
 
-![軟體主頁截圖](/asset/home.png)
+<ThemeImage light="/asset/home.png" dark="/asset/home.dark.png" alt="軟體主頁截圖" />
 
 ## 儲存庫資訊
 
