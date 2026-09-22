@@ -12,6 +12,10 @@ hero:
 
 <DownloadLinks microsoft-store="9N39P41XBKPJ" />
 
+## Screenshots
+
+![Screenshot der Startseite der App](/asset/home.png)
+
 ## Repository-Informationen
 
 > Ab v2026.9.19.0 wurde PowerPlan in Rust neu geschrieben und löst die ursprüngliche WinUI-Version ab.

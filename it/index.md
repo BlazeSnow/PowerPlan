@@ -12,6 +12,10 @@ hero:
 
 <DownloadLinks microsoft-store="9N39P41XBKPJ" />
 
+## Screenshot
+
+![Screenshot della pagina iniziale dell'app](/asset/home.png)
+
 ## Informazioni sul repository
 
 > A partire dalla versione v2026.9.19.0, PowerPlan è stato riscritto in Rust, subentrando alla versione WinUI originale.
