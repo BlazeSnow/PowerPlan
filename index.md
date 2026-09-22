@@ -12,6 +12,10 @@ hero:
 
 <DownloadLinks microsoft-store="9N39P41XBKPJ" />
 
+## 软件截图
+
+![软件主页截图](/asset/home.png)
+
 ## 仓库信息
 
 > 由 v2026.9.19.0 起，PowerPlan 使用 Rust 重写，接替原有的 WinUI 版。
